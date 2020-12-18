@@ -1,10 +1,15 @@
 sonata_admin:
     title: 'Sonata Admin'
+    security:
+        role_admin: ROLE_ADMIN
+        role_super_admin: ROLE_SUPER_ADMIN
     dashboard:
         blocks:
             - { type: sonata.admin.block.admin_list, position: left }
     options:
         legacy_twig_text_extension: false
+    templates:
+        user_block: 'Admin/Core/user_block.html.twig'
 
 sonata_block:
     blocks:
