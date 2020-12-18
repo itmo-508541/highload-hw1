@@ -27,6 +27,15 @@ stages:
           echo 'export '`echo $name|awk -F''"$ENV_SUFFIX"'$' '{print $1}'`'='`printenv $name`'' >> .build-env;
         done
 
+.deploy-script: &deploy-script
+    image: $CI_GIT_IMAGE_WITH_TAG
+    <<: *suffix-vars
+    before_script:
+        - eval $(ssh-agent -s)
+        - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    tags:
+        - executor-docker
+
 .qa: &qa
     stage: qa
     image: jakzal/phpqa:1.9.2-alpine
@@ -173,11 +182,8 @@ stages:
     dependencies: []
 
 .secure-copy: &secure-copy
+    <<: *deploy-script
     stage: deploy
-    image: $CI_GIT_IMAGE_WITH_TAG
-    before_script:
-      - eval $(ssh-agent -s)
-      - ssh-add <(echo "$SSH_PRIVATE_KEY")
     script:
       - eval $(cat .build-env)
       - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
@@ -200,8 +206,6 @@ stages:
           docker-compose up -d nginx ;
           docker logout '"$CI_REGISTRY"' ;
           echo "[$(date -R)] web-server is up"'
-    tags:
-      - executor-docker
 
 .env-test: &env-test
     variables:
