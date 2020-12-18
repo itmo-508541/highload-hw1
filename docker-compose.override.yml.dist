@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+    nginx:
+        build:
+            context: "."
+            dockerfile: Dockerfile-nginx
+            target: base
+        ports:
+            - "80:80"
+        depends_on:
+            - php
+        volumes:
+            - ./public:/srv/public
+            - ./storage/upload:/srv/storage/upload
+
+    php:
+        build:
+            context: "."
+            dockerfile: Dockerfile
+            target: dev
+        env_file: .env
+        depends_on:
+            - mysql
+        volumes:
+            - .:/srv
+            - /srv/var
+        environment:
+            XDEBUG_CONFIG: "remote_host=172.19.0.1 remote_connect_back=off"

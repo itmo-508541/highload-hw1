@@ -1,0 +1,9 @@
+framework:
+    secret: '%env(ENV_secret)%'
+    session:
+        handler_id: null
+    php_errors:
+        log: true
+    cache: null
+parameters:
+    env(ENV_secret): ThisTokenIsNotSoSecretChangeIt
