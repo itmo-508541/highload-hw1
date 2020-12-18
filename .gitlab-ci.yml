@@ -18,6 +18,7 @@ stages:
   - build-step2
   - test
   - deploy
+  - data
 
 .suffix-vars: &suffix-vars
     before_script:
@@ -206,6 +207,20 @@ stages:
           docker-compose up -d nginx ;
           docker logout '"$CI_REGISTRY"' ;
           echo "[$(date -R)] web-server is up"'
+
+.fixture: &fixture
+    <<: *deploy-script
+    stage: data
+    when: manual
+    dependencies: []
+
+.fixture-admin:
+    <<: *fixture
+    script:
+      - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
+        cd '"$DEPLOY_DIRECTORY"' ;
+        docker-compose exec php -T bin\console fos:user:create admin admin@docker.local admin ;
+        docker-compose exec php -T bin\console fos:user:promote admin ROLE_SUPER_ADMIN'
 
 .env-test: &env-test
     variables:
