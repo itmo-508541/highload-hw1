@@ -217,6 +217,7 @@ stages:
 .fixture-admin: &fixture-admin
     <<: *fixture
     script:
+      - eval $(cat .build-env)
       - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
         cd '"$DEPLOY_DIRECTORY"' ;
         docker-compose exec php -T bin\console fos:user:create admin admin@docker.local admin ;
