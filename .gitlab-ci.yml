@@ -28,6 +28,15 @@ stages:
         echo 'export '`echo $name|awk -F''"$ENV_SUFFIX"'$' '{print $1}'`'='`printenv $name`'' >> .build-env;
       done
 
+services:
+  - docker:19.03.13-dind
+
+.docker-build:
+  image: docker:19.03.2
+  tags:
+    - executor-docker
+    - docker-in-docker
+
 .deploy-script:
   image: $CI_GIT_IMAGE_WITH_TAG
   variables:
@@ -43,7 +52,7 @@ stages:
     - .suffix-vars
   stage: prepare
   script:
-    - ls
+    - ls /certs
   artifacts:
     paths:
       - .build-env
@@ -105,9 +114,9 @@ prepare:env-production:
 
 build:docker-compose-image:
   extends:
+    - .docker-build
     - .job-policy-all
   stage: prepare
-  image: docker:stable
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_DOCKER_COMPOSE_IMAGE_CACHE || true
@@ -117,15 +126,12 @@ build:docker-compose-image:
           ./docker/compose
     - docker push $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
-  tags:
-    - executor-docker
-    - docker-in-docker
 
 build:docker-git-image:
   extends:
+    - .docker-build
     - .job-policy-all
   stage: prepare
-  image: docker:stable
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_GIT_IMAGE_CACHE || true
@@ -135,16 +141,12 @@ build:docker-git-image:
           ./docker/git
     - docker push $CI_GIT_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
-  tags:
-    - executor-docker
-    - docker-in-docker
-
 
 build:docker-source-image:
   extends:
+    - .docker-build
     - .job-policy-all
   stage: build-step1
-  image: docker:stable
   script:
     - cat .build-env
     - eval $(cat .build-env)
@@ -164,15 +166,12 @@ build:docker-source-image:
           --target source .
     - docker push $CI_SOURCE_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
-  tags:
-    - executor-docker
-    - docker-in-docker
 
 build:docker-app-image:
   extends:
+    - .docker-build
     - .job-policy-all
   stage: build-step2
-  image: docker:stable
   script:
     - eval $(cat .build-env)
     - echo '{"github-oauth":{"github.com":"'"$COMPOSER_GITHUB_TOKEN"'"}}' > ./auth.json
@@ -189,9 +188,6 @@ build:docker-app-image:
           --target prod .
     - docker push $CI_APP_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
-  tags:
-    - executor-docker
-    - docker-in-docker
 
 build:docker-compose:
   extends:
@@ -212,25 +208,22 @@ build:docker-compose:
 
 build:docker-nginx-image:
   extends:
+    - .docker-build
     - .job-policy-all
   stage: build-step2
-  image: docker:stable
   script:
     - eval $(cat .build-env)
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_NGINX_IMAGE_CACHE || true
     - docker pull $CI_SOURCE_IMAGE_WITH_TAG || true
     - docker build --build-arg server_name=$SERVER_NAME --build-arg server_upstream=prod --build-arg app_image=$CI_SOURCE_IMAGE_WITH_TAG
-      --cache-from $CI_NGINX_IMAGE_CACHE
-      --tag $CI_NGINX_IMAGE_WITH_TAG
-      --target prod
-      --file Dockerfile-nginx .
+          --cache-from $CI_NGINX_IMAGE_CACHE
+          --tag $CI_NGINX_IMAGE_WITH_TAG
+          --target prod
+          --file Dockerfile-nginx .
     - docker push $CI_NGINX_IMAGE_WITH_TAG
     - docker history --no-trunc $CI_NGINX_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
-  tags:
-    - executor-docker
-    - docker-in-docker
 
 test:phpunit:
   extends:
@@ -246,6 +239,7 @@ test:phpunit:
     - phpunit
   tags:
     - executor-docker
+  dependencies: []
 
 deploy:secure-copy:
   extends:
