@@ -38,12 +38,6 @@ stages:
   tags:
     - executor-docker
 
-.qa:
-  stage: prepare
-  image: jakzal/phpqa:1.9.2-alpine
-  tags:
-    - executor-docker
-
 .prepare-env:
   extends:
     - .suffix-vars
@@ -56,7 +50,62 @@ stages:
   tags:
     - executor-docker
 
-.docker-compose-image:
+.fixture:
+  extends:
+    - .deploy-script
+  stage: data
+  when: manual
+
+.env-test:
+  variables:
+    ENV_SUFFIX: "_TEST"
+
+.env-master:
+  variables:
+    ENV_SUFFIX: "_MASTER"
+
+.env-production:
+  variables:
+    ENV_SUFFIX: "_PRODUCTION"
+
+.job-policy-master:
+  only:
+    - master
+
+.job-policy-production:
+  only:
+    - /^release-.*$/
+
+.job-policy-all:
+  only:
+    - master
+    - /^release-.*$/
+
+qa:php-cs-fixer:
+  extends:
+    - .job-policy-all
+  stage: prepare
+  image: jakzal/phpqa:1.9.2-alpine
+  script:
+    - php-cs-fixer fix --diff --dry-run -v
+  tags:
+    - executor-docker
+
+prepare:env-master:
+  extends:
+    - .env-master
+    - .prepare-env
+    - .job-policy-master
+
+prepare:env-production:
+  extends:
+    - .env-production
+    - .prepare-env
+    - .job-policy-production
+
+build:docker-compose-image:
+  extends:
+    - .job-policy-all
   stage: prepare
   image: docker:stable
   script:
@@ -65,14 +114,16 @@ stages:
     - docker build
           --cache-from $CI_DOCKER_COMPOSE_IMAGE_CACHE
           --tag $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
-      ./docker/compose
+          ./docker/compose
     - docker push $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
   tags:
     - executor-docker
     - docker-in-docker
 
-.docker-git-image:
+build:docker-git-image:
+  extends:
+    - .job-policy-all
   stage: prepare
   image: docker:stable
   script:
@@ -88,7 +139,10 @@ stages:
     - executor-docker
     - docker-in-docker
 
-.docker-source-image:
+
+build:docker-source-image:
+  extends:
+    - .job-policy-all
   stage: build-step1
   image: docker:stable
   script:
@@ -114,7 +168,9 @@ stages:
     - executor-docker
     - docker-in-docker
 
-.docker-app-image:
+build:docker-app-image:
+  extends:
+    - .job-policy-all
   stage: build-step2
   image: docker:stable
   script:
@@ -137,7 +193,9 @@ stages:
     - executor-docker
     - docker-in-docker
 
-.docker-compose:
+build:docker-compose:
+  extends:
+    - .job-policy-all
   stage: build-step2
   image: $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
   script:
@@ -152,7 +210,9 @@ stages:
   tags:
     - executor-docker
 
-.docker-nginx-image:
+build:docker-nginx-image:
+  extends:
+    - .job-policy-all
   stage: build-step2
   image: docker:stable
   script:
@@ -161,10 +221,10 @@ stages:
     - docker pull $CI_NGINX_IMAGE_CACHE || true
     - docker pull $CI_SOURCE_IMAGE_WITH_TAG || true
     - docker build --build-arg server_name=$SERVER_NAME --build-arg server_upstream=prod --build-arg app_image=$CI_SOURCE_IMAGE_WITH_TAG
-          --cache-from $CI_NGINX_IMAGE_CACHE
-          --tag $CI_NGINX_IMAGE_WITH_TAG
-          --target prod
-          --file Dockerfile-nginx .
+      --cache-from $CI_NGINX_IMAGE_CACHE
+      --tag $CI_NGINX_IMAGE_WITH_TAG
+      --target prod
+      --file Dockerfile-nginx .
     - docker push $CI_NGINX_IMAGE_WITH_TAG
     - docker history --no-trunc $CI_NGINX_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
@@ -172,7 +232,11 @@ stages:
     - executor-docker
     - docker-in-docker
 
-.phpunit:
+test:phpunit:
+  extends:
+    - .env-test
+    - .suffix-vars
+    - .job-policy-all
   stage: test
   image: $CI_SOURCE_IMAGE_WITH_TAG
   script:
@@ -183,9 +247,10 @@ stages:
   tags:
     - executor-docker
 
-.secure-copy:
+deploy:secure-copy:
   extends:
     - .deploy-script
+    - .job-policy-all
   stage: deploy
   script:
     - eval $(cat .build-env)
@@ -210,111 +275,6 @@ stages:
           docker logout '"$CI_REGISTRY"' ;
           echo "[$(date -R)] web-server is up"'
 
-.fixture:
-  extends:
-    - .deploy-script
-  stage: data
-  when: manual
-
-.fixture-admin:
-  extends:
-    - .fixture
-  script:
-    - eval $(cat .build-env)
-    - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
-          cd '"$DEPLOY_DIRECTORY"' ;
-          docker-compose exec php -T bin\console fos:user:create admin admin@docker.local admin ;
-          docker-compose exec php -T bin\console fos:user:promote admin ROLE_SUPER_ADMIN'
-
-.env-test:
-  variables:
-    ENV_SUFFIX: "_TEST"
-
-.env-master:
-  variables:
-    ENV_SUFFIX: "_MASTER"
-
-.env-production:
-  variables:
-    ENV_SUFFIX: "_PRODUCTION"
-
-.job-policy-master:
-  only:
-    - master
-  except:
-    - tags
-
-.job-policy-production:
-  only:
-    - /^release-.*$/
-  except:
-    - branches
-
-.job-policy-all:
-  only:
-    - master
-    - /^release-.*$/
-
-qa:php-cs-fixer:
-  extends:
-    - .qa
-    - .job-policy-all
-  script:
-    - php-cs-fixer fix --diff --dry-run -v
-
-prepare:env-master:
-  extends:
-    - .env-master
-    - .prepare-env
-    - .job-policy-master
-
-prepare:env-production:
-  extends:
-    - .env-production
-    - .prepare-env
-    - .job-policy-production
-
-build:docker-compose-image:
-  extends:
-    - .docker-compose-image
-    - .job-policy-all
-
-build:docker-git-image:
-  extends:
-    - .docker-git-image
-    - .job-policy-all
-
-build:docker-source-image:
-  extends:
-    - .docker-source-image
-    - .job-policy-all
-
-build:docker-app-image:
-  extends:
-    - .docker-app-image
-    - .job-policy-all
-
-build:docker-compose:
-  extends:
-    - .docker-compose
-    - .job-policy-all
-
-build:docker-nginx-image:
-  extends:
-    - .docker-nginx-image
-    - .job-policy-all
-
-test:phpunit:
-  extends:
-    - .env-test
-    - .phpunit
-    - .job-policy-all
-
-deploy:secure-copy:
-  extends:
-    - .secure-copy
-    - .job-policy-all
-
 deploy:sync-project-forks:
   extends:
     - .job-policy-master
@@ -332,5 +292,11 @@ deploy:sync-project-forks:
 
 data:fixture-admin:
   extends:
-    - .fixture-admin
+    - .fixture
     - .job-policy-all
+  script:
+    - eval $(cat .build-env)
+    - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
+          cd '"$DEPLOY_DIRECTORY"' ;
+          docker-compose exec php -T bin\console fos:user:create admin admin@docker.local admin ;
+          docker-compose exec php -T bin\console fos:user:promote admin ROLE_SUPER_ADMIN'
