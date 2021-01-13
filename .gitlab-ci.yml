@@ -28,14 +28,9 @@ stages:
         echo 'export '`echo $name|awk -F''"$ENV_SUFFIX"'$' '{print $1}'`'='`printenv $name`'' >> .build-env;
       done
 
+# See https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
 .docker-build:
-  services:
-    - docker:19.03.13-dind
   image: docker:19.03.13
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_DRIVER: overlay2
   tags:
     - executor-docker
     - docker-in-docker
