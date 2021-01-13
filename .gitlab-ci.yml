@@ -50,6 +50,8 @@ stages:
     GIT_STRATEGY: none
   script:
     - ls
+  tags:
+    - executor-docker
 
 .docker-compose-image:
   stage: prepare
