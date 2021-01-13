@@ -42,6 +42,15 @@ stages:
   tags:
     - executor-docker
 
+.prepare-env:
+  extends:
+    - .suffix-vars
+  stage: prepare
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - ls
+
 .docker-compose-image:
   stage: prepare
   image: docker:stable
@@ -49,8 +58,8 @@ stages:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_DOCKER_COMPOSE_IMAGE_CACHE || true
     - docker build
-      --cache-from $CI_DOCKER_COMPOSE_IMAGE_CACHE
-      --tag $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
+          --cache-from $CI_DOCKER_COMPOSE_IMAGE_CACHE
+          --tag $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
       ./docker/compose
     - docker push $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
@@ -65,9 +74,9 @@ stages:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_GIT_IMAGE_CACHE || true
     - docker build
-      --cache-from $CI_GIT_IMAGE_CACHE
-      --tag $CI_GIT_IMAGE_WITH_TAG
-      ./docker/git
+          --cache-from $CI_GIT_IMAGE_CACHE
+          --tag $CI_GIT_IMAGE_WITH_TAG
+          ./docker/git
     - docker push $CI_GIT_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
   tags:
@@ -75,8 +84,8 @@ stages:
     - docker-in-docker
 
 .docker-source-image:
-  extends:
-    - .suffix-vars
+  #extends:
+  #  - .suffix-vars
   stage: build-step1
   image: docker:stable
   script:
@@ -255,6 +264,12 @@ qa:php-cs-fixer:
     - .qa
   script:
     - php-cs-fixer fix --diff --dry-run -v
+
+prepare:prepare-env-master:
+  extends:
+    - .env-master
+    - .prepare-env
+    - .job-policy-master
 
 build:docker-compose-image-master:
   extends:
