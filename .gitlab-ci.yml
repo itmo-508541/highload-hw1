@@ -186,8 +186,6 @@ build:docker-app-image:
           --target prod .
     - docker push $CI_APP_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
-  needs:
-    - prepare:docker-source-image
 
 build:docker-compose:
   extends:
@@ -205,8 +203,6 @@ build:docker-compose:
       - build/
   tags:
     - executor-docker
-  needs:
-    - prepare:docker-compose-image
 
 build:docker-nginx-image:
   extends:
@@ -226,8 +222,6 @@ build:docker-nginx-image:
     - docker push $CI_NGINX_IMAGE_WITH_TAG
     - docker history --no-trunc $CI_NGINX_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
-  needs:
-    - prepare:docker-source-image
 
 test:phpunit:
   extends:
