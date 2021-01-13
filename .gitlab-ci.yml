@@ -1,16 +1,16 @@
 variables:
-    CI_APP_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME"
-    CI_APP_IMAGE_CACHE: "$CI_REGISTRY_IMAGE:master"
-    CI_DEV_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE/dev:$CI_COMMIT_REF_NAME"
-    CI_DEV_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/dev:master"
-    CI_SOURCE_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE/source:$CI_COMMIT_REF_NAME"
-    CI_SOURCE_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/source:master"
-    CI_NGINX_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_NAME"
-    CI_NGINX_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/nginx:master"
-    CI_DOCKER_COMPOSE_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE/docker-compose:$CI_COMMIT_REF_NAME"
-    CI_DOCKER_COMPOSE_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/docker-compose:master"
-    CI_GIT_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE/git:$CI_COMMIT_REF_NAME"
-    CI_GIT_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/git:master"
+  CI_APP_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME"
+  CI_APP_IMAGE_CACHE: "$CI_REGISTRY_IMAGE:master"
+  CI_DEV_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE/dev:$CI_COMMIT_REF_NAME"
+  CI_DEV_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/dev:master"
+  CI_SOURCE_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE/source:$CI_COMMIT_REF_NAME"
+  CI_SOURCE_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/source:master"
+  CI_NGINX_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_NAME"
+  CI_NGINX_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/nginx:master"
+  CI_DOCKER_COMPOSE_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE/docker-compose:$CI_COMMIT_REF_NAME"
+  CI_DOCKER_COMPOSE_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/docker-compose:master"
+  CI_GIT_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE/git:$CI_COMMIT_REF_NAME"
+  CI_GIT_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/git:master"
 
 stages:
   - qa
@@ -21,177 +21,186 @@ stages:
   - data
 
 .suffix-vars: &suffix-vars
-    before_script:
-      - cat .env | grep ENV_ > .build-env
-      - sed -i 's/^/export /' .build-env
-      - for name in `env | awk -F= '{if($1 ~ /'"$ENV_SUFFIX"'$/) print $1}'`; do
-          echo 'export '`echo $name|awk -F''"$ENV_SUFFIX"'$' '{print $1}'`'='`printenv $name`'' >> .build-env;
-        done
+  before_script:
+    - cat .env | grep ENV_ > .build-env
+    - sed -i 's/^/export /' .build-env
+    - for name in `env | awk -F= '{if($1 ~ /'"$ENV_SUFFIX"'$/) print $1}'`; do
+        echo 'export '`echo $name|awk -F''"$ENV_SUFFIX"'$' '{print $1}'`'='`printenv $name`'' >> .build-env;
+      done
 
 .deploy-script: &deploy-script
-    image: $CI_GIT_IMAGE_WITH_TAG
-    <<: *suffix-vars
-    before_script:
-        - eval $(ssh-agent -s)
-        - ssh-add <(echo "$SSH_PRIVATE_KEY")
-    tags:
-        - executor-docker
+  #extends:
+  #  - .suffix-vars
+  image: $CI_GIT_IMAGE_WITH_TAG
+  before_script:
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  tags:
+    - executor-docker
 
-.qa: &qa
-    stage: qa
-    image: jakzal/phpqa:1.9.2-alpine
-    tags:
-      - executor-docker
+.qa:
+  stage: qa
+  image: jakzal/phpqa:1.9.2-alpine
+  tags:
+    - executor-docker
 
 .docker-source-image: &docker-source-image
-    stage: build-step1
-    image: docker:stable
-    <<: *suffix-vars
-    script:
-      - eval $(cat .build-env)
-      - echo '{"github-oauth":{"github.com":"'"$COMPOSER_GITHUB_TOKEN"'"}}' > ./auth.json
-      - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-      - docker pull $CI_DEV_IMAGE_CACHE || true
-      - docker build
+  extends:
+    - .suffix-vars
+  stage: build-step1
+  image: docker:stable
+  script:
+    - eval $(cat .build-env)
+    - echo '{"github-oauth":{"github.com":"'"$COMPOSER_GITHUB_TOKEN"'"}}' > ./auth.json
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_DEV_IMAGE_CACHE || true
+    - docker build
           --cache-from $CI_DEV_IMAGE_CACHE
           --tag $CI_DEV_IMAGE_WITH_TAG
           --target dev .
-      - docker push $CI_DEV_IMAGE_WITH_TAG
-      - docker pull $CI_SOURCE_IMAGE_CACHE || true
-      - docker build
+    - docker push $CI_DEV_IMAGE_WITH_TAG
+    - docker pull $CI_SOURCE_IMAGE_CACHE || true
+    - docker build
           --cache-from $CI_DEV_IMAGE_CACHE
           --cache-from $CI_SOURCE_IMAGE_CACHE
           --tag $CI_SOURCE_IMAGE_WITH_TAG
           --target source .
-      - docker push $CI_SOURCE_IMAGE_WITH_TAG
-      - docker logout $CI_REGISTRY
-    tags:
-      - executor-docker
-      - docker-in-docker
+    - docker push $CI_SOURCE_IMAGE_WITH_TAG
+    - docker logout $CI_REGISTRY
+  tags:
+    - executor-docker
+    - docker-in-docker
 
 .docker-compose-image: &docker-compose-image
-    stage: build-step1
-    image: docker:stable
-    <<: *suffix-vars
-    script:
-      - eval $(cat .build-env)
-      - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-      - docker pull $CI_DOCKER_COMPOSE_IMAGE_CACHE || true
-      - docker build
+  extends:
+    - .suffix-vars
+  stage: build-step1
+  image: docker:stable
+  script:
+    - eval $(cat .build-env)
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_DOCKER_COMPOSE_IMAGE_CACHE || true
+    - docker build
           --cache-from $CI_DOCKER_COMPOSE_IMAGE_CACHE
           --tag $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
           ./docker/compose
-      - docker push $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
-      - docker logout $CI_REGISTRY
-    tags:
-      - executor-docker
-      - docker-in-docker
+    - docker push $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
+    - docker logout $CI_REGISTRY
+  tags:
+    - executor-docker
+    - docker-in-docker
 
 .docker-git-image: &docker-git-image
-    stage: build-step1
-    image: docker:stable
-    <<: *suffix-vars
-    script:
-      - eval $(cat .build-env)
-      - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-      - docker pull $CI_GIT_IMAGE_CACHE || true
-      - docker build
+  extends:
+    - .suffix-vars
+  stage: build-step1
+  image: docker:stable
+  script:
+    - eval $(cat .build-env)
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_GIT_IMAGE_CACHE || true
+    - docker build
           --cache-from $CI_GIT_IMAGE_CACHE
           --tag $CI_GIT_IMAGE_WITH_TAG
           ./docker/git
-      - docker push $CI_GIT_IMAGE_WITH_TAG
-      - docker logout $CI_REGISTRY
-    tags:
-      - executor-docker
-      - docker-in-docker
+    - docker push $CI_GIT_IMAGE_WITH_TAG
+    - docker logout $CI_REGISTRY
+  tags:
+    - executor-docker
+    - docker-in-docker
 
 .docker-app-image: &docker-app-image
-    stage: build-step2
-    image: docker:stable
-    <<: *suffix-vars
-    script:
-      - eval $(cat .build-env)
-      - echo '{"github-oauth":{"github.com":"'"$COMPOSER_GITHUB_TOKEN"'"}}' > ./auth.json
-      - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-      - docker pull $CI_DEV_IMAGE_CACHE || true
-      - docker pull $CI_SOURCE_IMAGE_CACHE || true
-      - docker pull $CI_APP_IMAGE_CACHE || true
-      - docker build
+  extends:
+    - .suffix-vars
+  stage: build-step2
+  image: docker:stable
+  script:
+    - eval $(cat .build-env)
+    - echo '{"github-oauth":{"github.com":"'"$COMPOSER_GITHUB_TOKEN"'"}}' > ./auth.json
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_DEV_IMAGE_CACHE || true
+    - docker pull $CI_SOURCE_IMAGE_CACHE || true
+    - docker pull $CI_APP_IMAGE_CACHE || true
+    - docker build
           --cache-from $CI_DEV_IMAGE_CACHE
           --cache-from $CI_SOURCE_IMAGE_CACHE
           --cache-from $CI_APP_IMAGE_CACHE
           --tag $CI_APP_IMAGE_WITH_TAG
           --build-arg source_image=$CI_SOURCE_IMAGE_WITH_TAG
           --target prod .
-      - docker push $CI_APP_IMAGE_WITH_TAG
-      - docker logout $CI_REGISTRY
-    tags:
-      - executor-docker
-      - docker-in-docker
+    - docker push $CI_APP_IMAGE_WITH_TAG
+    - docker logout $CI_REGISTRY
+  tags:
+    - executor-docker
+    - docker-in-docker
 
 .docker-compose: &docker-compose
-    stage: build-step2
-    image: $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
-    <<: *suffix-vars
-    script:
-      - eval $(cat .build-env)
-      - mkdir build
-      - printenv | grep ENV_ > .compose-env
-      - docker-compose -f docker-compose.deploy.yml config > build/docker-compose.yml
-      - sed -i 's/\/builds\/'"$CI_PROJECT_NAMESPACE"'\/'"$CI_PROJECT_NAME"'/\./g' build/docker-compose.yml
-    artifacts:
-        untracked: true
-        name: "$CI_COMMIT_REF_SLUG"
-        paths:
-          - build/
-    tags:
-      - executor-docker
-    dependencies: []
+  extends:
+    - .suffix-vars
+  stage: build-step2
+  image: $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
+  script:
+    - eval $(cat .build-env)
+    - mkdir build
+    - printenv | grep ENV_ > .compose-env
+    - docker-compose -f docker-compose.deploy.yml config > build/docker-compose.yml
+    - sed -i 's/\/builds\/'"$CI_PROJECT_NAMESPACE"'\/'"$CI_PROJECT_NAME"'/\./g' build/docker-compose.yml
+  artifacts:
+    untracked: true
+    name: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - build/
+  tags:
+    - executor-docker
+  dependencies: []
 
 .docker-nginx-image: &docker-nginx-image
-    stage: build-step2
-    image: docker:stable
-    <<: *suffix-vars
-    script:
-      - eval $(cat .build-env)
-      - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-      - docker pull $CI_NGINX_IMAGE_CACHE || true
-      - docker pull $CI_SOURCE_IMAGE_WITH_TAG || true
-      - docker build --build-arg server_name=$SERVER_NAME --build-arg server_upstream=prod --build-arg app_image=$CI_SOURCE_IMAGE_WITH_TAG
+  extends:
+    - .suffix-vars
+  stage: build-step2
+  image: docker:stable
+  script:
+    - eval $(cat .build-env)
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_NGINX_IMAGE_CACHE || true
+    - docker pull $CI_SOURCE_IMAGE_WITH_TAG || true
+    - docker build --build-arg server_name=$SERVER_NAME --build-arg server_upstream=prod --build-arg app_image=$CI_SOURCE_IMAGE_WITH_TAG
           --cache-from $CI_NGINX_IMAGE_CACHE
           --tag $CI_NGINX_IMAGE_WITH_TAG
           --target prod
           --file Dockerfile-nginx .
-      - docker push $CI_NGINX_IMAGE_WITH_TAG
-      - docker history --no-trunc $CI_NGINX_IMAGE_WITH_TAG
-      - docker logout $CI_REGISTRY
-    tags:
-      - executor-docker
-      - docker-in-docker
+    - docker push $CI_NGINX_IMAGE_WITH_TAG
+    - docker history --no-trunc $CI_NGINX_IMAGE_WITH_TAG
+    - docker logout $CI_REGISTRY
+  tags:
+    - executor-docker
+    - docker-in-docker
 
 .phpunit: &phpunit
-    stage: test
-    image: $CI_SOURCE_IMAGE_WITH_TAG
-    <<: *suffix-vars
-    script:
-      - eval $(cat .build-env)
-      - cd /srv
-      - composer install --prefer-dist --no-scripts --no-interaction
-      - phpunit
-    tags:
-      - executor-docker
-    dependencies: []
+  extends:
+    - .suffix-vars
+  stage: test
+  image: $CI_SOURCE_IMAGE_WITH_TAG
+  script:
+    - eval $(cat .build-env)
+    - cd /srv
+    - composer install --prefer-dist --no-scripts --no-interaction
+    - phpunit
+  tags:
+    - executor-docker
+  dependencies: []
 
 .secure-copy: &secure-copy
-    <<: *deploy-script
-    stage: deploy
-    script:
-      - eval $(cat .build-env)
-      - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
+  extends:
+    - .deploy-script
+  stage: deploy
+  script:
+    - eval $(cat .build-env)
+    - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
           rm -rf '"$DEPLOY_DIRECTORY"'_tmp ;
           mkdir -p '"$DEPLOY_DIRECTORY"'_tmp'
-      - scp -P 22 -r build/* ''"$DEPLOY_USER"'@'"$DEPLOY_HOST"':'"$DEPLOY_DIRECTORY"'_tmp'
-      - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
+    - scp -P 22 -r build/* ''"$DEPLOY_USER"'@'"$DEPLOY_HOST"':'"$DEPLOY_DIRECTORY"'_tmp'
+    - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
           if [ -d '"$DEPLOY_DIRECTORY"' ]; then rm -rf '"$DEPLOY_DIRECTORY"'; fi ;
           mv '"$DEPLOY_DIRECTORY"'_tmp '"$DEPLOY_DIRECTORY"' ;
           cd '"$DEPLOY_DIRECTORY"' ;
@@ -209,157 +218,178 @@ stages:
           echo "[$(date -R)] web-server is up"'
 
 .fixture: &fixture
-    <<: *deploy-script
-    stage: data
-    when: manual
-    dependencies: []
+  extends:
+    - .deploy-script
+  stage: data
+  when: manual
+  dependencies: []
 
 .fixture-admin: &fixture-admin
-    <<: *fixture
-    script:
-      - eval $(cat .build-env)
-      - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
-        cd '"$DEPLOY_DIRECTORY"' ;
-        docker-compose exec php -T bin\console fos:user:create admin admin@docker.local admin ;
-        docker-compose exec php -T bin\console fos:user:promote admin ROLE_SUPER_ADMIN'
+  extends:
+    - .fixture
+  script:
+    - eval $(cat .build-env)
+    - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
+          cd '"$DEPLOY_DIRECTORY"' ;
+          docker-compose exec php -T bin\console fos:user:create admin admin@docker.local admin ;
+          docker-compose exec php -T bin\console fos:user:promote admin ROLE_SUPER_ADMIN'
 
 .env-test: &env-test
-    variables:
-        ENV_SUFFIX: "_TEST"
+  variables:
+    ENV_SUFFIX: "_TEST"
 
 .env-master: &env-master
-    variables:
-        ENV_SUFFIX: "_MASTER"
+  variables:
+    ENV_SUFFIX: "_MASTER"
 
 .env-production: &env-production
-    variables:
-        ENV_SUFFIX: "_PRODUCTION"
+  variables:
+    ENV_SUFFIX: "_PRODUCTION"
 
 .job-policy-master: &job-policy-master
-    only:
-      - master
-    except:
-      - tags
+  only:
+    - master
+  except:
+    - tags
 
 .job-policy-production: &job-policy-production
-    only:
-      - /^release-.*$/
-    except:
-      - branches
+  only:
+    - /^release-.*$/
+  except:
+    - branches
 
 qa:php-cs-fixer:
-    <<: *qa
-    script:
-        - php-cs-fixer fix --diff --dry-run -v
+  extends:
+    - .qa
+  script:
+    - php-cs-fixer fix --diff --dry-run -v
 
 build:docker-source-image-master:
-    <<: *docker-source-image
-    <<: *env-master
-    <<: *job-policy-master
+  extends:
+    - .docker-source-image
+    - .env-master
+    - .job-policy-master
 
 build:docker-compose-image-master:
-    <<: *docker-compose-image
-    <<: *env-master
-    <<: *job-policy-master
+  extends:
+    - .docker-compose-image
+    - .env-master
+    - .job-policy-master
 
 build:docker-git-image-master:
-    <<: *docker-git-image
-    <<: *env-master
-    <<: *job-policy-master
+  extends:
+    - .docker-git-image
+    - .env-master
+    - .job-policy-master
 
 build:docker-app-image-master:
-    <<: *docker-app-image
-    <<: *env-master
-    <<: *job-policy-master
+  extends:
+    - .docker-app-image
+    - .env-master
+    - .job-policy-master
 
 build:docker-compose-master:
-    <<: *docker-compose
-    <<: *env-master
-    <<: *job-policy-master
+  extends:
+    - .docker-compose
+    - .env-master
+    - .job-policy-master
 
 build:docker-nginx-image-master:
-    <<: *docker-nginx-image
-    <<: *env-master
-    <<: *job-policy-master
+  extends:
+    - .docker-nginx-image
+    - .env-master
+    - .job-policy-master
 
 test:phpunit-master:
-    <<: *phpunit
-    <<: *env-test
-    <<: *job-policy-master
+  extends:
+    - .phpunit
+    - .env-test
+    - .job-policy-master
 
 deploy:secure-copy-master:
-    <<: *secure-copy
-    <<: *job-policy-master
-    environment:
-        name: staging
-    dependencies:
-      - build:docker-compose-master
+  extends:
+    - .secure-copy
+    - .job-policy-master
+  environment:
+    name: staging
+  dependencies:
+    - build:docker-compose-master
 
 data:fixture-cron-master:
-  <<: *fixture-admin
-  <<: *env-master
-  <<: *job-policy-master
+  extends:
+    - .fixture-admin
+    - .env-master
+    - .job-policy-master
 
 build:docker-source-image-production:
-    <<: *docker-source-image
-    <<: *env-production
-    <<: *job-policy-production
+  extends:
+    - .docker-source-image
+    - .env-production
+    - .job-policy-production
 
 build:docker-compose-image-production:
-    <<: *docker-compose-image
-    <<: *env-production
-    <<: *job-policy-production
+  extends:
+    - .docker-compose-image
+    - .env-production
+    - .job-policy-production
 
 build:docker-git-image-production:
-    <<: *docker-git-image
-    <<: *env-production
-    <<: *job-policy-production
+  extends:
+    - .docker-git-image
+    - .env-production
+    - .job-policy-production
 
 build:docker-app-image-production:
-    <<: *docker-app-image
-    <<: *env-production
-    <<: *job-policy-production
+  extends:
+    - .docker-app-image
+    - .env-production
+    - .job-policy-production
 
 build:docker-compose-production:
-    <<: *docker-compose
-    <<: *env-production
-    <<: *job-policy-production
+  extends:
+    - .docker-compose
+    - .env-production
+    - .job-policy-production
 
 build:docker-nginx-image-production:
-    <<: *docker-nginx-image
-    <<: *env-production
-    <<: *job-policy-production
+  extends:
+    - .docker-nginx-image
+    - .env-production
+    - .job-policy-production
 
 test:phpunit-production:
-    <<: *phpunit
-    <<: *env-test
-    <<: *job-policy-production
+  extends:
+    - .phpunit
+    - .env-test
+    - .job-policy-production
 
 deploy:secure-copy-production:
-    <<: *secure-copy
-    <<: *job-policy-production
-    environment:
-        name: production
-    dependencies:
-      - build:docker-compose-production
+  extends:
+    - .secure-copy
+    - .job-policy-production
+  environment:
+    name: production
+  dependencies:
+    - build:docker-compose-production
 
 data:fixture-cron-production:
-  <<: *fixture-admin
-  <<: *env-production
-  <<: *job-policy-production
+  extends:
+    - .fixture-admin
+    - .env-production
+    - .job-policy-production
 
 deploy:sync-project-forks:
-    stage: deploy
-    image: $CI_GIT_IMAGE_WITH_TAG
-    before_script:
-      - eval $(ssh-agent -s)
-      - ssh-add <(echo "$SSH_PRIVATE_KEY")
-    script:
-      - git branch -d stable || true
-      - git checkout -b stable
-      - for FORK in $PROJECT_FORKS; do git remote add fork $FORK && git push fork stable && git remote rm fork; done
-    only:
-      - master
-    dependencies: []
-    tags:
-      - executor-docker
+  stage: deploy
+  image: $CI_GIT_IMAGE_WITH_TAG
+  before_script:
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  script:
+    - git branch -d stable || true
+    - git checkout -b stable
+    - for FORK in $PROJECT_FORKS; do git remote add fork $FORK && git push fork stable && git remote rm fork; done
+  only:
+    - master
+  dependencies: []
+  tags:
+    - executor-docker
