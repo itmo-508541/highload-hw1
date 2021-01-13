@@ -50,6 +50,9 @@ stages:
   stage: prepare
   script:
     - ls
+  artifacts:
+    paths:
+      - .build-env
   tags:
     - executor-docker
 
@@ -91,6 +94,7 @@ stages:
   stage: build-step1
   image: docker:stable
   script:
+    - cat .build-env
     - eval $(cat .build-env)
     - echo '{"github-oauth":{"github.com":"'"$COMPOSER_GITHUB_TOKEN"'"}}' > ./auth.json
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -267,7 +271,7 @@ qa:php-cs-fixer:
   script:
     - php-cs-fixer fix --diff --dry-run -v
 
-prepare:prepare-env-master:
+prepare:env-master:
   extends:
     - .env-master
     - .prepare-env
