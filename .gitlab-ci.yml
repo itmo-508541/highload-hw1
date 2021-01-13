@@ -14,8 +14,7 @@ variables:
 
 stages:
   - prepare
-  - build-step1
-  - build-step2
+  - build
   - test
   - deploy
   - data
@@ -114,7 +113,7 @@ build:docker-compose-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: prepare
+  stage: build
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_DOCKER_COMPOSE_IMAGE_CACHE || true
@@ -129,7 +128,7 @@ build:docker-git-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: prepare
+  stage: build
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_GIT_IMAGE_CACHE || true
@@ -144,7 +143,7 @@ build:docker-source-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: build-step1
+  stage: build
   script:
     - cat .build-env
     - eval $(cat .build-env)
@@ -169,7 +168,7 @@ build:docker-app-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: build-step2
+  stage: build
   script:
     - eval $(cat .build-env)
     - echo '{"github-oauth":{"github.com":"'"$COMPOSER_GITHUB_TOKEN"'"}}' > ./auth.json
@@ -186,11 +185,13 @@ build:docker-app-image:
           --target prod .
     - docker push $CI_APP_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
+  needs:
+    - build:docker-source-image
 
 build:docker-compose:
   extends:
     - .job-policy-all
-  stage: build-step2
+  stage: build
   image: $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
   script:
     - eval $(cat .build-env)
@@ -203,12 +204,14 @@ build:docker-compose:
       - build/
   tags:
     - executor-docker
+  needs:
+    - build:docker-compose-image
 
 build:docker-nginx-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: build-step2
+  stage: build
   script:
     - eval $(cat .build-env)
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -222,6 +225,8 @@ build:docker-nginx-image:
     - docker push $CI_NGINX_IMAGE_WITH_TAG
     - docker history --no-trunc $CI_NGINX_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
+  needs:
+    - build:docker-source-image
 
 test:phpunit:
   extends:
