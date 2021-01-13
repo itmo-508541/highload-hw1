@@ -13,9 +13,9 @@ variables:
   CI_GIT_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/git:master"
 
 stages:
-  - qa
   - prepare
-  - build
+  - build-step1
+  - build-step2
   - test
   - deploy
   - data
@@ -91,7 +91,7 @@ stages:
 qa:php-cs-fixer:
   extends:
     - .job-policy-all
-  stage: qa
+  stage: prepare
   image: jakzal/phpqa:1.9.2-alpine
   script:
     - php-cs-fixer fix --diff --dry-run -v
@@ -114,7 +114,7 @@ prepare:docker-compose-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: prepare
+  stage: build-step1
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_DOCKER_COMPOSE_IMAGE_CACHE || true
@@ -129,7 +129,7 @@ prepare:docker-git-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: prepare
+  stage: build-step1
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_GIT_IMAGE_CACHE || true
@@ -144,7 +144,7 @@ prepare:docker-source-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: prepare
+  stage: build-step1
   script:
     - cat .build-env
     - eval $(cat .build-env)
@@ -169,7 +169,7 @@ build:docker-app-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: build
+  stage: build-step2
   script:
     - eval $(cat .build-env)
     - echo '{"github-oauth":{"github.com":"'"$COMPOSER_GITHUB_TOKEN"'"}}' > ./auth.json
@@ -192,7 +192,7 @@ build:docker-app-image:
 build:docker-compose:
   extends:
     - .job-policy-all
-  stage: build
+  stage: build-step2
   image: $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
   script:
     - eval $(cat .build-env)
@@ -212,7 +212,7 @@ build:docker-nginx-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: build
+  stage: build-step2
   script:
     - eval $(cat .build-env)
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
