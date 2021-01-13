@@ -20,6 +20,18 @@ stages:
   - deploy
   - data
 
+.env-test:
+  variables:
+    ENV_SUFFIX: "_TEST"
+
+.env-master:
+  variables:
+    ENV_SUFFIX: "_MASTER"
+
+.env-production:
+  variables:
+    ENV_SUFFIX: "_PRODUCTION"
+
 .suffix-vars:
   before_script:
     - cat .env | grep ENV_ > .build-env
@@ -33,7 +45,18 @@ stages:
   image: docker:19.03.13
   tags:
     - executor-docker
-    - docker-in-docker
+
+.prepare-env:
+  extends:
+    - .suffix-vars
+  stage: prepare
+  script:
+    - echo 'Ok!'
+  artifacts:
+    paths:
+      - .build-env
+  tags:
+    - executor-docker
 
 .deploy-script:
   image: $CI_GIT_IMAGE_WITH_TAG
@@ -45,35 +68,11 @@ stages:
   tags:
     - executor-docker
 
-.prepare-env:
-  extends:
-    - .suffix-vars
-  stage: prepare
-  script:
-    - ls /certs
-  artifacts:
-    paths:
-      - .build-env
-  tags:
-    - executor-docker
-
 .fixture:
   extends:
     - .deploy-script
   stage: data
   when: manual
-
-.env-test:
-  variables:
-    ENV_SUFFIX: "_TEST"
-
-.env-master:
-  variables:
-    ENV_SUFFIX: "_MASTER"
-
-.env-production:
-  variables:
-    ENV_SUFFIX: "_PRODUCTION"
 
 .job-policy-master:
   only:
