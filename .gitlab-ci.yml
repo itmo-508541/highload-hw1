@@ -13,6 +13,7 @@ variables:
   CI_GIT_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/git:master"
 
 stages:
+  - qa
   - prepare
   - build
   - test
@@ -90,7 +91,7 @@ stages:
 qa:php-cs-fixer:
   extends:
     - .job-policy-all
-  stage: prepare
+  stage: qa
   image: jakzal/phpqa:1.9.2-alpine
   script:
     - php-cs-fixer fix --diff --dry-run -v
@@ -109,11 +110,11 @@ prepare:env-production:
     - .prepare-env
     - .job-policy-production
 
-build:docker-compose-image:
+prepare:docker-compose-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: build
+  stage: prepare
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_DOCKER_COMPOSE_IMAGE_CACHE || true
@@ -124,11 +125,11 @@ build:docker-compose-image:
     - docker push $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
 
-build:docker-git-image:
+prepare:docker-git-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: build
+  stage: prepare
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_GIT_IMAGE_CACHE || true
@@ -139,11 +140,11 @@ build:docker-git-image:
     - docker push $CI_GIT_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
 
-build:docker-source-image:
+prepare:docker-source-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: build
+  stage: prepare
   script:
     - cat .build-env
     - eval $(cat .build-env)
@@ -186,7 +187,7 @@ build:docker-app-image:
     - docker push $CI_APP_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
   needs:
-    - build:docker-source-image
+    - prepare:docker-source-image
 
 build:docker-compose:
   extends:
@@ -205,7 +206,7 @@ build:docker-compose:
   tags:
     - executor-docker
   needs:
-    - build:docker-compose-image
+    - prepare:docker-compose-image
 
 build:docker-nginx-image:
   extends:
@@ -226,7 +227,7 @@ build:docker-nginx-image:
     - docker history --no-trunc $CI_NGINX_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
   needs:
-    - build:docker-source-image
+    - prepare:docker-source-image
 
 test:phpunit:
   extends:
