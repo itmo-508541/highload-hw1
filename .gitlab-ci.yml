@@ -30,6 +30,8 @@ stages:
 
 .deploy-script:
   image: $CI_GIT_IMAGE_WITH_TAG
+  variables:
+    GIT_STRATEGY: none
   before_script:
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
@@ -46,8 +48,6 @@ stages:
   extends:
     - .suffix-vars
   stage: prepare
-  variables:
-    GIT_STRATEGY: none
   script:
     - ls
   tags:
