@@ -89,8 +89,6 @@ stages:
     - docker-in-docker
 
 .docker-source-image:
-  #extends:
-  #  - .suffix-vars
   stage: build-step1
   image: docker:stable
   script:
@@ -117,8 +115,6 @@ stages:
     - docker-in-docker
 
 .docker-app-image:
-  extends:
-    - .suffix-vars
   stage: build-step2
   image: docker:stable
   script:
@@ -142,8 +138,6 @@ stages:
     - docker-in-docker
 
 .docker-compose:
-  extends:
-    - .suffix-vars
   stage: build-step2
   image: $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
   script:
@@ -153,17 +147,12 @@ stages:
     - docker-compose -f docker-compose.deploy.yml config > build/docker-compose.yml
     - sed -i 's/\/builds\/'"$CI_PROJECT_NAMESPACE"'\/'"$CI_PROJECT_NAME"'/\./g' build/docker-compose.yml
   artifacts:
-    untracked: true
-    name: "$CI_COMMIT_REF_SLUG"
     paths:
       - build/
   tags:
     - executor-docker
-  dependencies: []
 
 .docker-nginx-image:
-  extends:
-    - .suffix-vars
   stage: build-step2
   image: docker:stable
   script:
@@ -184,8 +173,6 @@ stages:
     - docker-in-docker
 
 .phpunit:
-  extends:
-    - .suffix-vars
   stage: test
   image: $CI_SOURCE_IMAGE_WITH_TAG
   script:
@@ -195,7 +182,6 @@ stages:
     - phpunit
   tags:
     - executor-docker
-  dependencies: []
 
 .secure-copy:
   extends:
@@ -229,7 +215,6 @@ stages:
     - .deploy-script
   stage: data
   when: manual
-  dependencies: []
 
 .fixture-admin:
   extends:
@@ -265,131 +250,63 @@ stages:
   except:
     - branches
 
+.job-policy-all:
+  only:
+    - master
+    - /^release-.*$/
+
 qa:php-cs-fixer:
   extends:
     - .qa
+    - .job-policy-all
   script:
     - php-cs-fixer fix --diff --dry-run -v
 
-prepare:env-master:
+prepare:env:
   extends:
-    - .env-master
     - .prepare-env
-    - .job-policy-master
+    - .job-policy-all
 
-build:docker-compose-image-master:
+build:docker-compose-image:
   extends:
-    - .env-master
     - .docker-compose-image
-    - .job-policy-master
+    - .job-policy-all
 
-build:docker-git-image-master:
+build:docker-git-image:
   extends:
-    - .env-master
     - .docker-git-image
-    - .job-policy-master
+    - .job-policy-all
 
-build:docker-source-image-master:
+build:docker-source-image:
   extends:
-    - .env-master
     - .docker-source-image
-    - .job-policy-master
+    - .job-policy-all
 
-build:docker-app-image-master:
+build:docker-app-image:
   extends:
-    - .env-master
     - .docker-app-image
-    - .job-policy-master
+    - .job-policy-all
 
-build:docker-compose-master:
+build:docker-compose:
   extends:
-    - .env-master
     - .docker-compose
-    - .job-policy-master
+    - .job-policy-all
 
-build:docker-nginx-image-master:
+build:docker-nginx-image:
   extends:
-    - .env-master
     - .docker-nginx-image
-    - .job-policy-master
+    - .job-policy-all
 
-test:phpunit-master:
+test:phpunit:
   extends:
     - .env-test
     - .phpunit
-    - .job-policy-master
+    - .job-policy-all
 
-deploy:secure-copy-master:
+deploy:secure-copy:
   extends:
     - .secure-copy
-    - .job-policy-master
-  environment:
-    name: staging
-  dependencies:
-    - build:docker-compose-master
-
-data:fixture-cron-master:
-  extends:
-    - .env-master
-    - .fixture-admin
-    - .job-policy-master
-
-build:docker-compose-image-production:
-  extends:
-    - .env-production
-    - .docker-compose-image
-    - .job-policy-production
-
-build:docker-git-image-production:
-  extends:
-    - .env-production
-    - .docker-git-image
-    - .job-policy-production
-
-build:docker-source-image-production:
-  extends:
-    - .env-production
-    - .docker-source-image
-    - .job-policy-production
-
-build:docker-app-image-production:
-  extends:
-    - .env-production
-    - .docker-app-image
-    - .job-policy-production
-
-build:docker-compose-production:
-  extends:
-    - .env-production
-    - .docker-compose
-    - .job-policy-production
-
-build:docker-nginx-image-production:
-  extends:
-    - .env-production
-    - .docker-nginx-image
-    - .job-policy-production
-
-test:phpunit-production:
-  extends:
-    - .env-test
-    - .phpunit
-    - .job-policy-production
-
-deploy:secure-copy-production:
-  extends:
-    - .secure-copy
-    - .job-policy-production
-  environment:
-    name: production
-  dependencies:
-    - build:docker-compose-production
-
-data:fixture-cron-production:
-  extends:
-    - .env-production
-    - .fixture-admin
-    - .job-policy-production
+    - .job-policy-all
 
 deploy:sync-project-forks:
   stage: deploy
@@ -403,6 +320,10 @@ deploy:sync-project-forks:
     - for FORK in $PROJECT_FORKS; do git remote add fork $FORK && git push fork stable && git remote rm fork; done
   only:
     - master
-  dependencies: []
   tags:
     - executor-docker
+
+data:fixture-admin:
+  extends:
+    - .fixture-admin
+    - .job-policy-all
