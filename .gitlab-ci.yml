@@ -13,14 +13,14 @@ variables:
   CI_GIT_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/git:master"
 
 stages:
-  - qa
+  - prepare
   - build-step1
   - build-step2
   - test
   - deploy
   - data
 
-.suffix-vars: &suffix-vars
+.suffix-vars:
   before_script:
     - cat .env | grep ENV_ > .build-env
     - sed -i 's/^/export /' .build-env
@@ -28,9 +28,7 @@ stages:
         echo 'export '`echo $name|awk -F''"$ENV_SUFFIX"'$' '{print $1}'`'='`printenv $name`'' >> .build-env;
       done
 
-.deploy-script: &deploy-script
-  #extends:
-  #  - .suffix-vars
+.deploy-script:
   image: $CI_GIT_IMAGE_WITH_TAG
   before_script:
     - eval $(ssh-agent -s)
@@ -39,12 +37,44 @@ stages:
     - executor-docker
 
 .qa:
-  stage: qa
+  stage: prepare
   image: jakzal/phpqa:1.9.2-alpine
   tags:
     - executor-docker
 
-.docker-source-image: &docker-source-image
+.docker-compose-image:
+  stage: prepare
+  image: docker:stable
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_DOCKER_COMPOSE_IMAGE_CACHE || true
+    - docker build
+      --cache-from $CI_DOCKER_COMPOSE_IMAGE_CACHE
+      --tag $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
+      ./docker/compose
+    - docker push $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
+    - docker logout $CI_REGISTRY
+  tags:
+    - executor-docker
+    - docker-in-docker
+
+.docker-git-image:
+  stage: prepare
+  image: docker:stable
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_GIT_IMAGE_CACHE || true
+    - docker build
+      --cache-from $CI_GIT_IMAGE_CACHE
+      --tag $CI_GIT_IMAGE_WITH_TAG
+      ./docker/git
+    - docker push $CI_GIT_IMAGE_WITH_TAG
+    - docker logout $CI_REGISTRY
+  tags:
+    - executor-docker
+    - docker-in-docker
+
+.docker-source-image:
   extends:
     - .suffix-vars
   stage: build-step1
@@ -71,45 +101,7 @@ stages:
     - executor-docker
     - docker-in-docker
 
-.docker-compose-image: &docker-compose-image
-  extends:
-    - .suffix-vars
-  stage: build-step1
-  image: docker:stable
-  script:
-    - eval $(cat .build-env)
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker pull $CI_DOCKER_COMPOSE_IMAGE_CACHE || true
-    - docker build
-          --cache-from $CI_DOCKER_COMPOSE_IMAGE_CACHE
-          --tag $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
-          ./docker/compose
-    - docker push $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
-    - docker logout $CI_REGISTRY
-  tags:
-    - executor-docker
-    - docker-in-docker
-
-.docker-git-image: &docker-git-image
-  extends:
-    - .suffix-vars
-  stage: build-step1
-  image: docker:stable
-  script:
-    - eval $(cat .build-env)
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker pull $CI_GIT_IMAGE_CACHE || true
-    - docker build
-          --cache-from $CI_GIT_IMAGE_CACHE
-          --tag $CI_GIT_IMAGE_WITH_TAG
-          ./docker/git
-    - docker push $CI_GIT_IMAGE_WITH_TAG
-    - docker logout $CI_REGISTRY
-  tags:
-    - executor-docker
-    - docker-in-docker
-
-.docker-app-image: &docker-app-image
+.docker-app-image:
   extends:
     - .suffix-vars
   stage: build-step2
@@ -134,7 +126,7 @@ stages:
     - executor-docker
     - docker-in-docker
 
-.docker-compose: &docker-compose
+.docker-compose:
   extends:
     - .suffix-vars
   stage: build-step2
@@ -154,7 +146,7 @@ stages:
     - executor-docker
   dependencies: []
 
-.docker-nginx-image: &docker-nginx-image
+.docker-nginx-image:
   extends:
     - .suffix-vars
   stage: build-step2
@@ -176,7 +168,7 @@ stages:
     - executor-docker
     - docker-in-docker
 
-.phpunit: &phpunit
+.phpunit:
   extends:
     - .suffix-vars
   stage: test
@@ -190,7 +182,7 @@ stages:
     - executor-docker
   dependencies: []
 
-.secure-copy: &secure-copy
+.secure-copy:
   extends:
     - .deploy-script
   stage: deploy
@@ -217,14 +209,14 @@ stages:
           docker logout '"$CI_REGISTRY"' ;
           echo "[$(date -R)] web-server is up"'
 
-.fixture: &fixture
+.fixture:
   extends:
     - .deploy-script
   stage: data
   when: manual
   dependencies: []
 
-.fixture-admin: &fixture-admin
+.fixture-admin:
   extends:
     - .fixture
   script:
@@ -234,25 +226,25 @@ stages:
           docker-compose exec php -T bin\console fos:user:create admin admin@docker.local admin ;
           docker-compose exec php -T bin\console fos:user:promote admin ROLE_SUPER_ADMIN'
 
-.env-test: &env-test
+.env-test:
   variables:
     ENV_SUFFIX: "_TEST"
 
-.env-master: &env-master
+.env-master:
   variables:
     ENV_SUFFIX: "_MASTER"
 
-.env-production: &env-production
+.env-production:
   variables:
     ENV_SUFFIX: "_PRODUCTION"
 
-.job-policy-master: &job-policy-master
+.job-policy-master:
   only:
     - master
   except:
     - tags
 
-.job-policy-production: &job-policy-production
+.job-policy-production:
   only:
     - /^release-.*$/
   except:
@@ -264,46 +256,46 @@ qa:php-cs-fixer:
   script:
     - php-cs-fixer fix --diff --dry-run -v
 
-build:docker-source-image-master:
-  extends:
-    - .docker-source-image
-    - .env-master
-    - .job-policy-master
-
 build:docker-compose-image-master:
   extends:
-    - .docker-compose-image
     - .env-master
+    - .docker-compose-image
     - .job-policy-master
 
 build:docker-git-image-master:
   extends:
-    - .docker-git-image
     - .env-master
+    - .docker-git-image
+    - .job-policy-master
+
+build:docker-source-image-master:
+  extends:
+    - .env-master
+    - .docker-source-image
     - .job-policy-master
 
 build:docker-app-image-master:
   extends:
-    - .docker-app-image
     - .env-master
+    - .docker-app-image
     - .job-policy-master
 
 build:docker-compose-master:
   extends:
-    - .docker-compose
     - .env-master
+    - .docker-compose
     - .job-policy-master
 
 build:docker-nginx-image-master:
   extends:
-    - .docker-nginx-image
     - .env-master
+    - .docker-nginx-image
     - .job-policy-master
 
 test:phpunit-master:
   extends:
-    - .phpunit
     - .env-test
+    - .phpunit
     - .job-policy-master
 
 deploy:secure-copy-master:
@@ -317,50 +309,50 @@ deploy:secure-copy-master:
 
 data:fixture-cron-master:
   extends:
-    - .fixture-admin
     - .env-master
+    - .fixture-admin
     - .job-policy-master
-
-build:docker-source-image-production:
-  extends:
-    - .docker-source-image
-    - .env-production
-    - .job-policy-production
 
 build:docker-compose-image-production:
   extends:
-    - .docker-compose-image
     - .env-production
+    - .docker-compose-image
     - .job-policy-production
 
 build:docker-git-image-production:
   extends:
-    - .docker-git-image
     - .env-production
+    - .docker-git-image
+    - .job-policy-production
+
+build:docker-source-image-production:
+  extends:
+    - .env-production
+    - .docker-source-image
     - .job-policy-production
 
 build:docker-app-image-production:
   extends:
-    - .docker-app-image
     - .env-production
+    - .docker-app-image
     - .job-policy-production
 
 build:docker-compose-production:
   extends:
-    - .docker-compose
     - .env-production
+    - .docker-compose
     - .job-policy-production
 
 build:docker-nginx-image-production:
   extends:
-    - .docker-nginx-image
     - .env-production
+    - .docker-nginx-image
     - .job-policy-production
 
 test:phpunit-production:
   extends:
-    - .phpunit
     - .env-test
+    - .phpunit
     - .job-policy-production
 
 deploy:secure-copy-production:
@@ -374,8 +366,8 @@ deploy:secure-copy-production:
 
 data:fixture-cron-production:
   extends:
-    - .fixture-admin
     - .env-production
+    - .fixture-admin
     - .job-policy-production
 
 deploy:sync-project-forks:
