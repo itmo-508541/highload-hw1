@@ -26,4 +26,4 @@ services:
             - .:/srv
             - /srv/var
         environment:
-            XDEBUG_CONFIG: "remote_host=172.19.0.1 remote_connect_back=off"
+            XDEBUG_CONFIG: "client_host=172.19.0.1"
