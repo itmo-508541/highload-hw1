@@ -28,11 +28,16 @@ stages:
         echo 'export '`echo $name|awk -F''"$ENV_SUFFIX"'$' '{print $1}'`'='`printenv $name`'' >> .build-env;
       done
 
-services:
-  - docker:19.03.13-dind
-
 .docker-build:
-  image: docker:19.03.2
+  services:
+    - docker:19.03.13-dind
+  image: docker:19.03.13
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+    DOCKER_DRIVER: overlay2
   tags:
     - executor-docker
     - docker-in-docker
