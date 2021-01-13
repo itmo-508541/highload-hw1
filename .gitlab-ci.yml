@@ -262,10 +262,17 @@ qa:php-cs-fixer:
   script:
     - php-cs-fixer fix --diff --dry-run -v
 
-prepare:env:
+prepare:env-master:
   extends:
+    - .env-master
     - .prepare-env
-    - .job-policy-all
+    - .job-policy-master
+
+prepare:env-production:
+  extends:
+    - .env-production
+    - .prepare-env
+    - .job-policy-production
 
 build:docker-compose-image:
   extends:
@@ -309,6 +316,8 @@ deploy:secure-copy:
     - .job-policy-all
 
 deploy:sync-project-forks:
+  extends:
+    - .job-policy-master
   stage: deploy
   image: $CI_GIT_IMAGE_WITH_TAG
   before_script:
@@ -318,8 +327,6 @@ deploy:sync-project-forks:
     - git branch -d stable || true
     - git checkout -b stable
     - for FORK in $PROJECT_FORKS; do git remote add fork $FORK && git push fork stable && git remote rm fork; done
-  only:
-    - master
   tags:
     - executor-docker
 
