@@ -45,6 +45,7 @@ stages:
   image: docker:19.03.13
   tags:
     - executor-docker
+    - docker-in-docker
 
 .prepare-env:
   extends:
