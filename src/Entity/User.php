@@ -26,7 +26,7 @@ class User extends BaseUser
     public function getRolesAsString()
     {
         $roles = $this->getRoles();
-        if (count($roles) > 1 && in_array(self::ROLE_DEFAULT, $roles)) {
+        if (\count($roles) > 1 && \in_array(self::ROLE_DEFAULT, $roles)) {
             $index = array_search(self::ROLE_DEFAULT, $roles);
             unset($roles[$index]);
         }

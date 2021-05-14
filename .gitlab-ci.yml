@@ -113,7 +113,7 @@ prepare:env-production:
 prepare:docker-compose-image:
   extends:
     - .docker-build
-    - .job-policy-all
+    - .job-policy-all #-master
   stage: build-step1
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -143,7 +143,7 @@ prepare:docker-git-image:
 prepare:docker-source-image:
   extends:
     - .docker-build
-    - .job-policy-all
+    - .job-policy-all #master
   stage: build-step1
   script:
     - cat .build-env
@@ -168,7 +168,7 @@ prepare:docker-source-image:
 build:docker-app-image:
   extends:
     - .docker-build
-    - .job-policy-all
+    - .job-policy-all #-master
   stage: build-step2
   script:
     - eval $(cat .build-env)
@@ -189,7 +189,7 @@ build:docker-app-image:
 
 build:docker-compose:
   extends:
-    - .job-policy-all
+    - .job-policy-all #-master
   stage: build-step2
   image: $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
   script:
@@ -207,7 +207,7 @@ build:docker-compose:
 build:docker-nginx-image:
   extends:
     - .docker-build
-    - .job-policy-all
+    - .job-policy-all #-master
   stage: build-step2
   script:
     - eval $(cat .build-env)
@@ -227,7 +227,7 @@ test:phpunit:
   extends:
     - .env-test
     - .suffix-vars
-    - .job-policy-all
+    - .job-policy-all #-master
   stage: test
   image: $CI_SOURCE_IMAGE_WITH_TAG
   script:
@@ -242,7 +242,7 @@ test:phpunit:
 deploy:secure-copy:
   extends:
     - .deploy-script
-    - .job-policy-all
+    - .job-policy-all #-master
   stage: deploy
   script:
     - eval $(cat .build-env)
@@ -267,6 +267,23 @@ deploy:secure-copy:
           docker logout '"$CI_REGISTRY"' ;
           echo "[$(date -R)] web-server is up"'
 
+#deploy:production:
+#  extends:
+#    - .deploy-script
+#    - .job-policy-production
+#  stage: deploy
+#  script:
+#    - eval $(cat .build-env)
+#    - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
+#          sudo service nginx stop ;
+#          cd '"$DEPLOY_DIRECTORY"';
+#          git fetch --all --prune ;
+#          git checkout origin/production ;
+#          composer install --no-dev --prefer-dist --no-scripts --optimize-autoloader --no-interaction ;
+#          sudo phing storage-prepare ;
+#          phing app-deploy database-deploy -Dsymfony.env=prod ;
+#          sudo service nginx start'
+
 deploy:sync-project-forks:
   extends:
     - .job-policy-master
@@ -285,10 +302,10 @@ deploy:sync-project-forks:
 data:fixture-admin:
   extends:
     - .fixture
-    - .job-policy-all
+    - .job-policy-all #-master
   script:
     - eval $(cat .build-env)
     - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
           cd '"$DEPLOY_DIRECTORY"' ;
-          docker-compose exec php -T bin\console fos:user:create admin admin@docker.local admin ;
-          docker-compose exec php -T bin\console fos:user:promote admin ROLE_SUPER_ADMIN'
+          docker-compose exec -T php bin/console fos:user:create admin admin@docker.local admin ;
+          docker-compose exec -T php bin/console fos:user:promote admin ROLE_SUPER_ADMIN'

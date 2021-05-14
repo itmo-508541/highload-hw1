@@ -32,7 +32,7 @@ class UserAdmin extends AbstractAdmin
         return array_filter(
             $exportFields,
             function ($v) {
-                return !in_array($v, ['password', 'salt']);
+                return !\in_array($v, ['password', 'salt']);
             }
         );
     }
@@ -102,9 +102,6 @@ class UserAdmin extends AbstractAdmin
         ;
     }
 
-    /**
-     * @param ShowMapper $showMapper
-     */
     protected function configureShowFields(ShowMapper $showMapper)
     {
         $showMapper

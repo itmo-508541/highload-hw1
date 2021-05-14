@@ -6,6 +6,8 @@ services:
             context: "."
             dockerfile: Dockerfile-nginx
             target: base
+        entrypoint: ["/docker-entrypoint.sh"]
+        command: ["nginx", "-g", "daemon off;"]
         ports:
             - "80:80"
         depends_on:
@@ -26,4 +28,4 @@ services:
             - .:/srv
             - /srv/var
         environment:
-            XDEBUG_CONFIG: "client_host=172.19.0.1"
+            XDEBUG_CONFIG: "client_host=172.20.0.1"
