@@ -92,7 +92,7 @@ qa:php-cs-fixer:
   extends:
     - .job-policy-all
   stage: prepare
-  image: jakzal/phpqa:1.9.2-alpine
+  image: jakzal/phpqa:1.56.1-php7.4-alpine
   script:
     - php-cs-fixer fix --diff --dry-run -v
   tags:
@@ -260,7 +260,6 @@ deploy:secure-copy:
           docker-compose up -d --force-recreate --no-deps spare ;
           docker-compose exec -T spare phing storage-prepare database-deploy -Dsymfony.env=prod ;
           docker-compose up -d --force-recreate --no-deps php ;
-          docker-compose exec -T php cron ;
           echo "[$(date -R)] web-server is down" ;
           docker-compose stop nginx ;
           docker-compose up -d nginx ;

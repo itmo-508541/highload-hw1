@@ -1,17 +1,17 @@
 ARG source_image=scratch
-FROM debian:buster-slim AS php
+FROM debian:buster-20210511-slim AS php
 
 ENV TERM linux
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update -y -oAcquire::AllowInsecureRepositories=true \
-    && apt-get install -y --no-install-recommends --allow-unauthenticated \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
             apt-transport-https gnupg ca-certificates curl \
-            cron netcat \
+            netcat \
     && echo "deb https://packages.sury.org/php/ buster main" >> /etc/apt/sources.list.d/sury.org.list \
     && curl -sS https://packages.sury.org/php/apt.gpg | apt-key add - \
     && apt-get update \
-    && apt-get install -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends --allow-unauthenticated \
             php7.4-curl \
             php7.4-fpm \
             php7.4-intl \
@@ -41,7 +41,7 @@ FROM ${source_image} AS source_image
 
 FROM php AS base
 
-COPY --from=jakzal/phpqa:1.9.2-alpine /usr/local/bin/phpunit /usr/bin/composer /usr/local/bin/
+COPY --from=jakzal/phpqa:1.56.1-php7.4-alpine /tools/phpunit-7 /tools/composer /usr/local/bin/
 
 
 
@@ -85,5 +85,3 @@ FROM php AS prod
 ENV APP_ENV="prod"
 
 COPY --from=source_image /srv/ .
-
-RUN cat docker/app.crontab > /var/spool/cron/crontabs/root
