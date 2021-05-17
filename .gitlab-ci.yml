@@ -195,6 +195,9 @@ build:docker-compose:
   script:
     - eval $(cat .build-env)
     - mkdir build
+    - for name in `env | awk -F= '{if($1 ~ /_MASTER|_TEST|_PRODUCTION$/) print $1}'`; do
+        unset $name
+      done
     - printenv | grep ENV_ > .compose-env
     - docker-compose -f docker-compose.deploy.yml config > build/docker-compose.yml
     - sed -i 's/\/builds\/'"$CI_PROJECT_NAMESPACE"'\/'"$CI_PROJECT_NAME"'/\./g' build/docker-compose.yml
