@@ -55,6 +55,7 @@ RUN apt-get update -y \
     && mkdir -p /tmp/sessions \
     && chmod -R 777 /tmp/sessions
 
+COPY docker/php-dev /etc/php/7.4/
 
 
 FROM base AS source
