@@ -29,3 +29,4 @@ services:
             - /srv/var
         environment:
             XDEBUG_CONFIG: "client_host=172.20.0.1"
+            PHP_IDE_CONFIG: "serverName=docker.local"
