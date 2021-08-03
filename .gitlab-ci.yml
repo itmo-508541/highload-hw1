@@ -143,7 +143,7 @@ prepare:docker-git-image:
 prepare:docker-source-image:
   extends:
     - .docker-build
-    - .job-policy-all #master
+    - .job-policy-all #-master
   stage: build-step1
   script:
     - cat .build-env
@@ -281,7 +281,7 @@ deploy:secure-copy:
 #          cd '"$DEPLOY_DIRECTORY"';
 #          git fetch --all --prune ;
 #          git checkout origin/production ;
-#          composer install --no-dev --prefer-dist --no-scripts --optimize-autoloader --no-interaction ;
+#          composer install --no-dev --prefer-dist --no-scripts --optimize-autoloader --no-interaction --no-plugins ;
 #          sudo phing storage-prepare ;
 #          phing app-deploy database-deploy -Dsymfony.env=prod ;
 #          sudo service nginx start'
