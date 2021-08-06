@@ -309,5 +309,5 @@ data:fixture-admin:
     - eval $(cat .build-env)
     - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
           cd '"$DEPLOY_DIRECTORY"' ;
-          docker-compose exec -T php bin/console app:user:create admin admin@docker.local admin ;
+          docker-compose exec -T php bin/console app:user:create admin admin ;
           docker-compose exec -T php bin/console app:user:promote admin ROLE_SUPER_ADMIN'
