@@ -237,7 +237,7 @@ test:phpunit:
     - eval $(cat .build-env)
     - cd /srv
     - composer install --prefer-dist --no-scripts --no-interaction
-    - phpunit-7
+    - phpunit
   tags:
     - executor-docker
   dependencies: []
