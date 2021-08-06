@@ -17,7 +17,7 @@ services:
 
     php: &php-service
         image: "${CI_APP_IMAGE_WITH_TAG}"
-        command: "php-fpm7.4"
+        command: "php-fpm8.0"
         env_file:
             - .env
             - .compose-env
