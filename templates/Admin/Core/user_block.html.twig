@@ -2,17 +2,8 @@
 
 {% block user_block %}
     {% if app.user %}
-        {% set _bg_class          = "bg-light-blue" %}
-        {% set _logout_uri        = path('fos_user_security_logout') %}
-        {% set _logout_text       = 'layout.logout'|trans({}, 'FOSUserBundle') %}
-
-        {#
-        <li class="user-header {{ _bg_class }}">
-            <p>{{ app.user }}</p>
-        </li>
-        #}
         <li class="user-footer">
-            <a href="{{ _logout_uri }}" class="btn btn-default"><i class="fa fa-sign-out fa-fw"></i> {{ _logout_text }}</a>
+            <a href="{{ path('app_logout') }}" class="btn btn-default"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
         </li>
     {% endif %}
 {% endblock %}

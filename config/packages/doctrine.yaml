@@ -9,14 +9,14 @@ parameters:
 doctrine:
     dbal:
         driver: pdo_mysql
-        server_version: '5.7'
+        server_version: '8.0'
         charset: utf8mb4
         default_table_options:
             charset: utf8mb4
             collate: utf8mb4_unicode_ci
         url: 'mysql://%env(ENV_database_user)%:%env(ENV_database_password)%@%env(ENV_database_host)%:%env(ENV_database_port)%/%env(ENV_database_name)%'
     orm:
-        auto_generate_proxy_classes: '%kernel.debug%'
+        auto_generate_proxy_classes: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         auto_mapping: true
         mappings:
@@ -24,5 +24,5 @@ doctrine:
                 is_bundle: false
                 type: annotation
                 dir: '%kernel.project_dir%/src/Entity'
-                prefix: App\Entity
+                prefix: 'App\Entity'
                 alias: App

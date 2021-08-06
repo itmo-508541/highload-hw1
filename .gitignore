@@ -1,13 +1,22 @@
-.env.local
 .idea
 .php_cs
 .php_cs.cache
-.phpunit
 /auth.json
 /build/
 /docker-compose.override.yml
-/phpunit.xml
-/public/bundles/
 /public/upload
 /storage
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
 /vendor/
+###< symfony/framework-bundle ###
+
+###> symfony/phpunit-bridge ###
+.phpunit.result.cache
+/phpunit.xml
+###< symfony/phpunit-bridge ###

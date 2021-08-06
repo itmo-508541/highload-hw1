@@ -1,8 +1,46 @@
 version: '3.4'
 
 services:
+    nginx:
+        build:
+            context: "."
+            dockerfile: Dockerfile-nginx
+            target: base
+        entrypoint: ["/docker-entrypoint.sh"]
+        command: ["nginx", "-g", "daemon off;"]
+        ports:
+            - "80:80"
+        depends_on:
+            - php
+            - mysql
+        volumes:
+            - ./public:/srv/public
+            - ./storage/upload:/srv/storage/upload
+
+    php:
+        build:
+            context: "."
+            dockerfile: Dockerfile
+            target: dev
+        env_file: .env
+        volumes:
+            - .:/srv
+            - /srv/var
+
+    phpmyadmin:
+        image: phpmyadmin:5.1.1
+        ports:
+            - 8080:80
+        depends_on:
+            - mysql
+        environment:
+            PMA_ARBITRARY: "1"
+            PMA_HOST: "mysql"
+            PMA_USER: "root"
+            PMA_PASSWORD: "root"
+
     mysql:
-        image: mysql:5.7.22
+        image: mysql:8.0.26
         command: mysqld --sql_mode=""
         ports:
             - "3306:3306"
@@ -13,18 +51,6 @@ services:
             MYSQL_PASSWORD: "db_password"
         volumes:
             - database:/var/lib/mysql
-
-    phpmyadmin:
-        image: phpmyadmin/phpmyadmin
-        ports:
-            - 8080:80
-        environment:
-            PMA_ARBITRARY: "1"
-            PMA_HOST: "mysql"
-            PMA_USER: "root"
-            PMA_PASSWORD: "root"
-        volumes:
-            - /sessions
 
 volumes:
     database:

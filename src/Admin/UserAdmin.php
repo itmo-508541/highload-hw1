@@ -3,7 +3,7 @@
 namespace App\Admin;
 
 use App\Entity\User;
-use FOS\UserBundle\Model\UserManagerInterface;
+use App\Traits\UserPasswordHasherTrait;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
@@ -12,22 +12,33 @@ use Sonata\AdminBundle\Show\ShowMapper;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-/**
- * Class UserAdmin.
- */
 class UserAdmin extends AbstractAdmin
 {
-    /**
-     * @var UserManagerInterface
-     */
-    protected $userManager;
+    use UserPasswordHasherTrait;
+
+    private array $securityRoleHierarchy = [];
+
+    public function setSecurityRoleHierarchy(array $securityRoleHierarchy): void
+    {
+        $this->securityRoleHierarchy = $securityRoleHierarchy;
+    }
 
     /**
-     * {@inheritdoc}
+     * @param User $user
      */
-    public function getExportFields()
+    public function preUpdate($user): void
     {
-        $exportFields = parent::getExportFields();
+        $plainPassword = $user->getPlainPassword();
+        if (!empty($plainPassword)) {
+            $password = $this->userPassworsHasher->hashPassword($user, $plainPassword);
+
+            $user->setPassword($password);
+        }
+    }
+
+    protected function configureExportFields(): array
+    {
+        $exportFields = parent::configureExportFields();
 
         return array_filter(
             $exportFields,
@@ -37,61 +48,14 @@ class UserAdmin extends AbstractAdmin
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getFormBuilder()
-    {
-        $this->formOptions['data_class'] = $this->getClass();
-
-        $options = $this->formOptions;
-        if (!$this->getSubject() || null === $this->getSubject()->getId()) {
-            $options['validation_groups'] = 'Registration';
-        } else {
-            $options['validation_groups'] = 'Profile';
-        }
-
-        $formBuilder = $this->getFormContractor()->getFormBuilder($this->getUniqid(), $options);
-
-        $this->defineFormBuilder($formBuilder);
-
-        return $formBuilder;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function preUpdate($user)
-    {
-        $this->userManager->updateCanonicalFields($user);
-        $this->userManager->updatePassword($user);
-    }
-
-    /**
-     * Set user manager.
-     *
-     * @param UserManagerInterface $userManager User manager
-     *
-     * @return $this
-     * @required
-     */
-    public function setUserManager(UserManagerInterface $userManager)
-    {
-        $this->userManager = $userManager;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureListFields(ListMapper $listMapper)
+    protected function configureListFields(ListMapper $listMapper): void
     {
         $listMapper
             ->add('id')
-            ->addIdentifier('email')
             ->addIdentifier('username')
-            ->add('enabled')
+            ->add('rolesAsString', null, [
+                'label' => 'Roles',
+            ])
             ->add(
                 '_action', 'actions', [
                     'actions' => [
@@ -102,36 +66,28 @@ class UserAdmin extends AbstractAdmin
         ;
     }
 
-    protected function configureShowFields(ShowMapper $showMapper)
+    protected function configureShowFields(ShowMapper $showMapper): void
     {
         $showMapper
             ->add('id')
-            ->add('email')
             ->add('username')
-            ->add('rolesAsString')
-            ->add('enabled')
+            ->add('rolesAsString', null, [
+                'label' => 'Roles',
+            ])
         ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureDatagridFilters(DatagridMapper $filterMapper)
+    protected function configureDatagridFilters(DatagridMapper $filterMapper): void
     {
         $filterMapper
-            ->add('email')
             ->add('username')
         ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureFormFields(FormMapper $formMapper)
+    protected function configureFormFields(FormMapper $formMapper): void
     {
         $choices = [];
-        $container = $this->getConfigurationPool()->getContainer();
-        foreach ($container->getParameter('security.role_hierarchy.roles') as $key => $value) {
+        foreach ($this->securityRoleHierarchy as $key => $value) {
             $choices[$key] = $key;
             foreach ($value as $name) {
                 $choices[$name] = $name;
@@ -140,7 +96,6 @@ class UserAdmin extends AbstractAdmin
         asort($choices);
 
         $formMapper
-            ->add('email')
             ->add('username')
             ->add('plainPassword', TextType::class, [
                 'required' => (!$this->getSubject() || null === $this->getSubject()->getId()),
@@ -149,7 +104,6 @@ class UserAdmin extends AbstractAdmin
                 'choices' => $choices,
                 'multiple' => true,
             ])
-            ->add('enabled')
         ;
     }
 }

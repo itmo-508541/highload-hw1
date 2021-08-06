@@ -12,13 +12,13 @@ RUN apt-get update \
     && curl -sS https://packages.sury.org/php/apt.gpg | apt-key add - \
     && apt-get update \
     && apt-get install -y --no-install-recommends --allow-unauthenticated \
-            php7.4-curl \
-            php7.4-fpm \
-            php7.4-intl \
-            php7.4-mbstring \
-            php7.4-mysql \
-            php7.4-xml \
-            php7.4-zip \
+            php8.0-curl \
+            php8.0-fpm \
+            php8.0-intl \
+            php8.0-mbstring \
+            php8.0-mysql \
+            php8.0-xml \
+            php8.0-zip \
     && apt-get purge --autoremove -y gnupg \
     && apt-get clean -y \
     && curl -sS -L -o /usr/local/bin/phing http://www.phing.info/get/phing-latest.phar \
@@ -27,11 +27,11 @@ RUN apt-get update \
 
 WORKDIR /srv
 
-COPY docker/php /etc/php/7.4/
+COPY docker/php /etc/php/8.0/
 
 EXPOSE 9000
 
-CMD ["php-fpm7.4"]
+CMD ["php-fpm8.0"]
 
 
 
@@ -41,7 +41,7 @@ FROM ${source_image} AS source_image
 
 FROM php AS base
 
-COPY --from=jakzal/phpqa:1.56.1-php7.4-alpine /tools/phpunit-7 /tools/composer /usr/local/bin/
+COPY --from=jakzal/phpqa:1.59.1-php8.0-alpine /tools/phpunit /tools/composer /usr/local/bin/
 
 
 
@@ -49,13 +49,13 @@ FROM base AS dev
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \
-            php7.4-xdebug \
+            php8.0-xdebug \
             bash \
     && adduser --system --no-create-home --uid 1000 --gid 50 docker \
     && mkdir -p /tmp/sessions \
     && chmod -R 777 /tmp/sessions
 
-COPY docker/php-dev /etc/php/7.4/
+COPY docker/php-dev /etc/php/8.0/
 
 
 FROM base AS source

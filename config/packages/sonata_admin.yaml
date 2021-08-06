@@ -6,8 +6,6 @@ sonata_admin:
     dashboard:
         blocks:
             - { type: sonata.admin.block.admin_list, position: left }
-    options:
-        legacy_twig_text_extension: false
     templates:
         user_block: 'Admin/Core/user_block.html.twig'
 
