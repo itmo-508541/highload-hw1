@@ -1,9 +1,5 @@
-{% extends "@SonataAdmin/Core/user_block.html.twig" %}
-
-{% block user_block %}
-    {% if app.user %}
-        <li class="user-footer">
-            <a href="{{ path('app_logout') }}" class="btn btn-default"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
-        </li>
-    {% endif %}
-{% endblock %}
+{% if app.user %}
+    <li class="user-footer">
+        <a href="{{ path('app_logout') }}" class="btn btn-default"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+    </li>
+{% endif %}

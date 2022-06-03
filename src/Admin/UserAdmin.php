@@ -59,7 +59,7 @@ class UserAdmin extends AbstractAdmin
             ->add(
                 '_action', 'actions', [
                     'actions' => [
-                        'show' => [],
+                        'edit' => [],
                     ],
                 ]
             )
