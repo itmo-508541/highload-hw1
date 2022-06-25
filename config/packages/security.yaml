@@ -3,11 +3,14 @@ security:
     enable_authenticator_manager: true
 
     role_hierarchy:
+        ROLE_API:         ROLE_USER
         ROLE_ADMIN:       ROLE_USER
         ROLE_SUPER_ADMIN: ROLE_ADMIN
 
     password_hashers:
         App\Entity\User:
+            algorithm: auto
+        App\Entity\Client:
             algorithm: auto
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
@@ -16,6 +19,10 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\User
+                property: username
+        app_client_provider:
+            entity:
+                class: App\Entity\Client
                 property: username
 
     firewalls:
@@ -36,6 +43,16 @@ security:
                 target: /admin/login
             custom_authenticator: App\Security\UserAuthentificatorAuthenticator
             entry_point: form_login
+        client_token:
+            pattern:  ^/api/auth
+            stateless: true
+        api:
+            pattern:   ^/api
+            stateless: true
+            provider: app_client_provider
+            guard:
+                authenticators:
+                    - lexik_jwt_authentication.jwt_token_authenticator
         main:
             security: false
 
@@ -48,5 +65,11 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/admin/login, roles: PUBLIC_ACCESS }
-        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/logout$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/login_check$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/api/doc, role: [ROLE_ADMIN, ROLE_API] }
+        - { path: ^/admin/, role: ROLE_ADMIN }
+        - { path: ^/api/auth, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api, roles: [ROLE_API] }
+        - { path: ^/.*, role: IS_AUTHENTICATED_ANONYMOUSLY }

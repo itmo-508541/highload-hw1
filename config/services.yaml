@@ -4,6 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    upload_directory: '%kernel.project_dir%/storage/upload'
 
 services:
     # default configuration for services in *this* file
@@ -24,10 +25,32 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
+    App\Admin\ClientAdmin:
+        arguments: [ ~, App\Entity\Client, ~ ]
+        public: true
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: ClientAdmin, group: Main }
+        calls:
+            - ['setTranslationDomain', ['ClientAdmin']]
+
     App\Admin\UserAdmin:
         arguments: [ ~, App\Entity\User, ~ ]
         public: true
         tags:
-            - { name: sonata.admin, manager_type: orm, label: Users, group: Miscellaneous }
+            - { name: sonata.admin, manager_type: orm, label: UserAdmin, group: Internal }
         calls:
             - ['setSecurityRoleHierarchy', [ '%security.role_hierarchy.roles%']]
+            - ['setTranslationDomain', ['UserAdmin']]
+
+    app.admin.config:
+        class: App\Admin\ConfigAdmin
+        arguments: [ ~, App\Entity\Config, ~ ]
+        public: true
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: ConfigAdmin, group: Internal }
+        calls:
+            - ['setTranslationDomain', ['ConfigAdmin']]
+
+    App\Service\FileUploader:
+        arguments:
+            $targetDirectory: '%upload_directory%'

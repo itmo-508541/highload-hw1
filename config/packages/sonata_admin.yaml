@@ -1,5 +1,9 @@
 sonata_admin:
     title: 'Sonata Admin'
+    default_admin_services:
+        label_translator_strategy: 'sonata.admin.label.strategy.underscore'
+    search: false
+
     security:
         role_admin: ROLE_ADMIN
         role_super_admin: ROLE_SUPER_ADMIN

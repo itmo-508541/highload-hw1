@@ -1,0 +1,11 @@
+ConfigAdmin: Configuration
+
+list:
+  label_id: Id
+  label_value: Value
+
+filter:
+  label_id: Id
+
+breadcrumb:
+  link_config_list: Configuration

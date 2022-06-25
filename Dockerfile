@@ -14,6 +14,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends --allow-unauthenticated \
             php8.0-curl \
             php8.0-fpm \
+            php8.0-gd \
             php8.0-intl \
             php8.0-mbstring \
             php8.0-mysql \

@@ -53,9 +53,7 @@ class UserAdmin extends AbstractAdmin
         $listMapper
             ->add('id')
             ->addIdentifier('username')
-            ->add('rolesAsString', null, [
-                'label' => 'Roles',
-            ])
+            ->add('rolesAsString')
             ->add(
                 '_action', 'actions', [
                     'actions' => [
@@ -71,9 +69,7 @@ class UserAdmin extends AbstractAdmin
         $showMapper
             ->add('id')
             ->add('username')
-            ->add('rolesAsString', null, [
-                'label' => 'Roles',
-            ])
+            ->add('rolesAsString')
         ;
     }
 

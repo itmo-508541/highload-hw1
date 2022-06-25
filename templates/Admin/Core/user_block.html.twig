@@ -1,4 +1,9 @@
 {% if app.user %}
+    {% if is_granted('ROLE_ADMIN') %}
+    <li class="user-footer">
+        <a href="{{ path('app.swagger_ui') }}"><i class="fa fa-list"></i> API Doc</a>
+    </li>
+    {% endif %}
     <li class="user-footer">
         <a href="{{ path('app_logout') }}" class="btn btn-default"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
     </li>

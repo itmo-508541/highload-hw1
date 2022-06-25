@@ -23,7 +23,7 @@ services:
             - .compose-env
         environment:
             APP_ENV: prod
-            APP_DEBUG: 0
+            APP_DEBUG: ${ENV_debug}
             TRUSTED_PROXIES: "0.0.0.0/0"
         volumes:
           - "storage:/srv/storage:rw"
@@ -33,7 +33,7 @@ services:
         << : *php-service
 
     mysql:
-        image: mysql:8.0.26
+        image: mysql:8.0.29
         command: mysqld --sql_mode=""
         expose:
           - 3306

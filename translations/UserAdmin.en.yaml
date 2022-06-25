@@ -1,0 +1,25 @@
+UserAdmin: Admins
+
+list:
+  label_id: Id
+  label_username: Username
+  label_roles_as_string: Roles
+  label__action: Actions
+
+filter:
+  label_username: Username
+
+breadcrumb:
+  link_user_list: Admins
+
+show:
+  group_user_admin: Admin
+  label_id: Id
+  label_username: Username
+  label_roles_as_string: Roles
+
+form:
+  group_user_admin: Admin
+  label_username: Username
+  label_plain_password: Plain password
+  label_roles: Roles

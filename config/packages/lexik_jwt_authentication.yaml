@@ -1,0 +1,16 @@
+# See https://github.com/lexik/LexikJWTAuthenticationBundle/blob/HEAD/Resources/doc/1-configuration-reference.md
+#
+# openssl genrsa -out config/jwt/private.prod.pem -aes256 4096
+# openssl rsa -pubout -in config/jwt/private.prod.pem -out config/jwt/public.prod.pem
+lexik_jwt_authentication:
+    secret_key: '%env(resolve:JWT_SECRET_KEY)%'
+    public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
+    pass_phrase: '%env(JWT_PASSPHRASE)%'
+    token_ttl: 86400
+
+    token_extractors:
+        # look for a token as Authorization Header
+        authorization_header:
+            enabled: true
+            prefix:  ~
+            name:    X-Auth-Token

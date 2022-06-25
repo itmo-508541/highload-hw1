@@ -1,0 +1,6 @@
+parameters:
+    mailgun_dns: 'smtp://%env(ENV_mailgun_username)%:%env(ENV_mailgun_password)%@%env(ENV_mailgun_host)%'
+
+framework:
+    mailer:
+        dsn: '%mailgun_dns%'

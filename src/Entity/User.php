@@ -17,12 +17,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private int $id;
+    private ?int $id = null;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      */
-    private string $username;
+    private string $username = '';
 
     /**
      * @ORM\Column(type="json")
@@ -33,7 +33,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      * @ORM\Column(type="string")
      */
-    private string $password;
+    private string $password = '';
 
     /**
      * @var string Plain password. Used for model validation. Must not be persisted.
