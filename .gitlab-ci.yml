@@ -259,7 +259,7 @@ deploy:secure-copy:
           cd '"$DEPLOY_DIRECTORY"' ;
           docker login -u gitlab-ci-token -p '"$CI_JOB_TOKEN"' '"$CI_REGISTRY"' ;
           docker-compose pull ;
-          docker-compose up -d mysql ;
+          docker-compose up -d --no-recreate mysql ;
           docker-compose up -d --force-recreate --no-deps spare ;
           docker-compose exec -T spare phing storage-prepare database-deploy -Dsymfony.env=prod ;
           docker-compose up -d --force-recreate --no-deps php ;
