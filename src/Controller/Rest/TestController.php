@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * @Route(path="/api", condition="'dev' === '%kernel.environment%'")
+ * @Route(path="/test", condition="'dev' === '%kernel.environment%'")
  * @IsGranted("ROLE_API", statusCode=403, message="Access denied")
  * @Nelmio\Security(name="Bearer")
  * @OpenApi\Tag(name="Test")
@@ -23,9 +23,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class TestController extends AbstractFOSRestController
 {
     /**
-     * @Rest\Get("/test", condition="request.attributes.get('version') == 'v1.0'")
+     * @Rest\Get("/version", condition="request.attributes.get('version') == 'v1.0'")
      * @OpenApi\Get(
-     *     description="Token testing",
+     *     description="Token and version testing",
      *     @OpenApi\Response(
      *         response="200",
      *         description="Test",
