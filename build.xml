@@ -22,6 +22,14 @@
     </target>
 
     <target name="database-deploy" depends="database-ready">
+        <pdosqlexec url="mysql:host=${docker-compose.ENV_database_host}" userid="root" password="${docker-compose.ENV_database_root_password}" autocommit="true">
+            <transaction>
+                CREATE DATABASE IF NOT EXISTS ${docker-compose.ENV_database_name} CHARACTER SET utf8 COLLATE utf8_general_ci;
+                CREATE USER IF NOT EXISTS ${docker-compose.ENV_database_user}@"%" IDENTIFIED BY "${docker-compose.ENV_database_password}";
+                GRANT ALL PRIVILEGES ON ${docker-compose.ENV_database_name}.* TO ${docker-compose.ENV_database_user}@"%" WITH GRANT OPTION;
+            </transaction>
+        </pdosqlexec>
+
         <exec passthru="true" checkreturn="true"
               command="php ${symfony.console} doctrine:cache:clear-metadata --env=${symfony.env}" />
         <exec passthru="true" checkreturn="true"
