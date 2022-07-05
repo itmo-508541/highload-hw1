@@ -44,7 +44,7 @@ class AuthController extends AbstractFOSRestController
      *          required=true,
      *          @OpenApi\JsonContent(
      *              required={"username", "password"},
-     *              @OpenApi\Property(property="username", type="string", example="admin"),
+     *              @OpenApi\Property(property="username", type="string", example="example@gmail.com"),
      *              @OpenApi\Property(property="password", type="string", example="qwerty"),
      *          )
      *     ),
@@ -83,7 +83,7 @@ class AuthController extends AbstractFOSRestController
      *         required=true,
      *         @OpenApi\JsonContent(
      *             required={"username", "password"},
-     *             @OpenApi\Property(property="username", type="string", example="covex.mobile@gmail.com"),
+     *             @OpenApi\Property(property="username", type="string", example="example@gmail.com"),
      *             @OpenApi\Property(property="password", type="string", example="qwerty"),
      *             @OpenApi\Property(property="firstname", type="string", example="John"),
      *             @OpenApi\Property(property="lastname", type="string", example="Doe")
