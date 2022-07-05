@@ -1,7 +1,7 @@
 nelmio_api_doc:
     documentation:
         info:
-            title: Online Questionnaire
+            title: API
             description: ~
             version: 1.0.0
         components:
