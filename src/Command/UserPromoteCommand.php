@@ -22,8 +22,7 @@ class UserPromoteCommand extends Command
     {
         $this->setDescription('Create new user')
             ->addArgument('username', InputArgument::OPTIONAL, 'The username')
-            ->addArgument('role', InputArgument::OPTIONAL, 'Role')
-        ;
+            ->addArgument('role', InputArgument::OPTIONAL, 'Role');
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
@@ -43,7 +42,7 @@ class UserPromoteCommand extends Command
         $role = $input->getArgument('role');
 
         $roles = $user->getRoles();
-        if (!\in_array($role, $roles)) {
+        if (!\in_array($role, $roles, true)) {
             $roles[] = $role;
             $user->setRoles($roles);
 

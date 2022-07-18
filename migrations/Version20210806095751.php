@@ -16,7 +16,8 @@ final class Version20210806095751 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql(<<< SQL
+        $this->addSql(
+            <<< SQL
 CREATE TABLE `sessions` (
     `sess_id` VARBINARY(128) NOT NULL PRIMARY KEY,
     `sess_data` BLOB NOT NULL,

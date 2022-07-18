@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Admin;
 
 use App\Entity\Client;
@@ -22,13 +24,14 @@ class ClientAdmin extends AbstractAdmin
             ->add('firstname')
             ->add('lastname')
             ->add(
-                '_action', 'actions', [
+                '_action',
+                'actions',
+                [
                     'actions' => [
                         'show' => [],
                     ],
                 ]
-            )
-        ;
+            );
     }
 
     protected function configureShowFields(ShowMapper $showMapper): void
@@ -46,15 +49,13 @@ class ClientAdmin extends AbstractAdmin
             ->add('token', null, [
                 'template' => 'CRUD/client_show_token.html.twig',
                 'value' => $this->jwtManager->create($object),
-            ])
-        ;
+            ]);
     }
 
     protected function configureDatagridFilters(DatagridMapper $filterMapper): void
     {
         $filterMapper
-            ->add('username')
-        ;
+            ->add('username');
     }
 
     protected function configureRoutes(RouteCollectionInterface $collection): void

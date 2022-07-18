@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\UserRepository;
@@ -88,8 +90,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRolesAsString()
     {
         $roles = $this->getRoles();
-        if (\count($roles) > 1 && \in_array('ROLE_USER', $roles)) {
-            $index = array_search('ROLE_USER', $roles);
+        if (\count($roles) > 1 && \in_array('ROLE_USER', $roles, true)) {
+            $index = array_search('ROLE_USER', $roles, true);
             unset($roles[$index]);
         }
 

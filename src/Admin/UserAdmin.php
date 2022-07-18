@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Admin;
 
 use App\Entity\User;
@@ -42,8 +44,8 @@ class UserAdmin extends AbstractAdmin
 
         return array_filter(
             $exportFields,
-            function ($v) {
-                return !\in_array($v, ['password', 'salt']);
+            static function ($v) {
+                return !\in_array($v, ['password', 'salt'], true);
             }
         );
     }
@@ -55,13 +57,14 @@ class UserAdmin extends AbstractAdmin
             ->addIdentifier('username')
             ->add('rolesAsString')
             ->add(
-                '_action', 'actions', [
+                '_action',
+                'actions',
+                [
                     'actions' => [
                         'edit' => [],
                     ],
                 ]
-            )
-        ;
+            );
     }
 
     protected function configureShowFields(ShowMapper $showMapper): void
@@ -69,15 +72,13 @@ class UserAdmin extends AbstractAdmin
         $showMapper
             ->add('id')
             ->add('username')
-            ->add('rolesAsString')
-        ;
+            ->add('rolesAsString');
     }
 
     protected function configureDatagridFilters(DatagridMapper $filterMapper): void
     {
         $filterMapper
-            ->add('username')
-        ;
+            ->add('username');
     }
 
     protected function configureFormFields(FormMapper $formMapper): void
@@ -99,7 +100,6 @@ class UserAdmin extends AbstractAdmin
             ->add('roles', ChoiceType::class, [
                 'choices' => $choices,
                 'multiple' => true,
-            ])
-        ;
+            ]);
     }
 }

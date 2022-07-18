@@ -92,7 +92,7 @@ qa:php-cs-fixer:
   extends:
     - .job-policy-all
   stage: prepare
-  image: jakzal/phpqa:1.56.1-php7.4-alpine
+  image: jakzal/phpqa:1.76-php8.0-alpine
   script:
     - php-cs-fixer fix --diff --dry-run -v
   tags:

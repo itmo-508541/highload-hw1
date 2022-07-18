@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
 
 use Symfony\Bridge\Doctrine\Security\User\EntityUserProvider;
@@ -21,7 +23,7 @@ trait UserCommandTrait
         foreach ($arguments as $argument) {
             if (!$input->getArgument($argument)) {
                 $question = new Question(sprintf('Please choose a %s:', $argument));
-                $question->setValidator(function ($value) use ($argument) {
+                $question->setValidator(static function ($value) use ($argument) {
                     if (empty($value)) {
                         throw new \Exception(sprintf('%s can not be empty', ucfirst($argument)));
                     }
@@ -29,7 +31,7 @@ trait UserCommandTrait
                     return $value;
                 });
 
-                if (\in_array($argument, ['password'])) {
+                if (\in_array($argument, ['password'], true)) {
                     $question->setHidden(true);
                 }
 

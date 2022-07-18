@@ -24,8 +24,7 @@ class UserCreateCommand extends Command
     {
         $this->setDescription('Create new user')
             ->addArgument('username', InputArgument::OPTIONAL, 'The username')
-            ->addArgument('password', InputArgument::OPTIONAL, 'The password')
-        ;
+            ->addArgument('password', InputArgument::OPTIONAL, 'The password');
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
