@@ -13,13 +13,12 @@ variables:
   CI_GIT_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/git:master"
 
 stages:
-  - qa
-  - env
+  - .pre
   - pre-build
   - build
   - test
   - deploy
-  - data
+  - .post
 
 # See https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
 .docker-build:
@@ -29,7 +28,7 @@ stages:
     - docker-in-docker
 
 .prepare-env:
-  stage: env
+  stage: .pre
   needs: []
 
 .deploy-script:
@@ -45,7 +44,7 @@ stages:
 .fixture:
   extends:
     - .deploy-script
-  stage: data
+  stage: .post
   when: manual
 
 .job-policy-master:
@@ -64,7 +63,7 @@ stages:
 qa:php-cs-fixer:
   extends:
     - .job-policy-all
-  stage: qa
+  stage: .pre
   needs: []
   image: jakzal/phpqa:1.76-php8.0-alpine
   script:
@@ -75,11 +74,11 @@ qa:php-cs-fixer:
 prepare:env:
   extends:
     - .job-policy-all
-  stage: env
+  stage: .pre
   needs: []
   before_script:
     - if [[ $CI_COMMIT_BRANCH == "production" ]]; then ENV_SUFFIX="_PRODUCTION"; else ENV_SUFFIX="_MASTER"; fi
-  script: &prepare-env
+  script: &prepare-env # весь script целиком используется как before_script в test:phpunit
     - cat .env | grep ENV_ > .build-env
     - sed -i 's/^/export /' .build-env
     - for name in `env | awk -F= '{if($1 ~ /'"$ENV_SUFFIX"'$/) print $1}'`; do
