@@ -48,27 +48,17 @@ stages:
   when: manual
 
 .job-policy-master:
-  rules:
-    - if: $CI_COMMIT_BRANCH == "master"
-      variables:
-        ENV_SUFFIX: _MASTER
-    - when: never
+  only:
+    - master
 
 .job-policy-production:
-  rules:
-    - if: $CI_COMMIT_BRANCH == "production"
-      variables:
-        ENV_SUFFIX: _PRODUCTION
-    - when: never
+  only:
+    - production
 
 .job-policy-all:
-  - if: $CI_COMMIT_BRANCH == "master"
-    variables:
-      ENV_SUFFIX: _MASTER
-  - if: $CI_COMMIT_BRANCH == "production"
-    variables:
-      ENV_SUFFIX: _PRODUCTION
-  - when: never
+  only:
+    - master
+    - production
 
 qa:php-cs-fixer:
   extends:
@@ -86,6 +76,8 @@ prepare:env:
     - .job-policy-all
   stage: .pre
   needs: []
+  before_script:
+    - if [[ $CI_COMMIT_BRANCH == "production" ]]; then ENV_SUFFIX="_PRODUCTION"; else ENV_SUFFIX="_MASTER"; fi
   script: &prepare-env # весь script целиком используется как before_script в test:phpunit
     - cat .env | grep ENV_ > .build-env
     - sed -i 's/^/export /' .build-env
