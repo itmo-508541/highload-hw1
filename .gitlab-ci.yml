@@ -55,13 +55,11 @@ stages:
 .job-policy-production:
   only:
     - production
-    #- /^release-.*$/
 
 .job-policy-all:
   only:
     - master
     - production
-    #- /^release-.*$/
 
 qa:php-cs-fixer:
   extends:
