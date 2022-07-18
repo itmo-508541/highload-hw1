@@ -15,6 +15,7 @@ variables:
 stages:
   - qa
   - env
+  - pre-build
   - build
   - test
   - deploy
@@ -96,7 +97,7 @@ build:docker-compose-image:
   extends:
     - .docker-build
     - .job-policy-all #-master
-  stage: build
+  stage: pre-build
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_DOCKER_COMPOSE_IMAGE_CACHE || true
@@ -111,7 +112,7 @@ build:docker-git-image:
   extends:
     - .docker-build
     - .job-policy-all
-  stage: build
+  stage: pre-build
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_GIT_IMAGE_CACHE || true
@@ -126,7 +127,7 @@ build:docker-source-image:
   extends:
     - .docker-build
     - .job-policy-all #-master
-  stage: build
+  stage: pre-build
   needs:
     - job: prepare:env
       artifacts: true
