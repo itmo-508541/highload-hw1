@@ -1,3 +1,5 @@
+image: docker:19.03.13
+
 variables:
   CI_APP_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME"
   CI_APP_IMAGE_CACHE: "$CI_REGISTRY_IMAGE:master"
@@ -20,16 +22,29 @@ stages:
   - deploy
   - .post
 
-# See https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
-.docker-build:
-  image: docker:19.03.13
+.job-tags:
   tags:
     - executor-docker
     - docker-in-docker
 
-.prepare-env:
-  stage: .pre
-  needs: []
+.job-policy-master:
+  extends:
+    - .job-tags
+  only:
+    - master
+
+.job-policy-production:
+  extends:
+    - .job-tags
+  only:
+    - production
+
+.job-policy-all:
+  extends:
+    - .job-tags
+  only:
+    - master
+    - production
 
 .deploy-script:
   image: $CI_GIT_IMAGE_WITH_TAG
@@ -38,27 +53,12 @@ stages:
   before_script:
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
-  tags:
-    - executor-docker
 
 .fixture:
   extends:
     - .deploy-script
   stage: .post
   when: manual
-
-.job-policy-master:
-  only:
-    - master
-
-.job-policy-production:
-  only:
-    - production
-
-.job-policy-all:
-  only:
-    - master
-    - production
 
 qa:php-cs-fixer:
   extends:
@@ -68,8 +68,6 @@ qa:php-cs-fixer:
   image: jakzal/phpqa:1.76-php8.0-alpine
   script:
     - php-cs-fixer fix --diff --dry-run -v
-  tags:
-    - executor-docker
 
 prepare:env:
   extends:
@@ -87,12 +85,9 @@ prepare:env:
   artifacts:
     paths:
       - .build-env
-  tags:
-    - executor-docker
 
 build:docker-compose-image:
   extends:
-    - .docker-build
     - .job-policy-all #-master
   stage: pre-build
   script:
@@ -107,7 +102,6 @@ build:docker-compose-image:
 
 build:docker-git-image:
   extends:
-    - .docker-build
     - .job-policy-all
   stage: pre-build
   script:
@@ -122,7 +116,6 @@ build:docker-git-image:
 
 build:docker-source-image:
   extends:
-    - .docker-build
     - .job-policy-all #-master
   stage: pre-build
   needs:
@@ -149,7 +142,6 @@ build:docker-source-image:
 
 build:docker-app-image:
   extends:
-    - .docker-build
     - .job-policy-all #-master
   stage: build
   needs:
@@ -194,12 +186,9 @@ build:docker-compose:
   artifacts:
     paths:
       - build/
-  tags:
-    - executor-docker
 
 build:docker-nginx-image:
   extends:
-    - .docker-build
     - .job-policy-all #-master
   stage: build
   needs:
@@ -234,8 +223,6 @@ test:phpunit:
     - cd /srv
     - composer install --prefer-dist --no-scripts --no-interaction
     - phpunit
-  tags:
-    - executor-docker
   dependencies: []
 
 deploy:secure-copy:
@@ -294,8 +281,6 @@ deploy:sync-project-forks:
     - git branch -d stable || true
     - git checkout -b stable
     - for FORK in $PROJECT_FORKS; do git remote add fork $FORK && git push fork stable && git remote rm fork; done
-  tags:
-    - executor-docker
 
 data:fixture-admin:
   extends:
