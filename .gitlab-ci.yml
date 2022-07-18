@@ -229,7 +229,6 @@ build:docker-nginx-image:
 test:phpunit:
   extends:
     - .env-test
-    - .suffix-vars
     - .job-policy-all #-master
   stage: test
   image: $CI_SOURCE_IMAGE_WITH_TAG
