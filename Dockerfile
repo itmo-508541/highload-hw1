@@ -1,5 +1,5 @@
 ARG source_image=scratch
-FROM debian:buster-20210511-slim AS php
+FROM debian:bullseye-20220711-slim AS php
 
 ENV TERM linux
 ENV DEBIAN_FRONTEND noninteractive
@@ -8,7 +8,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
             apt-transport-https gnupg ca-certificates curl \
             netcat \
-    && echo "deb https://packages.sury.org/php/ buster main" >> /etc/apt/sources.list.d/sury.org.list \
+    && echo "deb https://packages.sury.org/php/ bullseye main" >> /etc/apt/sources.list.d/sury.org.list \
     && curl -sS https://packages.sury.org/php/apt.gpg | apt-key add - \
     && apt-get update \
     && apt-get install -y --no-install-recommends --allow-unauthenticated \

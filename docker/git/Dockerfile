@@ -1,4 +1,4 @@
-FROM debian:stretch-slim
+FROM debian:bullseye-20220711-slim
 
 RUN apt-get update && apt-get install -y git \
     && rm -rf /var/lib/apt/lists/* /tmp/*
