@@ -42,7 +42,7 @@ FROM ${source_image} AS source_image
 
 FROM php AS base
 
-COPY --from=jakzal/phpqa:1.59.1-php8.0-alpine /tools/phpunit /tools/composer /usr/local/bin/
+COPY --from=jakzal/phpqa:1.76-php8.0-alpine /tools/phpunit /tools/composer /usr/local/bin/
 
 
 
