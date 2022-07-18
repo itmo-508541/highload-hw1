@@ -21,14 +21,6 @@ stages:
   - deploy
   - data
 
-.suffix-vars:
-  script:
-    - cat .env | grep ENV_ > .build-env
-    - sed -i 's/^/export /' .build-env
-    - for name in `env | awk -F= '{if($1 ~ /'"$ENV_SUFFIX"'$/) print $1}'`; do
-        echo 'export '`echo $name|awk -F''"$ENV_SUFFIX"'$' '{print $1}'`'='`printenv $name`'' >> .build-env;
-      done
-
 # See https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
 .docker-build:
   image: docker:19.03.13
@@ -39,13 +31,6 @@ stages:
 .prepare-env:
   stage: env
   needs: []
-  script:
-    - !reference [.suffix-vars, script]
-  artifacts:
-    paths:
-      - .build-env
-  tags:
-    - executor-docker
 
 .deploy-script:
   image: $CI_GIT_IMAGE_WITH_TAG
@@ -89,19 +74,24 @@ qa:php-cs-fixer:
   tags:
     - executor-docker
 
-env:master:
-  variables:
-    ENV_SUFFIX: "_MASTER"
+prepare:env:
   extends:
-    - .prepare-env
-    - .job-policy-master
-
-env:production:
-  variables:
-    ENV_SUFFIX: "_PRODUCTION"
-  extends:
-    - .prepare-env
-    - .job-policy-production
+    - .job-policy-all
+  stage: env
+  needs: []
+  before_script:
+    - if [[ $CI_COMMIT_BRANCH == "production" ]]; then ENV_SUFFIX="_PRODUCTION"; else ENV_SUFFIX="_MASTER"; fi
+  script: &prepare-env
+    - cat .env | grep ENV_ > .build-env
+    - sed -i 's/^/export /' .build-env
+    - for name in `env | awk -F= '{if($1 ~ /'"$ENV_SUFFIX"'$/) print $1}'`; do
+        echo 'export '`echo $name|awk -F''"$ENV_SUFFIX"'$' '{print $1}'`'='`printenv $name`'' >> .build-env;
+      done
+  artifacts:
+    paths:
+      - .build-env
+  tags:
+    - executor-docker
 
 build:docker-compose-image:
   extends:
@@ -232,8 +222,8 @@ test:phpunit:
     - .job-policy-all #-master
   stage: test
   image: $CI_SOURCE_IMAGE_WITH_TAG
+  before_script: *prepare-env
   script:
-    - !reference [.suffix-vars, script]
     - eval $(cat .build-env)
     - cd /srv
     - composer install --prefer-dist --no-scripts --no-interaction
