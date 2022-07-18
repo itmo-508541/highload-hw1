@@ -128,8 +128,10 @@ build:docker-source-image:
     - .docker-build
     - .job-policy-all #-master
   stage: pre-build
+  needs:
+    - job: prepare:env
+      artifacts: true
   script:
-    - cat .build-env
     - eval $(cat .build-env)
     - echo '{"github-oauth":{"github.com":"'"$COMPOSER_GITHUB_TOKEN"'"}}' > ./auth.json
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -155,6 +157,8 @@ build:docker-app-image:
   stage: build
   needs:
     - job: build:docker-source-image
+    - job: prepare:env
+      artifacts: true
   script:
     - eval $(cat .build-env)
     - echo '{"github-oauth":{"github.com":"'"$COMPOSER_GITHUB_TOKEN"'"}}' > ./auth.json
@@ -178,6 +182,8 @@ build:docker-compose:
   stage: build
   needs:
     - job: build:docker-compose-image
+    - job: prepare:env
+      artifacts: true
   image: $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
   script:
     - eval $(cat .build-env)
@@ -201,6 +207,8 @@ build:docker-nginx-image:
   stage: build
   needs:
     - job: build:docker-source-image
+    - job: prepare:env
+      artifacts: true
   script:
     - eval $(cat .build-env)
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -212,7 +220,6 @@ build:docker-nginx-image:
           --target prod
           --file Dockerfile-nginx .
     - docker push $CI_NGINX_IMAGE_WITH_TAG
-    - docker history --no-trunc $CI_NGINX_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
 
 test:phpunit:
@@ -221,6 +228,8 @@ test:phpunit:
   extends:
     - .job-policy-all #-master
   stage: test
+  needs:
+    - job: build:docker-source-image
   image: $CI_SOURCE_IMAGE_WITH_TAG
   before_script: *prepare-env
   script:
