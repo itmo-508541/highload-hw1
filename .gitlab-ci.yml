@@ -21,20 +21,8 @@ stages:
   - deploy
   - data
 
-.env-test:
-  variables:
-    ENV_SUFFIX: "_TEST"
-
-.env-master:
-  variables:
-    ENV_SUFFIX: "_MASTER"
-
-.env-production:
-  variables:
-    ENV_SUFFIX: "_PRODUCTION"
-
 .suffix-vars:
-  before_script:
+  script:
     - cat .env | grep ENV_ > .build-env
     - sed -i 's/^/export /' .build-env
     - for name in `env | awk -F= '{if($1 ~ /'"$ENV_SUFFIX"'$/) print $1}'`; do
@@ -49,12 +37,10 @@ stages:
     - docker-in-docker
 
 .prepare-env:
-  extends:
-    - .suffix-vars
   stage: env
   needs: []
   script:
-    - echo 'Ok!'
+    - !reference [.suffix-vars, script]
   artifacts:
     paths:
       - .build-env
@@ -104,14 +90,16 @@ qa:php-cs-fixer:
     - executor-docker
 
 env:master:
+  variables:
+    ENV_SUFFIX: "_MASTER"
   extends:
-    - .env-master
     - .prepare-env
     - .job-policy-master
 
 env:production:
+  variables:
+    ENV_SUFFIX: "_PRODUCTION"
   extends:
-    - .env-production
     - .prepare-env
     - .job-policy-production
 
@@ -238,13 +226,14 @@ build:docker-nginx-image:
     - docker logout $CI_REGISTRY
 
 test:phpunit:
+  variables:
+    ENV_SUFFIX: "_TEST"
   extends:
-    - .env-test
-    - .suffix-vars #generate env for unit tests
     - .job-policy-all #-master
   stage: test
   image: $CI_SOURCE_IMAGE_WITH_TAG
   script:
+    - !reference [.suffix-vars, script]
     - eval $(cat .build-env)
     - cd /srv
     - composer install --prefer-dist --no-scripts --no-interaction
