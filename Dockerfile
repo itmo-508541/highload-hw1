@@ -52,9 +52,7 @@ RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \
             php8.0-xdebug \
             bash \
-    && adduser --system --no-create-home --uid 1000 --gid 50 docker \
-    && mkdir -p /tmp/sessions \
-    && chmod -R 777 /tmp/sessions
+    && adduser --system --no-create-home --uid 1000 --gid 50 docker
 
 COPY docker/php-dev /etc/php/8.0/
 
