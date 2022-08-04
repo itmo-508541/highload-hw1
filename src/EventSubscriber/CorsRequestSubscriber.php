@@ -36,8 +36,8 @@ class CorsRequestSubscriber implements EventSubscriberInterface
         $headers = $event->getResponse()->headers;
         $headers->set('Access-Control-Allow-Origin', '*');
         if ($this->checkRequest($event->getRequest())) {
-            $headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-            $headers->set('Access-Control-Allow-Headers', 'Authorization, Content-Type, Accept');
+            $headers->set('Access-Control-Allow-Methods', 'POST, GET, PUT, OPTIONS, DELETE');
+            $headers->set('Access-Control-Allow-Headers', 'Authorization, Content-Type, Accept, X-Auth-Token');
             $headers->set('Access-Control-Allow-Credentials', 'true');
             $headers->set('Access-Control-Max-Age', '3600');
             $headers->set('Cache-Control', 'no-cache, must-revalidate');
