@@ -1,4 +1,4 @@
-image: docker:19.03.13
+image: docker:26
 
 variables:
   CI_APP_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME"
@@ -9,8 +9,6 @@ variables:
   CI_SOURCE_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/source:master"
   CI_NGINX_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_REF_NAME"
   CI_NGINX_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/nginx:master"
-  CI_DOCKER_COMPOSE_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE/docker-compose:$CI_COMMIT_REF_NAME"
-  CI_DOCKER_COMPOSE_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/docker-compose:master"
   CI_GIT_IMAGE_WITH_TAG: "$CI_REGISTRY_IMAGE/git:$CI_COMMIT_REF_NAME"
   CI_GIT_IMAGE_CACHE: "$CI_REGISTRY_IMAGE/git:master"
 
@@ -31,12 +29,16 @@ stages:
     - .job-tags
   only:
     - master
+  environment:
+    name: master
 
 .job-policy-production:
   extends:
     - .job-tags
   only:
     - production
+  environment:
+    name: production
 
 .job-policy-all:
   extends:
@@ -44,6 +46,8 @@ stages:
   only:
     - master
     - production
+  environment:
+    name: $CI_COMMIT_REF_SLUG
 
 .deploy-script:
   image: $CI_GIT_IMAGE_WITH_TAG
@@ -84,20 +88,6 @@ prepare:env:
   artifacts:
     paths:
       - .build-env
-
-build:docker-compose-image:
-  extends:
-    - .job-policy-all #-master
-  stage: build
-  script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker pull $CI_DOCKER_COMPOSE_IMAGE_CACHE || true
-    - docker build
-          --cache-from $CI_DOCKER_COMPOSE_IMAGE_CACHE
-          --tag $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
-          ./docker/compose
-    - docker push $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
-    - docker logout $CI_REGISTRY
 
 build:docker-git-image:
   extends:
@@ -169,10 +159,8 @@ build:docker-compose:
     - .job-policy-all #-master
   stage: build
   needs:
-    - job: build:docker-compose-image
     - job: prepare:env
       artifacts: true
-  image: $CI_DOCKER_COMPOSE_IMAGE_WITH_TAG
   script:
     - eval $(cat .build-env)
     - mkdir build
@@ -180,7 +168,7 @@ build:docker-compose:
         unset $name;
       done
     - printenv | grep ENV_ > .compose-env
-    - docker-compose -f docker-compose.deploy.yml config > build/docker-compose.yml
+    - docker compose -f docker-compose.deploy.yml config > build/docker-compose.yml
     - sed -i 's/\/builds\/'"$CI_PROJECT_NAMESPACE"'\/'"$CI_PROJECT_NAME"'/\./g' build/docker-compose.yml
   artifacts:
     paths:
@@ -240,14 +228,14 @@ deploy:secure-copy:
           mv '"$DEPLOY_DIRECTORY"'_tmp '"$DEPLOY_DIRECTORY"' ;
           cd '"$DEPLOY_DIRECTORY"' ;
           docker login -u gitlab-ci-token -p '"$CI_JOB_TOKEN"' '"$CI_REGISTRY"' ;
-          docker-compose pull ;
-          docker-compose up -d --no-recreate mysql ;
-          docker-compose up -d --force-recreate --no-deps spare ;
-          docker-compose exec -T spare phing storage-prepare database-deploy -Dsymfony.env=prod ;
-          docker-compose up -d --force-recreate --no-deps php ;
+          docker compose pull ;
+          docker compose up -d --no-recreate mysql ;
+          docker compose up -d --force-recreate --no-deps spare ;
+          docker compose exec -T spare phing storage-prepare database-deploy -Dsymfony.env=prod ;
+          docker compose up -d --force-recreate --no-deps php ;
           echo "[$(date -R)] web-server is down" ;
-          docker-compose stop nginx ;
-          docker-compose up -d nginx ;
+          docker compose stop nginx ;
+          docker compose up -d nginx ;
           docker logout '"$CI_REGISTRY"' ;
           echo "[$(date -R)] web-server is up"'
 
@@ -289,5 +277,5 @@ data:fixture-admin:
     - eval $(cat .build-env)
     - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
           cd '"$DEPLOY_DIRECTORY"' ;
-          docker-compose exec -T php bin/console app:user:create admin admin ;
-          docker-compose exec -T php bin/console app:user:promote admin ROLE_SUPER_ADMIN'
+          docker compose exec -T php bin/console app:user:create admin admin ;
+          docker compose exec -T php bin/console app:user:promote admin ROLE_SUPER_ADMIN'
