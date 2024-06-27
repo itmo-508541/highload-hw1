@@ -74,10 +74,7 @@ RUN composer check-platform-reqs \
 
 COPY . .
 
-RUN chmod -R -x+X . \
-    && chmod 755 bin/console \
-    && phing app-deploy -Dsymfony.env=prod
-
+RUN phing app-deploy -Dsymfony.env=prod
 
 
 FROM php AS prod
