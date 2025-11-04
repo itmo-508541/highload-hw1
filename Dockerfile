@@ -22,7 +22,7 @@ RUN apt-get update \
             php8.0-zip \
     && apt-get purge --autoremove -y gnupg \
     && apt-get clean -y \
-    && curl -sS -L -o /usr/local/bin/phing http://www.phing.info/get/phing-latest.phar \
+    && curl -sS -L -o /usr/local/bin/phing https://github.com/phingofficial/phing/releases/download/3.0.0/phing-3.0.0.phar \
     && chmod +x /usr/local/bin/phing \
     && rm -rf /var/lib/apt/lists/* /usr/share/man/* /usr/share/doc/* /var/cache/* /var/log/* /tmp/*
 
