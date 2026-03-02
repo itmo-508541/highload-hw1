@@ -26,9 +26,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\ConstraintViolationList;
 
 /**
- * @Route(path="/auth")
  * @OpenApi\Tag(name="Auth")
  */
+#[Route(path: '/auth')]
 class AuthController extends AbstractFOSRestController
 {
     use EntityManagerTrait;
@@ -64,7 +64,7 @@ class AuthController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function createTokenAction(Request $request): AuthToken
+    public function createToken(Request $request): AuthToken
     {
         $username = $request->get('username');
         $password = $request->get('password');
@@ -105,7 +105,7 @@ class AuthController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function createAction(Request $request): AuthToken
+    public function create(Request $request): AuthToken
     {
         $username = $request->get('username');
         $password = $request->get('password');
@@ -169,7 +169,7 @@ class AuthController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function confirmAction(Request $request): AuthToken
+    public function confirm(Request $request): AuthToken
     {
         $token = $request->get('token');
 
@@ -208,7 +208,7 @@ class AuthController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function forgotPasswordAction(Request $request): Success
+    public function forgotPassword(Request $request): Success
     {
         $email = $request->get('email', '-');
         $client = $this->em->getRepository(Client::class)->findOneBy([

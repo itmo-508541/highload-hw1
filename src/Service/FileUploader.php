@@ -12,11 +12,8 @@ class FileUploader
 {
     use SluggerTrait;
 
-    private string $targetDirectory;
-
-    public function __construct(string $targetDirectory)
+    public function __construct(private string $targetDirectory)
     {
-        $this->targetDirectory = $targetDirectory;
     }
 
     public function upload(UploadedFile $file): ?string
@@ -27,7 +24,7 @@ class FileUploader
 
         try {
             $file->move($this->getTargetDirectory(), $fileName);
-        } catch (FileException $e) {
+        } catch (FileException) {
             $fileName = null;
         }
 

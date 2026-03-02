@@ -16,6 +16,7 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  * @method Client|null findOneBy(array $criteria, array $orderBy = null)
  * @method Client[]    findAll()
  * @method Client[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository<\App\Entity\Client>
  */
 class ClientRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
@@ -30,7 +31,7 @@ class ClientRepository extends ServiceEntityRepository implements PasswordUpgrad
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
         if (!$user instanceof Client) {
-            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', \get_class($user)));
+            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', $user::class));
         }
 
         $user->setPassword($newHashedPassword);

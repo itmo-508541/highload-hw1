@@ -31,7 +31,7 @@ trait UserCommandTrait
                     return $value;
                 });
 
-                if (\in_array($argument, ['password'], true)) {
+                if ($argument === 'password') {
                     $question->setHidden(true);
                 }
 

@@ -11,21 +11,18 @@ use JMS\Serializer\Annotation as JMS;
  */
 class Test
 {
-    /**
-     * @JMS\Exclude()
-     */
-    private $secretData;
-
-    /**
-     * @JMS\Expose()
-     * @JMS\Type(name="string")
-     */
-    private $publicData;
-
-    public function __construct(int $publicData, int $secretData)
+    public function __construct(
+        /**
+         * @JMS\Expose()
+         * @JMS\Type(name="string")
+         */
+        private int $publicData,
+        /**
+         * @JMS\Exclude()
+         */
+        private int $secretData
+    )
     {
-        $this->publicData = $publicData;
-        $this->secretData = $secretData;
     }
 
     public function getSecretData(): int

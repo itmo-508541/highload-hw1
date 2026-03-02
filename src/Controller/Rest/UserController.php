@@ -19,11 +19,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * @Route(path="/user")
  * @OpenApi\Tag(name="User")
  * @Nelmio\Security(name="Bearer")
  * @IsGranted("ROLE_API", statusCode=403, message="Access denied")
  */
+#[Route(path: '/user')]
 class UserController extends AbstractFOSRestController
 {
     use EntityManagerTrait;
@@ -42,7 +42,7 @@ class UserController extends AbstractFOSRestController
      *
      * @param Client $client
      */
-    public function meAction(UserInterface $client): Client
+    public function me(UserInterface $client): Client
     {
         return $client;
     }
@@ -70,11 +70,11 @@ class UserController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function changePasswordAction(Request $request, UserInterface $client): Client
+    public function changePassword(Request $request, UserInterface $client): Client
     {
         /** @var Client $client */
         $plainPassword = $request->get('password', '');
-        if (!\strlen($plainPassword)) {
+        if ((string) $plainPassword === '') {
             throw new BadRequestHttpException('Invalid password');
         }
 

@@ -11,15 +11,14 @@ use JMS\Serializer\Annotation as JMS;
  */
 class AuthToken
 {
-    /**
-     * @JMS\Expose()
-     * @JMS\Type(name="string")
-     */
-    private string $token;
-
-    public function __construct(string $token)
+    public function __construct(
+        /**
+         * @JMS\Expose()
+         * @JMS\Type(name="string")
+         */
+        private string $token
+    )
     {
-        $this->token = $token;
     }
 
     public function getToken(): string

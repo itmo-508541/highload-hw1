@@ -8,14 +8,13 @@ use JMS\Serializer\Annotation as JMS;
 
 class Success
 {
-    /**
-     * @JMS\Type(name="string")
-     */
-    private string $message;
-
-    public function __construct(string $message = '')
+    public function __construct(
+        /**
+         * @JMS\Type(name="string")
+         */
+        private string $message = ''
+    )
     {
-        $this->message = $message;
     }
 
     public function getMessage(): string

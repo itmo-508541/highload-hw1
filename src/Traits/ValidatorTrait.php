@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Traits;
 
+use Symfony\Contracts\Service\Attribute\Required;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 trait ValidatorTrait
@@ -13,9 +14,7 @@ trait ValidatorTrait
      */
     protected $validator;
 
-    /**
-     * @required
-     */
+    #[Required]
     public function setValidator(ValidatorInterface $validator): void
     {
         $this->validator = $validator;

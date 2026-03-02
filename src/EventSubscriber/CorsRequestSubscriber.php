@@ -46,7 +46,7 @@ class CorsRequestSubscriber implements EventSubscriberInterface
 
     private function checkRequest(Request $request): bool
     {
-        $isApi = '/api/' === substr($request->getRequestUri(), 0, 5);
+        $isApi = str_starts_with($request->getRequestUri(), '/api/');
         $isOptions = 'OPTIONS' === $request->getMethod();
 
         return $isApi && $isOptions;

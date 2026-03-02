@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Traits;
 
+use Symfony\Contracts\Service\Attribute\Required;
 use Symfony\Component\Mailer\MailerInterface;
 
 trait MailerTrait
@@ -13,9 +14,7 @@ trait MailerTrait
      */
     protected $mailer;
 
-    /**
-     * @required
-     */
+    #[Required]
     public function setMailer(MailerInterface $mailer): void
     {
         $this->mailer = $mailer;

@@ -19,8 +19,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     }
  * )
  * @JMS\ExclusionPolicy("all")
- * @UniqueEntity(fields={"username"}, errorPath="username", ignoreNull=false)
  */
+#[UniqueEntity(fields: ['username'], errorPath: 'username', ignoreNull: false)]
 class Client implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public const ROLE = 'ROLE_API';
@@ -35,11 +35,11 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     /**
-     * @Assert\NotBlank()
-     * @Assert\Email()
      * @JMS\Expose()
      * @ORM\Column(type="string", length=180, unique=true)
      */
+    #[Assert\NotBlank]
+    #[Assert\Email]
     private string $username;
 
     /**
@@ -48,17 +48,17 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     private string $password;
 
     /**
-     * @Assert\NotBlank()
      * @JMS\Expose()
      * @ORM\Column(type="string", length=64)
      */
+    #[Assert\NotBlank]
     private ?string $firstname = null;
 
     /**
-     * @Assert\NotBlank()
      * @JMS\Expose()
      * @ORM\Column(type="string", length=64)
      */
+    #[Assert\NotBlank]
     private ?string $lastname = null;
 
     /**
@@ -69,12 +69,12 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private ?\DateTime $confirmedAt;
+    private ?\DateTime $confirmedAt = null;
 
     /**
      * @ORM\Column(type="string", length=64, nullable=true)
      */
-    private ?string $confirmationToken;
+    private ?string $confirmationToken = null;
 
     public function __construct()
     {

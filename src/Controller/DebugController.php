@@ -10,18 +10,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/debug", condition="'dev' === '%kernel.environment%'")
- */
+#[Route(path: '/debug', condition: "'dev' === '%kernel.environment%'")]
 class DebugController extends AbstractController
 {
     use EntityManagerTrait;
     use SluggerTrait;
 
-    /**
-     * @Route("/zip")
-     */
-    public function indexAction(): Response
+    #[Route(path: '/zip')]
+    public function index(): Response
     {
         return new Response($this->slugger->slug('test string')->toString());
     }

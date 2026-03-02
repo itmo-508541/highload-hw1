@@ -15,11 +15,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * @Route(path="/test", condition="'dev' === '%kernel.environment%'")
  * @IsGranted("ROLE_API", statusCode=403, message="Access denied")
  * @Nelmio\Security(name="Bearer")
  * @OpenApi\Tag(name="Test")
  */
+#[Route(path: '/test', condition: "'dev' === '%kernel.environment%'")]
 class TestController extends AbstractFOSRestController
 {
     /**
@@ -33,7 +33,7 @@ class TestController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function indexAction(Request $request, UserInterface $user): Test
+    public function index(UserInterface $user): Test
     {
         return new Test(1, 2);
     }

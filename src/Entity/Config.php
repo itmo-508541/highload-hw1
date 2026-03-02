@@ -10,24 +10,20 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="App\Repository\ConfigRepository")
  * @ORM\Table()
  */
-class Config
+class Config implements \Stringable
 {
     /**
      * @ORM\Id
      * @ORM\Column(type="string", length=255)
-     *
-     * @var string
      */
-    protected $id;
+    protected ?string $id = null;
 
     /**
      * @ORM\Column(type="text", nullable=false)
-     *
-     * @var string
      */
-    protected $value;
+    protected string $value;
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->id;
     }

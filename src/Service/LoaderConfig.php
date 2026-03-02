@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use Symfony\Contracts\Service\Attribute\Required;
 use App\Entity\Config;
 use App\Repository\ConfigRepository;
 
@@ -41,14 +42,13 @@ class LoaderConfig
 
             $record->setId($key);
         }
+
         $record->setValue((string) $value);
 
         $this->configRepository->save($record);
     }
 
-    /**
-     * @required
-     */
+    #[Required]
     public function setConfigRepository(ConfigRepository $configRepository): void
     {
         $this->configRepository = $configRepository;

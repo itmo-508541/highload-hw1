@@ -28,7 +28,7 @@ class UserAdmin extends AbstractAdmin
     /**
      * @param User $user
      */
-    public function preUpdate($user): void
+    protected function preUpdate($user): void
     {
         $plainPassword = $user->getPlainPassword();
         if (!empty($plainPassword)) {
@@ -44,9 +44,7 @@ class UserAdmin extends AbstractAdmin
 
         return array_filter(
             $exportFields,
-            static function ($v) {
-                return !\in_array($v, ['password', 'salt'], true);
-            }
+            static fn(string $v) => !\in_array($v, ['password', 'salt'], true)
         );
     }
 
@@ -90,6 +88,7 @@ class UserAdmin extends AbstractAdmin
                 $choices[$name] = $name;
             }
         }
+
         asort($choices);
 
         $form

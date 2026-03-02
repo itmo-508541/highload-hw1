@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Traits;
 
+use Symfony\Contracts\Service\Attribute\Required;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 trait UserPasswordHasherTrait
@@ -13,9 +14,7 @@ trait UserPasswordHasherTrait
      */
     protected $userPassworsHasher;
 
-    /**
-     * @required
-     */
+    #[Required]
     public function setUserPasswordHasher(UserPasswordHasherInterface $userPasswordHasher): void
     {
         $this->userPassworsHasher = $userPasswordHasher;
