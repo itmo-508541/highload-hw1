@@ -13,12 +13,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    /**
-     * @phpstan-ignore property.unusedType
-     */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
+    // @phpstan-ignore property.unusedType
     private ?int $id = null;
 
     #[ORM\Column(type: Types::STRING, length: 180, unique: true)]

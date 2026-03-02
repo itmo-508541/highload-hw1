@@ -5,18 +5,6 @@
     "behat/transliterator": {
         "version": "v1.5.0"
     },
-    "doctrine/annotations": {
-        "version": "1.0",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "1.0",
-            "ref": "a2759dd6123694c8d901d0ec80006e044c2e6457"
-        },
-        "files": [
-            "config/routes/annotations.yaml"
-        ]
-    },
     "doctrine/cache": {
         "version": "2.1.1"
     },
@@ -246,18 +234,6 @@
     "psr/simple-cache": {
         "version": "2.0.0"
     },
-    "sensio/framework-extra-bundle": {
-        "version": "6.2",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "5.2",
-            "ref": "fb7e19da7f013d0d422fa9bce16f5c510e27609b"
-        },
-        "files": [
-            "config/packages/sensio_framework_extra.yaml"
-        ]
-    },
     "sonata-project/admin-bundle": {
         "version": "4.0",
         "recipe": {
@@ -274,9 +250,6 @@
     },
     "sonata-project/block-bundle": {
         "version": "4.6.0"
-    },
-    "sonata-project/cache": {
-        "version": "2.2.0"
     },
     "sonata-project/doctrine-extensions": {
         "version": "1.13.1"
@@ -556,6 +529,18 @@
         "files": [
             "config/packages/twig.yaml",
             "templates/base.html.twig"
+        ]
+    },
+    "symfony/uid": {
+        "version": "6.2",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "6.2",
+            "ref": "d294ad4add3e15d7eb1bae0221588ca89b38e558"
+        },
+        "files": [
+            "config/packages/uid.yaml"
         ]
     },
     "symfony/validator": {

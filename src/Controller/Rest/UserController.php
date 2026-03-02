@@ -12,18 +12,18 @@ use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation as Nelmio;
 use OpenApi\Annotations as OpenApi;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * @OpenApi\Tag(name="User")
  * @Nelmio\Security(name="Bearer")
- * @IsGranted("ROLE_API", statusCode=403, message="Access denied")
  */
 #[Route(path: '/user')]
+#[IsGranted('ROLE_API', message: 'Access denied', statusCode: 403)]
 class UserController extends AbstractFOSRestController
 {
     use EntityManagerTrait;

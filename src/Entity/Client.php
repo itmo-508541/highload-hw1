@@ -23,12 +23,10 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public const ROLE = 'ROLE_API';
 
-    /**
-     * @phpstan-ignore property.unusedType
-     */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
+    // @phpstan-ignore property.unusedType
     private ?int $id = null;
 
     /**

@@ -9,16 +9,16 @@ use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation as Nelmio;
 use OpenApi\Annotations as OpenApi;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
- * @IsGranted("ROLE_API", statusCode=403, message="Access denied")
  * @Nelmio\Security(name="Bearer")
  * @OpenApi\Tag(name="Test")
  */
 #[Route(path: '/test', condition: "'dev' === '%kernel.environment%'")]
+#[IsGranted('ROLE_API', message: 'Access denied', statusCode: 403)]
 class TestController extends AbstractFOSRestController
 {
     /**
