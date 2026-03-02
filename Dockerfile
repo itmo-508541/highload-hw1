@@ -1,5 +1,5 @@
 ARG source_image=scratch
-FROM debian:bullseye-20220711-slim AS php
+FROM debian:trixie-slim AS php
 
 ENV TERM linux
 ENV DEBIAN_FRONTEND noninteractive
@@ -7,9 +7,10 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
             apt-transport-https gnupg ca-certificates curl \
-            netcat \
-    && echo "deb https://packages.sury.org/php/ bullseye main" >> /etc/apt/sources.list.d/sury.org.list \
-    && curl -sS https://packages.sury.org/php/apt.gpg | apt-key add - \
+            netcat-traditional \
+    && install -m 0755 -d /usr/share/keyrings \
+    && curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /usr/share/keyrings/sury-php.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/sury-php.gpg] https://packages.sury.org/php/ trixie main" | tee /etc/apt/sources.list.d/sury-php.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends --allow-unauthenticated \
             php8.0-curl \

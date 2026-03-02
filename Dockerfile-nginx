@@ -2,7 +2,7 @@ ARG app_image=scratch
 FROM ${app_image} AS app
 
 
-FROM nginx:1.23.0 AS base
+FROM nginx:trixie AS base
 ARG server_name=docker.local
 ARG server_upstream=dev
 
