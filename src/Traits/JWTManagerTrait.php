@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Traits;
 
-use Symfony\Contracts\Service\Attribute\Required;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Contracts\Service\Attribute\Required;
 
 trait JWTManagerTrait
 {

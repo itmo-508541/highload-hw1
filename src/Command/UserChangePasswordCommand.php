@@ -32,7 +32,7 @@ class UserChangePasswordCommand extends Command
         $this->interactWith($input, $output, ['username', 'password']);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $repository = $this->em->getRepository(User::class);
 

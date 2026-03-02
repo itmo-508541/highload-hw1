@@ -30,7 +30,7 @@ class UserPromoteCommand extends Command
         $this->interactWith($input, $output, ['username', 'role']);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $repository = $this->em->getRepository(User::class);
 

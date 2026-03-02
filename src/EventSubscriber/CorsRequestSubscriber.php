@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
  */
 class CorsRequestSubscriber implements EventSubscriberInterface
 {
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             RequestEvent::class => ['onRequestEvent', 5000],

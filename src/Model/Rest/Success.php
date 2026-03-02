@@ -12,9 +12,8 @@ class Success
         /**
          * @JMS\Type(name="string")
          */
-        private string $message = ''
-    )
-    {
+        private readonly string $message = ''
+    ) {
     }
 
     public function getMessage(): string

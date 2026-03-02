@@ -74,7 +74,7 @@ class UserController extends AbstractFOSRestController
     {
         /** @var Client $client */
         $plainPassword = $request->get('password', '');
-        if ((string) $plainPassword === '') {
+        if ('' === (string) $plainPassword) {
             throw new BadRequestHttpException('Invalid password');
         }
 

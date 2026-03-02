@@ -16,13 +16,12 @@ class Test
          * @JMS\Expose()
          * @JMS\Type(name="string")
          */
-        private int $publicData,
+        private readonly int $publicData,
         /**
          * @JMS\Exclude()
          */
-        private int $secretData
-    )
-    {
+        private readonly int $secretData
+    ) {
     }
 
     public function getSecretData(): int

@@ -32,7 +32,7 @@ class UserCreateCommand extends Command
         $this->interactWith($input, $output, ['username', 'password']);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $user = new User();
 

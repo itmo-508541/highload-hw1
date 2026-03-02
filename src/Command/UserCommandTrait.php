@@ -25,13 +25,13 @@ trait UserCommandTrait
                 $question = new Question(sprintf('Please choose a %s:', $argument));
                 $question->setValidator(static function ($value) use ($argument) {
                     if (empty($value)) {
-                        throw new \Exception(sprintf('%s can not be empty', ucfirst($argument)));
+                        throw new \Exception(sprintf('%s can not be empty', ucfirst((string) $argument)));
                     }
 
                     return $value;
                 });
 
-                if ($argument === 'password') {
+                if ('password' === $argument) {
                     $question->setHidden(true);
                 }
 

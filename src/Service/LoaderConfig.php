@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use Symfony\Contracts\Service\Attribute\Required;
 use App\Entity\Config;
 use App\Repository\ConfigRepository;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class LoaderConfig
 {

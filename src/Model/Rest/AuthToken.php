@@ -16,9 +16,8 @@ class AuthToken
          * @JMS\Expose()
          * @JMS\Type(name="string")
          */
-        private string $token
-    )
-    {
+        private readonly string $token
+    ) {
     }
 
     public function getToken(): string

@@ -44,7 +44,7 @@ class UserAdmin extends AbstractAdmin
 
         return array_filter(
             $exportFields,
-            static fn(string $v): bool => !\in_array($v, ['password', 'salt'], true)
+            static fn (string $v): bool => !\in_array($v, ['password', 'salt'], true)
         );
     }
 
