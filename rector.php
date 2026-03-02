@@ -4,21 +4,20 @@ declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
 use Rector\Doctrine\Set\DoctrineSetList;
+use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitSelfCallRector;
+use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector;
 use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
 use Rector\Symfony\Set\SymfonySetList;
 
-return static function (RectorConfig $rectorConfig): void {
-    $rectorConfig->paths([
+return RectorConfig::configure()
+    ->withPaths([
         __DIR__.'/src',
         __DIR__.'/tests',
-    ]);
-
-    $rectorConfig->importNames();
-    $rectorConfig->importShortClasses(false);
-
-    $rectorConfig->sets([
+    ])
+    ->withImportNames(true, true, false)
+    ->withSets([
         LevelSetList::UP_TO_PHP_81,
         SymfonySetList::SYMFONY_60,
 
@@ -34,5 +33,10 @@ return static function (RectorConfig $rectorConfig): void {
 
         PHPUnitSetList::PHPUNIT_CODE_QUALITY,
         DoctrineSetList::DOCTRINE_CODE_QUALITY,
+    ])
+    ->withRules([
+        PreferPHPUnitSelfCallRector::class,
+    ])
+    ->withSkip([
+        PreferPHPUnitThisCallRector::class,
     ]);
-};

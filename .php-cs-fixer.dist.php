@@ -32,7 +32,9 @@ $rules = [
     'php_unit_set_up_tear_down_visibility' => true,
     'php_unit_strict' => true,
     'php_unit_test_annotation' => false,
-    'php_unit_test_case_static_method_calls' => true,
+    'php_unit_test_case_static_method_calls' => [
+        'call_type' => 'self',
+    ],
     'phpdoc_order' => true,
     'phpdoc_to_comment' => ['ignored_tags' => ['psalm-suppress', 'var']],
     'single_line_throw' => false,
