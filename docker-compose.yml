@@ -25,7 +25,6 @@ services:
             APP_DEBUG: 1
         volumes:
             - .:/srv
-            - /srv/var
 
     phpmyadmin:
         image: phpmyadmin:latest
