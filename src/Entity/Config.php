@@ -25,7 +25,7 @@ class Config implements \Stringable
 
     public function __toString(): string
     {
-        return $this->id;
+        return (string) $this->id;
     }
 
     public function getId(): ?string

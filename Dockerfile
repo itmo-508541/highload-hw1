@@ -13,14 +13,14 @@ RUN apt-get update \
     && echo "deb [signed-by=/usr/share/keyrings/sury-php.gpg] https://packages.sury.org/php/ trixie main" | tee /etc/apt/sources.list.d/sury-php.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends --allow-unauthenticated \
-            php8.0-curl \
-            php8.0-fpm \
-            php8.0-gd \
-            php8.0-intl \
-            php8.0-mbstring \
-            php8.0-mysql \
-            php8.0-xml \
-            php8.0-zip \
+            php8.1-curl \
+            php8.1-fpm \
+            php8.1-gd \
+            php8.1-intl \
+            php8.1-mbstring \
+            php8.1-mysql \
+            php8.1-xml \
+            php8.1-zip \
     && apt-get purge --autoremove -y gnupg \
     && apt-get clean -y \
     && curl -sS -L -o /usr/local/bin/phing https://github.com/phingofficial/phing/releases/download/3.0.0/phing-3.0.0.phar \
@@ -29,11 +29,11 @@ RUN apt-get update \
 
 WORKDIR /srv
 
-COPY docker/php /etc/php/8.0/
+COPY docker/php /etc/php/8.1/
 
 EXPOSE 9000
 
-CMD ["php-fpm8.0"]
+CMD ["php-fpm8.1"]
 
 
 
@@ -51,11 +51,11 @@ FROM base AS dev
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \
-            php8.0-xdebug \
+            php8.1-xdebug \
             bash \
     && adduser --system --no-create-home --uid 1000 --gid 50 docker
 
-COPY docker/php-dev /etc/php/8.0/
+COPY docker/php-dev /etc/php/8.1/
 
 
 FROM base AS source

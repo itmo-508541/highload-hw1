@@ -91,9 +91,6 @@
     "ezyang/htmlpurifier": {
         "version": "v4.14.0"
     },
-    "friendsofphp/proxy-manager-lts": {
-        "version": "v1.0.5"
-    },
     "friendsofsymfony/rest-bundle": {
         "version": "3.3",
         "recipe": {
@@ -134,9 +131,6 @@
     },
     "knplabs/knp-menu-bundle": {
         "version": "v3.1.0"
-    },
-    "laminas/laminas-code": {
-        "version": "4.4.2"
     },
     "lcobucci/clock": {
         "version": "2.2.0"
@@ -293,9 +287,6 @@
     },
     "sonata-project/twig-extensions": {
         "version": "1.7.0"
-    },
-    "stella-maris/clock": {
-        "version": "0.1.4"
     },
     "symfony/asset": {
         "version": "v5.3.4"

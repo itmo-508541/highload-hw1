@@ -19,7 +19,7 @@ return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->importShortClasses(false);
 
     $rectorConfig->sets([
-        LevelSetList::UP_TO_PHP_80,
+        LevelSetList::UP_TO_PHP_81,
         SymfonySetList::SYMFONY_54,
 
         SetList::CODING_STYLE,
