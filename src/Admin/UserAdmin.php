@@ -50,9 +50,9 @@ class UserAdmin extends AbstractAdmin
         );
     }
 
-    protected function configureListFields(ListMapper $listMapper): void
+    protected function configureListFields(ListMapper $list): void
     {
-        $listMapper
+        $list
             ->add('id')
             ->addIdentifier('username')
             ->add('rolesAsString')
@@ -67,21 +67,21 @@ class UserAdmin extends AbstractAdmin
             );
     }
 
-    protected function configureShowFields(ShowMapper $showMapper): void
+    protected function configureShowFields(ShowMapper $show): void
     {
-        $showMapper
+        $show
             ->add('id')
             ->add('username')
             ->add('rolesAsString');
     }
 
-    protected function configureDatagridFilters(DatagridMapper $filterMapper): void
+    protected function configureDatagridFilters(DatagridMapper $filter): void
     {
-        $filterMapper
+        $filter
             ->add('username');
     }
 
-    protected function configureFormFields(FormMapper $formMapper): void
+    protected function configureFormFields(FormMapper $form): void
     {
         $choices = [];
         foreach ($this->securityRoleHierarchy as $key => $value) {
@@ -92,10 +92,10 @@ class UserAdmin extends AbstractAdmin
         }
         asort($choices);
 
-        $formMapper
+        $form
             ->add('username')
             ->add('plainPassword', TextType::class, [
-                'required' => (!$this->getSubject() || null === $this->getSubject()->getId()),
+                'required' => false,
             ])
             ->add('roles', ChoiceType::class, [
                 'choices' => $choices,

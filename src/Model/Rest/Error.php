@@ -11,10 +11,10 @@ abstract class Error
     /**
      * @JMS\Type(name="string")
      */
-    private $code;
+    public string $code;
 
     /**
      * @JMS\Type(name="string")
      */
-    private $message;
+    public string $message;
 }

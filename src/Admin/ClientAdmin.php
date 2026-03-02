@@ -16,9 +16,9 @@ class ClientAdmin extends AbstractAdmin
 {
     use JWTManagerTrait;
 
-    protected function configureListFields(ListMapper $listMapper): void
+    protected function configureListFields(ListMapper $list): void
     {
-        $listMapper
+        $list
             ->add('id')
             ->addIdentifier('username')
             ->add('firstname')
@@ -34,11 +34,11 @@ class ClientAdmin extends AbstractAdmin
             );
     }
 
-    protected function configureShowFields(ShowMapper $showMapper): void
+    protected function configureShowFields(ShowMapper $show): void
     {
-        $object = $showMapper->getAdmin()->getSubject();
+        $object = $show->getAdmin()->getSubject();
         /* @var Client $object */
-        $showMapper
+        $show
             ->add('id')
             ->add('username')
             ->add('firstname')
@@ -52,9 +52,9 @@ class ClientAdmin extends AbstractAdmin
             ]);
     }
 
-    protected function configureDatagridFilters(DatagridMapper $filterMapper): void
+    protected function configureDatagridFilters(DatagridMapper $filter): void
     {
-        $filterMapper
+        $filter
             ->add('username');
     }
 

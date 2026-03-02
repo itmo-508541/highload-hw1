@@ -9,9 +9,9 @@ use App\Model\Rest\AuthToken;
 use App\Model\Rest\Error;
 use App\Model\Rest\Success;
 use App\Repository\UserRepository;
-use App\Service\LoaderConfig;
 use App\Traits\EntityManagerTrait;
 use App\Traits\JWTManagerTrait;
+use App\Traits\LoaderConfigTrait;
 use App\Traits\MailerTrait;
 use App\Traits\UserPasswordHasherTrait;
 use App\Traits\ValidatorTrait;
@@ -33,9 +33,11 @@ class AuthController extends AbstractFOSRestController
 {
     use EntityManagerTrait;
     use JWTManagerTrait;
+    use LoaderConfigTrait;
     use MailerTrait;
     use UserPasswordHasherTrait;
     use ValidatorTrait;
+
     private const CONFIG_EMAIL = ['email'];
 
     /**
@@ -103,7 +105,7 @@ class AuthController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function createAction(Request $request, LoaderConfig $loaderConfig): AuthToken
+    public function createAction(Request $request): AuthToken
     {
         $username = $request->get('username');
         $password = $request->get('password');
@@ -129,15 +131,15 @@ class AuthController extends AbstractFOSRestController
         $this->em->flush();
 
         $email = (new TemplatedEmail())
-            ->subject($loaderConfig->getValue(self::CONFIG_EMAIL, 'confirm.subject'))
+            ->subject($this->loaderConfig->getValue(self::CONFIG_EMAIL, 'confirm.subject'))
             ->htmlTemplate('email/Client/confirmation.html.twig')
             ->context([
-                'tokenUrl' => $loaderConfig->getTemplatedValue(self::CONFIG_EMAIL, 'forgot-password.url', [
+                'tokenUrl' => $this->loaderConfig->getTemplatedValue(self::CONFIG_EMAIL, 'forgot-password.url', [
                     'token' => $token,
                 ]),
             ])
             ->addTo($username)
-            ->addFrom($loaderConfig->getValue(self::CONFIG_EMAIL, 'from'));
+            ->addFrom($this->loaderConfig->getValue(self::CONFIG_EMAIL, 'from'));
 
         $this->mailer->send($email);
 
@@ -206,7 +208,7 @@ class AuthController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function forgotPasswordAction(Request $request, LoaderConfig $loaderConfig): Success
+    public function forgotPasswordAction(Request $request): Success
     {
         $email = $request->get('email', '-');
         $client = $this->em->getRepository(Client::class)->findOneBy([
@@ -220,15 +222,15 @@ class AuthController extends AbstractFOSRestController
             $this->em->flush();
 
             $email = (new TemplatedEmail())
-                ->subject($loaderConfig->getValue(self::CONFIG_EMAIL, 'forgot-password.subject'))
+                ->subject($this->loaderConfig->getValue(self::CONFIG_EMAIL, 'forgot-password.subject'))
                 ->htmlTemplate('email/Client/forgot-password.html.twig')
                 ->context([
-                    'tokenUrl' => $loaderConfig->getTemplatedValue(self::CONFIG_EMAIL, 'forgot-password.url', [
+                    'tokenUrl' => $this->loaderConfig->getTemplatedValue(self::CONFIG_EMAIL, 'forgot-password.url', [
                         'token' => $token,
                     ]),
                 ])
                 ->addTo($email)
-                ->addFrom($loaderConfig->getValue(self::CONFIG_EMAIL, 'from'));
+                ->addFrom($this->loaderConfig->getValue(self::CONFIG_EMAIL, 'from'));
 
             $this->mailer->send($email);
         }

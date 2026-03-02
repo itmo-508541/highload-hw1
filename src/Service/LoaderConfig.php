@@ -9,10 +9,7 @@ use App\Repository\ConfigRepository;
 
 class LoaderConfig
 {
-    /**
-     * @var ConfigRepository
-     */
-    private $configRepository;
+    private ConfigRepository $configRepository;
 
     public function getValue(array $params, string $suffix, $default = null): ?string
     {

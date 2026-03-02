@@ -11,10 +11,15 @@ class Success
     /**
      * @JMS\Type(name="string")
      */
-    private $message;
+    private string $message;
 
     public function __construct(string $message = '')
     {
         $this->message = $message;
+    }
+
+    public function getMessage(): string
+    {
+        return $this->message;
     }
 }

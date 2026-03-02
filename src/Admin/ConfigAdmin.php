@@ -14,23 +14,23 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class ConfigAdmin extends AbstractAdmin
 {
-    protected function configureListFields(ListMapper $listMapper): void
+    protected function configureListFields(ListMapper $list): void
     {
-        $listMapper
+        $list
             ->addIdentifier('id')
             ->add('value', null, [
                 'editable' => true,
             ]);
     }
 
-    protected function configureDatagridFilters(DatagridMapper $filterMapper): void
+    protected function configureDatagridFilters(DatagridMapper $filter): void
     {
-        $filterMapper->add('id');
+        $filter->add('id');
     }
 
-    protected function configureFormFields(FormMapper $formMapper): void
+    protected function configureFormFields(FormMapper $form): void
     {
-        $formMapper
+        $form
             ->add('id', TextType::class)
             ->add('value', TextareaType::class);
     }

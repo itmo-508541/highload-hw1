@@ -29,8 +29,10 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     *
+     * @phpstan-ignore property.unusedType
      */
-    private int $id;
+    private ?int $id = null;
 
     /**
      * @Assert\NotBlank()

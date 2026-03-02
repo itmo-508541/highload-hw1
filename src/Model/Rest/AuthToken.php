@@ -15,10 +15,15 @@ class AuthToken
      * @JMS\Expose()
      * @JMS\Type(name="string")
      */
-    private $token;
+    private string $token;
 
     public function __construct(string $token)
     {
         $this->token = $token;
+    }
+
+    public function getToken(): string
+    {
+        return $this->token;
     }
 }
