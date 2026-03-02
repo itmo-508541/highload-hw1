@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Repository\ClientRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as JMS;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -12,68 +14,55 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\ClientRepository")
- * @ORM\Table(
- *     indexes={
- *         @ORM\Index(name="confirmation_token", columns={"confirmation_token"})
- *     }
- * )
  * @JMS\ExclusionPolicy("all")
  */
 #[UniqueEntity(fields: ['username'], errorPath: 'username', ignoreNull: false)]
+#[ORM\Entity(repositoryClass: ClientRepository::class)]
+#[ORM\Index(columns: ['confirmation_token'], name: 'confirmation_token')]
 class Client implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public const ROLE = 'ROLE_API';
 
     /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     *
      * @phpstan-ignore property.unusedType
      */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
 
     /**
      * @JMS\Expose()
-     * @ORM\Column(type="string", length=180, unique=true)
      */
     #[Assert\NotBlank]
     #[Assert\Email]
+    #[ORM\Column(type: Types::STRING, length: 180, unique: true)]
     private string $username;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column(type: Types::STRING)]
     private string $password;
 
     /**
      * @JMS\Expose()
-     * @ORM\Column(type="string", length=64)
      */
     #[Assert\NotBlank]
+    #[ORM\Column(type: Types::STRING, length: 64)]
     private ?string $firstname = null;
 
     /**
      * @JMS\Expose()
-     * @ORM\Column(type="string", length=64)
      */
     #[Assert\NotBlank]
+    #[ORM\Column(type: Types::STRING, length: 64)]
     private ?string $lastname = null;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTime $createdAt;
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTime $confirmedAt = null;
 
-    /**
-     * @ORM\Column(type="string", length=64, nullable=true)
-     */
+    #[ORM\Column(type: Types::STRING, length: 64, nullable: true)]
     private ?string $confirmationToken = null;
 
     public function __construct()

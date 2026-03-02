@@ -4,23 +4,18 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Repository\ConfigRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\ConfigRepository")
- * @ORM\Table()
- */
+#[ORM\Entity(repositoryClass: ConfigRepository::class)]
 class Config implements \Stringable
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: Types::STRING, length: 255)]
     protected ?string $id = null;
 
-    /**
-     * @ORM\Column(type="text", nullable=false)
-     */
+    #[ORM\Column(type: Types::TEXT, nullable: false)]
     protected string $value;
 
     public function __toString(): string

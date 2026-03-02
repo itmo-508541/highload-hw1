@@ -41,7 +41,6 @@ class AuthController extends AbstractFOSRestController
     private const CONFIG_EMAIL = ['email'];
 
     /**
-     * @Rest\Post(path="/token")
      * @OpenApi\Post(
      *     description="JWT login",
      *     @OpenApi\RequestBody(
@@ -64,6 +63,7 @@ class AuthController extends AbstractFOSRestController
      *     )
      * )
      */
+    #[Rest\Post(path: '/token')]
     public function createToken(Request $request): AuthToken
     {
         $username = $request->get('username');
@@ -80,7 +80,6 @@ class AuthController extends AbstractFOSRestController
     }
 
     /**
-     * @Rest\Post("/create")
      * @OpenApi\Post(
      *     description="Register user",
      *     @OpenApi\RequestBody(
@@ -105,6 +104,7 @@ class AuthController extends AbstractFOSRestController
      *     )
      * )
      */
+    #[Rest\Post('/create')]
     public function create(Request $request): AuthToken
     {
         $username = $request->get('username');
@@ -147,7 +147,6 @@ class AuthController extends AbstractFOSRestController
     }
 
     /**
-     * @Rest\Post(path="/confirm")
      * @OpenApi\Post(
      *     description="Confirm email",
      *     @OpenApi\RequestBody(
@@ -169,6 +168,7 @@ class AuthController extends AbstractFOSRestController
      *     )
      * )
      */
+    #[Rest\Post(path: '/confirm')]
     public function confirm(Request $request): AuthToken
     {
         $token = $request->get('token');
@@ -191,7 +191,6 @@ class AuthController extends AbstractFOSRestController
     }
 
     /**
-     * @Rest\Post(path="/forgot-password")
      * @OpenApi\Post(
      *     description="Forgot password",
      *     @OpenApi\RequestBody(
@@ -208,6 +207,7 @@ class AuthController extends AbstractFOSRestController
      *     )
      * )
      */
+    #[Rest\Post(path: '/forgot-password')]
     public function forgotPassword(Request $request): Success
     {
         $email = $request->get('email', '-');

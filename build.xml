@@ -37,13 +37,13 @@
             <arg line="${symfony.console} doctrine:cache:clear-metadata --env=${symfony.env}" />
         </exec>
         <exec executable="php" passthru="true" checkreturn="true">
-            <arg line="${symfony.console} doctrine:schema:update --env=${symfony.env} --force --no-interaction" />
+            <arg line="${symfony.console} doctrine:schema:update --env=${symfony.env} --force --complete --dump-sql --no-interaction" />
         </exec>
         <exec executable="php" passthru="true" checkreturn="true">
             <arg line="${symfony.console} doctrine:migrations:status --env=${symfony.env}" />
         </exec>
         <exec executable="php" passthru="true" checkreturn="true">
-            <arg line="${symfony.console} doctrine:migrations:migrate --env=${symfony.env} --no-interaction --allow-no-migration" />
+            <arg line="${symfony.console} doctrine:migrations:migrate --env=${symfony.env} --allow-no-migration --no-interaction" />
         </exec>
 
         <echo message="${phing.project.name} DatabaseDeploy - OK" />

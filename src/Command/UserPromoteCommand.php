@@ -6,21 +6,21 @@ namespace App\Command;
 
 use App\Entity\User;
 use App\Traits\EntityManagerTrait;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'app:user:promote', description: 'Create new user')]
 class UserPromoteCommand extends Command
 {
     use EntityManagerTrait;
     use UserCommandTrait;
 
-    protected static $defaultName = 'app:user:promote';
-
     protected function configure()
     {
-        $this->setDescription('Create new user')
+        $this
             ->addArgument('username', InputArgument::OPTIONAL, 'The username')
             ->addArgument('role', InputArgument::OPTIONAL, 'Role');
     }

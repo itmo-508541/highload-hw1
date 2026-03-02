@@ -10,7 +10,6 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation as Nelmio;
 use OpenApi\Annotations as OpenApi;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -23,7 +22,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class TestController extends AbstractFOSRestController
 {
     /**
-     * @Rest\Get("/version", condition="request.attributes.get('version') == 'v1.0'")
      * @OpenApi\Get(
      *     description="Token and version testing",
      *     @OpenApi\Response(
@@ -33,6 +31,7 @@ class TestController extends AbstractFOSRestController
      *     )
      * )
      */
+    #[Rest\Get('/version', condition: "request.attributes.get('version') == 'v1.0'")]
     public function index(UserInterface $user): Test
     {
         return new Test(1, 2);

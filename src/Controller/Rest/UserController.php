@@ -30,7 +30,6 @@ class UserController extends AbstractFOSRestController
     use UserPasswordHasherTrait;
 
     /**
-     * @Rest\Get("/me")
      * @OpenApi\Get(
      *     description="Current client information",
      *     @OpenApi\Response(
@@ -42,13 +41,13 @@ class UserController extends AbstractFOSRestController
      *
      * @param Client $client
      */
+    #[Rest\Get('/me')]
     public function me(UserInterface $client): Client
     {
         return $client;
     }
 
     /**
-     * @Rest\Post("/change-password")
      * @OpenApi\Post(
      *     description="Update user password",
      *     @OpenApi\RequestBody(
@@ -70,6 +69,7 @@ class UserController extends AbstractFOSRestController
      *     )
      * )
      */
+    #[Rest\Post('/change-password')]
     public function changePassword(Request $request, UserInterface $client): Client
     {
         /** @var Client $client */
