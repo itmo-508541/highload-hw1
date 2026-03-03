@@ -11,14 +11,14 @@
     </target>
 
     <target name="app-deploy">
-        <exec executable="php" passthru="true" checkreturn="true">
-            <arg line="${symfony.console} cache:clear --env=${symfony.env} --no-warmup" />
+        <exec executable="${symfony.console}" passthru="true" checkreturn="true">
+            <arg line="cache:clear --env=${symfony.env} --no-warmup" />
         </exec>
-        <exec executable="php" passthru="true" checkreturn="true">
-            <arg line="${symfony.console} cache:warmup --env=${symfony.env}" />
+        <exec executable="${symfony.console}" passthru="true" checkreturn="true">
+            <arg line="cache:warmup --env=${symfony.env}" />
         </exec>
-        <exec executable="php" passthru="true" checkreturn="true">
-            <arg line="${symfony.console} assets:install --env=${symfony.env} public" />
+        <exec executable="${symfony.console}" passthru="true" checkreturn="true">
+            <arg line="assets:install --env=${symfony.env} public" />
         </exec>
 
         <echo message="${phing.project.name} AppDeploy - OK" />
@@ -33,17 +33,17 @@
             </transaction>
         </pdosqlexec>
 
-        <exec executable="php" passthru="true" checkreturn="true">
-            <arg line="${symfony.console} doctrine:cache:clear-metadata --env=${symfony.env}" />
+        <exec executable="${symfony.console}" passthru="true" checkreturn="true">
+            <arg line="doctrine:cache:clear-metadata --env=${symfony.env}" />
         </exec>
-        <exec executable="php" passthru="true" checkreturn="true">
-            <arg line="${symfony.console} doctrine:schema:update --env=${symfony.env} --force --dump-sql --no-interaction" />
+        <exec executable="${symfony.console}" passthru="true" checkreturn="true">
+            <arg line="doctrine:schema:update --env=${symfony.env} --force --dump-sql --no-interaction" />
         </exec>
-        <exec executable="php" passthru="true" checkreturn="true">
-            <arg line="${symfony.console} doctrine:migrations:status --env=${symfony.env}" />
+        <exec executable="${symfony.console}" passthru="true" checkreturn="true">
+            <arg line="doctrine:migrations:status --env=${symfony.env}" />
         </exec>
-        <exec executable="php" passthru="true" checkreturn="true">
-            <arg line="${symfony.console} doctrine:migrations:migrate --env=${symfony.env} --allow-no-migration --no-interaction" />
+        <exec executable="${symfony.console}" passthru="true" checkreturn="true">
+            <arg line="doctrine:migrations:migrate --env=${symfony.env} --allow-no-migration --no-interaction" />
         </exec>
 
         <echo message="${phing.project.name} DatabaseDeploy - OK" />
