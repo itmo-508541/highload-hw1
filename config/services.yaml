@@ -51,6 +51,9 @@ services:
         calls:
             - ['setTranslationDomain', ['ConfigAdmin']]
 
+    App\Security\UserAuthentificatorAuthenticator:
+        autowire: true
+
     App\Service\FileUploader:
         arguments:
             $targetDirectory: '%upload_directory%'

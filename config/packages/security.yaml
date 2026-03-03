@@ -1,7 +1,4 @@
 security:
-    # https://symfony.com/doc/current/security/experimental_authenticators.html
-    enable_authenticator_manager: true
-
     role_hierarchy:
         ROLE_API:         ROLE_USER
         ROLE_ADMIN:       ROLE_USER
@@ -42,6 +39,7 @@ security:
                 path: /admin/logout
                 target: /admin/login
             custom_authenticator: App\Security\UserAuthentificatorAuthenticator
+            provider: app_user_provider
             entry_point: form_login
         client_token:
             pattern:  ^/api/auth
