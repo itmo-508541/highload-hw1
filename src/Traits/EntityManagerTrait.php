@@ -9,10 +9,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 trait EntityManagerTrait
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
+    protected EntityManagerInterface $em;
 
     #[Required]
     public function setEntityManager(EntityManagerInterface $em): void

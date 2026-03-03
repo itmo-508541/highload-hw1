@@ -9,10 +9,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 trait ValidatorTrait
 {
-    /**
-     * @var ValidatorInterface
-     */
-    protected $validator;
+    protected ValidatorInterface $validator;
 
     #[Required]
     public function setValidator(ValidatorInterface $validator): void

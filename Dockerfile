@@ -13,27 +13,27 @@ RUN apt-get update \
     && echo "deb [signed-by=/usr/share/keyrings/sury-php.gpg] https://packages.sury.org/php/ trixie main" | tee /etc/apt/sources.list.d/sury-php.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends --allow-unauthenticated \
-            php8.2-curl \
-            php8.2-fpm \
-            php8.2-gd \
-            php8.2-intl \
-            php8.2-mbstring \
-            php8.2-mysql \
-            php8.2-xml \
-            php8.2-zip \
+            php8.4-curl \
+            php8.4-fpm \
+            php8.4-gd \
+            php8.4-intl \
+            php8.4-mbstring \
+            php8.4-mysql \
+            php8.4-xml \
+            php8.4-zip \
     && apt-get purge --autoremove -y gnupg \
     && apt-get clean -y \
-    && curl -sS -L -o /usr/local/bin/phing https://github.com/phingofficial/phing/releases/download/3.0.0/phing-3.0.0.phar \
+    && curl -sS -L -o /usr/local/bin/phing https://github.com/phingofficial/phing/releases/download/3.1.2/phing-3.1.2.phar \
     && chmod +x /usr/local/bin/phing \
     && rm -rf /var/lib/apt/lists/* /usr/share/man/* /usr/share/doc/* /var/cache/* /var/log/* /tmp/*
 
 WORKDIR /srv
 
-COPY docker/php /etc/php/8.2/
+COPY docker/php /etc/php/8.4/
 
 EXPOSE 9000
 
-CMD ["php-fpm8.2"]
+CMD ["php-fpm8.4"]
 
 
 
@@ -50,11 +50,11 @@ FROM base AS dev
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \
-            php8.2-xdebug \
+            php8.4-xdebug \
             bash \
     && adduser --system --no-create-home --uid 1000 --gid 50 docker
 
-COPY docker/php-dev /etc/php/8.2/
+COPY docker/php-dev /etc/php/8.4/
 
 
 FROM base AS source

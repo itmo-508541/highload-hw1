@@ -25,19 +25,18 @@ class UserAdmin extends AbstractAdmin
         $this->securityRoleHierarchy = $securityRoleHierarchy;
     }
 
-    /**
-     * @param User $user
-     */
-    protected function preUpdate($user): void
+    protected function preUpdate($object): void
     {
-        $plainPassword = $user->getPlainPassword();
+        /** @var User $object */
+        $plainPassword = $object->getPlainPassword();
         if (!empty($plainPassword)) {
-            $password = $this->userPassworsHasher->hashPassword($user, $plainPassword);
+            $password = $this->userPassworsHasher->hashPassword($object, $plainPassword);
 
-            $user->setPassword($password);
+            $object->setPassword($password);
         }
     }
 
+    #[\Override]
     protected function configureExportFields(): array
     {
         $exportFields = parent::configureExportFields();

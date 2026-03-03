@@ -9,10 +9,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 trait JWTManagerTrait
 {
-    /**
-     * @var JWTTokenManagerInterface
-     */
-    protected $jwtManager;
+    protected JWTTokenManagerInterface $jwtManager;
 
     #[Required]
     public function setJWTManager(JWTTokenManagerInterface $jwtManager): void

@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[UniqueEntity(fields: ['username'], errorPath: 'username', ignoreNull: false)]
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
-#[ORM\Index(columns: ['confirmation_token'], name: 'confirmation_token')]
+#[ORM\Index(name: 'confirmation_token', columns: ['confirmation_token'])]
 #[JMS\ExclusionPolicy('all')]
 class Client implements UserInterface, PasswordAuthenticatedUserInterface
 {

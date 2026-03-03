@@ -20,7 +20,8 @@ class ConfigRepository extends ServiceEntityRepository
 
     public function save(Config $config): void
     {
-        $this->_em->persist($config);
-        $this->_em->flush();
+        $em = $this->getEntityManager();
+        $em->persist($config);
+        $em->flush();
     }
 }

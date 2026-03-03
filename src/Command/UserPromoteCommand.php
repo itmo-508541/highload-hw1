@@ -38,7 +38,6 @@ class UserPromoteCommand extends Command
         $user = $repository->findOneBy([
             'username' => $username,
         ]);
-        /* @var User $user */
         $role = $input->getArgument('role');
 
         $roles = $user->getRoles();

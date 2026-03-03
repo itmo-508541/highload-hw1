@@ -37,7 +37,7 @@
             <arg line="${symfony.console} doctrine:cache:clear-metadata --env=${symfony.env}" />
         </exec>
         <exec executable="php" passthru="true" checkreturn="true">
-            <arg line="${symfony.console} doctrine:schema:update --env=${symfony.env} --force --complete --dump-sql --no-interaction" />
+            <arg line="${symfony.console} doctrine:schema:update --env=${symfony.env} --force --dump-sql --no-interaction" />
         </exec>
         <exec executable="php" passthru="true" checkreturn="true">
             <arg line="${symfony.console} doctrine:migrations:status --env=${symfony.env}" />

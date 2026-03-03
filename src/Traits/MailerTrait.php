@@ -9,10 +9,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 trait MailerTrait
 {
-    /**
-     * @var MailerInterface
-     */
-    protected $mailer;
+    protected MailerInterface $mailer;
 
     #[Required]
     public function setMailer(MailerInterface $mailer): void

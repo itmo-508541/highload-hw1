@@ -25,15 +25,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::JSON)]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column(type: Types::STRING)]
     private string $password = '';
 
-    /**
-     * @var string Plain password. Used for model validation. Must not be persisted.
-     */
     private ?string $plainPassword = '';
 
     public function getId(): ?int
@@ -41,9 +35,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
-    /**
-     * @deprecated since Symfony 5.3, use getUserIdentifier instead
-     */
+    #[\Deprecated(message: 'since Symfony 5.3, use getUserIdentifier instead')]
     public function getUsername(): string
     {
         return $this->username;
@@ -54,19 +46,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->username = $username;
     }
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
     public function getUserIdentifier(): string
     {
         return $this->username;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getRoles(): array
     {
         $roles = $this->roles;
@@ -92,9 +76,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return implode(', ', $roles);
     }
 
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
     public function getPassword(): string
     {
         return $this->password;
@@ -115,20 +96,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->plainPassword = $password;
     }
 
-    /**
-     * Returning a salt is only needed, if you are not using a modern
-     * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
-     *
-     * @see UserInterface
-     */
     public function getSalt(): ?string
     {
         return null;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function eraseCredentials(): void
     {
         $this->plainPassword = null;

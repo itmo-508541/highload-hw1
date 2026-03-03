@@ -36,7 +36,7 @@ class UserController extends AbstractFOSRestController
     )]
     public function me(UserInterface $client): Client
     {
-        /** @phpstan-var Client $client */
+        /** @var Client $client */
         return $client;
     }
 

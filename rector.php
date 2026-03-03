@@ -18,7 +18,7 @@ return RectorConfig::configure()
     ])
     ->withImportNames(true, true, false)
     ->withSets([
-        LevelSetList::UP_TO_PHP_82,
+        LevelSetList::UP_TO_PHP_84,
         SymfonySetList::SYMFONY_74,
 
         SetList::CODING_STYLE,

@@ -36,8 +36,8 @@ class ClientAdmin extends AbstractAdmin
 
     protected function configureShowFields(ShowMapper $show): void
     {
+        /** @var Client $object */
         $object = $show->getAdmin()->getSubject();
-        /* @var Client $object */
         $show
             ->add('id')
             ->add('username')

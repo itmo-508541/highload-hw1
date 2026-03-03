@@ -8,7 +8,6 @@ use App\Entity\Client;
 use App\Model\Rest\AuthToken;
 use App\Model\Rest\Error;
 use App\Model\Rest\Success;
-use App\Repository\UserRepository;
 use App\Traits\EntityManagerTrait;
 use App\Traits\JWTManagerTrait;
 use App\Traits\LoaderConfigTrait;
@@ -23,7 +22,6 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Validator\ConstraintViolationList;
 
 #[Route(path: '/auth')]
 #[OA\Tag(name: 'Auth')]
@@ -36,7 +34,7 @@ class AuthController extends AbstractFOSRestController
     use UserPasswordHasherTrait;
     use ValidatorTrait;
 
-    private const CONFIG_EMAIL = ['email'];
+    private const array CONFIG_EMAIL = ['email'];
 
     #[Rest\Post(path: '/token')]
     #[OA\Post(
@@ -62,7 +60,6 @@ class AuthController extends AbstractFOSRestController
         $password = $request->get('password');
 
         $repo = $this->em->getRepository(Client::class);
-        /* @var UserRepository $repo */
         $client = $repo->findOneBy(['username' => $username]);
         if (null === $client || !$this->userPassworsHasher->isPasswordValid($client, $password)) {
             throw new BadRequestHttpException('Invalid credentials');
@@ -109,14 +106,14 @@ class AuthController extends AbstractFOSRestController
         $client->setConfirmedAt(null);
 
         $errors = $this->validator->validate($client);
-        if ($errors instanceof ConstraintViolationList && \count($errors)) {
+        if (\count($errors) > 0) {
             throw new BadRequestHttpException($errors->get(0)->getMessage());
         }
 
         $this->em->persist($client);
         $this->em->flush();
 
-        $email = (new TemplatedEmail())
+        $email = new TemplatedEmail()
             ->subject($this->loaderConfig->getValue(self::CONFIG_EMAIL, 'confirm.subject'))
             ->htmlTemplate('email/Client/confirmation.html.twig')
             ->context([
@@ -157,7 +154,6 @@ class AuthController extends AbstractFOSRestController
         $client = $repo->findOneBy([
             'confirmationToken' => $token,
         ]);
-        /* @var Client|null $client */
         if (null === $client || null !== $client->getConfirmedAt()) {
             throw new BadRequestHttpException('Token was not found or already confirmed');
         }
@@ -199,7 +195,7 @@ class AuthController extends AbstractFOSRestController
             $this->em->persist($client);
             $this->em->flush();
 
-            $email = (new TemplatedEmail())
+            $email = new TemplatedEmail()
                 ->subject($this->loaderConfig->getValue(self::CONFIG_EMAIL, 'forgot-password.subject'))
                 ->htmlTemplate('email/Client/forgot-password.html.twig')
                 ->context([
