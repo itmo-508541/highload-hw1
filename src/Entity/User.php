@@ -101,7 +101,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return null;
     }
 
-    public function eraseCredentials(): void
+    public function serialize(): void
     {
         $this->plainPassword = null;
     }

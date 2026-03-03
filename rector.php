@@ -19,7 +19,6 @@ return RectorConfig::configure()
     ->withImportNames(true, true, false)
     ->withSets([
         LevelSetList::UP_TO_PHP_84,
-        SymfonySetList::SYMFONY_74,
 
         SetList::CODING_STYLE,
         SetList::CODE_QUALITY,
@@ -34,6 +33,7 @@ return RectorConfig::configure()
         DoctrineSetList::DOCTRINE_CODE_QUALITY,
     ])
     ->withAttributesSets(all: true)
+    ->withComposerBased(doctrine: true, symfony: true)
     ->withRules([
         PreferPHPUnitSelfCallRector::class,
     ])

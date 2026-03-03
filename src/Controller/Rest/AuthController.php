@@ -56,8 +56,8 @@ class AuthController extends AbstractFOSRestController
     )]
     public function createToken(Request $request): AuthToken
     {
-        $username = $request->get('username');
-        $password = $request->get('password');
+        $username = $request->request->get('username');
+        $password = $request->request->get('password');
 
         $repo = $this->em->getRepository(Client::class);
         $client = $repo->findOneBy(['username' => $username]);
@@ -90,10 +90,10 @@ class AuthController extends AbstractFOSRestController
     )]
     public function create(Request $request): AuthToken
     {
-        $username = $request->get('username');
-        $password = $request->get('password');
-        $firstname = $request->get('firstname', '');
-        $lastname = $request->get('lastname', '');
+        $username = $request->request->get('username');
+        $password = $request->request->get('password');
+        $firstname = $request->request->get('firstname', '');
+        $lastname = $request->request->get('lastname', '');
 
         $token = $this->generateToken();
 
@@ -148,7 +148,7 @@ class AuthController extends AbstractFOSRestController
     )]
     public function confirm(Request $request): AuthToken
     {
-        $token = $request->get('token');
+        $token = $request->request->get('token');
 
         $repo = $this->em->getRepository(Client::class);
         $client = $repo->findOneBy([
@@ -184,7 +184,7 @@ class AuthController extends AbstractFOSRestController
     )]
     public function forgotPassword(Request $request): Success
     {
-        $email = $request->get('email', '-');
+        $email = $request->request->get('email', '-');
         $client = $this->em->getRepository(Client::class)->findOneBy([
             'username' => $email,
         ]);

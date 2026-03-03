@@ -20,14 +20,14 @@ class UserChangePasswordCommand extends Command
     use UserCommandTrait;
     use UserPasswordHasherTrait;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->addArgument('username', InputArgument::OPTIONAL, 'The username')
             ->addArgument('password', InputArgument::OPTIONAL, 'The password');
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function interact(InputInterface $input, OutputInterface $output): void
     {
         $this->interactWith($input, $output, ['username', 'password']);
     }

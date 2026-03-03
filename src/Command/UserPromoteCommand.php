@@ -18,14 +18,14 @@ class UserPromoteCommand extends Command
     use EntityManagerTrait;
     use UserCommandTrait;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->addArgument('username', InputArgument::OPTIONAL, 'The username')
             ->addArgument('role', InputArgument::OPTIONAL, 'Role');
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function interact(InputInterface $input, OutputInterface $output): void
     {
         $this->interactWith($input, $output, ['username', 'role']);
     }
