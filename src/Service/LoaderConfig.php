@@ -25,7 +25,7 @@ class LoaderConfig
         $template = $this->getValue($params, $suffix);
         if (null !== $template) {
             foreach ($variables as $key => $value) {
-                $template = str_replace(sprintf('{{%s}}', $key), $value, $template);
+                $template = str_replace(\sprintf('{{%s}}', $key), $value, $template);
             }
         }
 

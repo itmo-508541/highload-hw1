@@ -19,7 +19,7 @@ return RectorConfig::configure()
     ->withImportNames(true, true, false)
     ->withSets([
         LevelSetList::UP_TO_PHP_81,
-        SymfonySetList::SYMFONY_63,
+        SymfonySetList::SYMFONY_64,
 
         SetList::CODING_STYLE,
         SetList::CODE_QUALITY,
@@ -33,7 +33,7 @@ return RectorConfig::configure()
         PHPUnitSetList::PHPUNIT_CODE_QUALITY,
         DoctrineSetList::DOCTRINE_CODE_QUALITY,
     ])
-    ->withAttributesSets(symfony: true, doctrine: true, phpunit: true, fosRest: true)
+    ->withAttributesSets(all: true)
     ->withRules([
         PreferPHPUnitSelfCallRector::class,
     ])

@@ -6,21 +6,15 @@ namespace App\Model;
 
 use JMS\Serializer\Annotation as JMS;
 
-/**
- * @JMS\ExclusionPolicy("all")
- */
+#[JMS\ExclusionPolicy(policy: 'all')]
 class Test
 {
     public function __construct(
-        /**
-         * @JMS\Expose()
-         * @JMS\Type(name="string")
-         */
+        #[JMS\Expose()]
+        #[JMS\Type(name: 'string')]
         private readonly int $publicData,
-        /**
-         * @JMS\Exclude()
-         */
-        private readonly int $secretData
+        #[JMS\Exclude()]
+        private readonly int $secretData,
     ) {
     }
 

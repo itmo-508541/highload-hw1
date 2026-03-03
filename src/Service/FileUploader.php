@@ -33,7 +33,7 @@ class FileUploader
 
     public function delete(string $filename): void
     {
-        $path = sprintf('%s/%s', $this->getTargetDirectory(), $filename);
+        $path = \sprintf('%s/%s', $this->getTargetDirectory(), $filename);
         if (file_exists($path) && is_file($path) && is_writable($path)) {
             @unlink($path);
         }

@@ -17,18 +17,16 @@ use App\Traits\UserPasswordHasherTrait;
 use App\Traits\ValidatorTrait;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Nelmio\ApiDocBundle\Annotation as Nelmio;
-use OpenApi\Annotations as OpenApi;
+use Nelmio\ApiDocBundle\Attribute as Nelmio;
+use OpenApi\Attributes as OA;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\ConstraintViolationList;
 
-/**
- * @OpenApi\Tag(name="Auth")
- */
 #[Route(path: '/auth')]
+#[OA\Tag(name: 'Auth')]
 class AuthController extends AbstractFOSRestController
 {
     use EntityManagerTrait;
@@ -40,30 +38,24 @@ class AuthController extends AbstractFOSRestController
 
     private const CONFIG_EMAIL = ['email'];
 
-    /**
-     * @OpenApi\Post(
-     *     description="JWT login",
-     *     @OpenApi\RequestBody(
-     *          required=true,
-     *          @OpenApi\JsonContent(
-     *              required={"username", "password"},
-     *              @OpenApi\Property(property="username", type="string", example="example@gmail.com"),
-     *              @OpenApi\Property(property="password", type="string", example="qwerty"),
-     *          )
-     *     ),
-     *     @OpenApi\Response(
-     *          response="200",
-     *          description="OK",
-     *          @Nelmio\Model(type=AuthToken::class)
-     *     ),
-     *     @OpenApi\Response(
-     *          response="400",
-     *          description="Bad request",
-     *          @Nelmio\Model(type=Error::class)
-     *     )
-     * )
-     */
     #[Rest\Post(path: '/token')]
+    #[OA\Post(
+        description: 'JWT login',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['username', 'password'],
+                properties: [
+                    new OA\Property(property: 'username', type: 'string', example: 'example@gmail.com'),
+                    new OA\Property(property: 'password', type: 'string', example: 'qwerty'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new Nelmio\Model(type: AuthToken::class)),
+            new OA\Response(response: 400, description: 'Bad request', content: new Nelmio\Model(type: Error::class)),
+        ]
+    )]
     public function createToken(Request $request): AuthToken
     {
         $username = $request->get('username');
@@ -79,32 +71,26 @@ class AuthController extends AbstractFOSRestController
         return new AuthToken($this->jwtManager->create($client));
     }
 
-    /**
-     * @OpenApi\Post(
-     *     description="Register user",
-     *     @OpenApi\RequestBody(
-     *         required=true,
-     *         @OpenApi\JsonContent(
-     *             required={"username", "password"},
-     *             @OpenApi\Property(property="username", type="string", example="example@gmail.com"),
-     *             @OpenApi\Property(property="password", type="string", example="qwerty"),
-     *             @OpenApi\Property(property="firstname", type="string", example="John"),
-     *             @OpenApi\Property(property="lastname", type="string", example="Doe")
-     *         )
-     *     ),
-     *     @OpenApi\Response(
-     *          response="200",
-     *          description="OK",
-     *          @Nelmio\Model(type=AuthToken::class)
-     *     ),
-     *     @OpenApi\Response(
-     *          response="400",
-     *          description="Bad request",
-     *          @Nelmio\Model(type=Error::class)
-     *     )
-     * )
-     */
     #[Rest\Post('/create')]
+    #[OA\Post(
+        description: 'Register user',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['username', 'password'],
+                properties: [
+                    new OA\Property(property: 'username', type: 'string', example: 'example@gmail.com'),
+                    new OA\Property(property: 'password', type: 'string', example: 'qwerty'),
+                    new OA\Property(property: 'firstname', type: 'string', example: 'John'),
+                    new OA\Property(property: 'lastname', type: 'string', example: 'Doe'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new Nelmio\Model(type: AuthToken::class)),
+            new OA\Response(response: 400, description: 'Bad request', content: new Nelmio\Model(type: Error::class)),
+        ]
+    )]
     public function create(Request $request): AuthToken
     {
         $username = $request->get('username');
@@ -146,29 +132,23 @@ class AuthController extends AbstractFOSRestController
         return new AuthToken($this->jwtManager->create($client));
     }
 
-    /**
-     * @OpenApi\Post(
-     *     description="Confirm email",
-     *     @OpenApi\RequestBody(
-     *          required=true,
-     *          @OpenApi\JsonContent(
-     *              required={"token"},
-     *              @OpenApi\Property(property="token", type="string", example="jsdbcbicb78wb")
-     *          )
-     *     ),
-     *     @OpenApi\Response(
-     *          response="200",
-     *          description="OK",
-     *          @Nelmio\Model(type=AuthToken::class)
-     *     ),
-     *     @OpenApi\Response(
-     *          response="400",
-     *          description="Token not found (or already confirmed)",
-     *          @Nelmio\Model(type=Error::class)
-     *     )
-     * )
-     */
     #[Rest\Post(path: '/confirm')]
+    #[OA\Post(
+        description: 'Confirm email',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['token'],
+                properties: [
+                    new OA\Property(property: 'token', type: 'string', example: 'jsdbcbicb78wb'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new Nelmio\Model(type: AuthToken::class)),
+            new OA\Response(response: 400, description: 'Bad request', content: new Nelmio\Model(type: Error::class)),
+        ]
+    )]
     public function confirm(Request $request): AuthToken
     {
         $token = $request->get('token');
@@ -190,24 +170,22 @@ class AuthController extends AbstractFOSRestController
         return new AuthToken($this->jwtManager->create($client));
     }
 
-    /**
-     * @OpenApi\Post(
-     *     description="Forgot password",
-     *     @OpenApi\RequestBody(
-     *          required=true,
-     *          @OpenApi\JsonContent(
-     *              required={"email"},
-     *              @OpenApi\Property(property="email", type="string", example="mail@example.com")
-     *          )
-     *     ),
-     *     @OpenApi\Response(
-     *          response="200",
-     *          description="OK",
-     *          @Nelmio\Model(type=Success::class)
-     *     )
-     * )
-     */
     #[Rest\Post(path: '/forgot-password')]
+    #[OA\Post(
+        description: 'Forgot password',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['email'],
+                properties: [
+                    new OA\Property(property: 'email', type: 'string', example: 'mail@example.com'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new Nelmio\Model(type: Success::class)),
+        ]
+    )]
     public function forgotPassword(Request $request): Success
     {
         $email = $request->get('email', '-');

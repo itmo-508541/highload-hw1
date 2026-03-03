@@ -48,7 +48,7 @@ class UserChangePasswordCommand extends Command
         $this->em->persist($user);
         $this->em->flush();
 
-        $output->writeln(sprintf('Changed password for user <comment>%s</comment>', $username));
+        $output->writeln(\sprintf('Changed password for user <comment>%s</comment>', $username));
 
         return 0;
     }

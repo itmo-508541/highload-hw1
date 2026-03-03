@@ -9,10 +9,8 @@ use JMS\Serializer\Annotation as JMS;
 class Success
 {
     public function __construct(
-        /**
-         * @JMS\Type(name="string")
-         */
-        private readonly string $message = ''
+        #[JMS\Type(name: 'string')]
+        private readonly string $message = '',
     ) {
     }
 

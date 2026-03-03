@@ -6,17 +6,13 @@ namespace App\Model\Rest;
 
 use JMS\Serializer\Annotation as JMS;
 
-/**
- * @JMS\ExclusionPolicy("all")
- */
+#[JMS\ExclusionPolicy('all')]
 class AuthToken
 {
     public function __construct(
-        /**
-         * @JMS\Expose()
-         * @JMS\Type(name="string")
-         */
-        private readonly string $token
+        #[JMS\Expose]
+        #[JMS\Type(name: 'string')]
+        private readonly string $token,
     ) {
     }
 

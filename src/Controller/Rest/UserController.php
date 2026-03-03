@@ -10,18 +10,16 @@ use App\Traits\EntityManagerTrait;
 use App\Traits\UserPasswordHasherTrait;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Nelmio\ApiDocBundle\Annotation as Nelmio;
-use OpenApi\Annotations as OpenApi;
+use Nelmio\ApiDocBundle\Attribute as Nelmio;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-/**
- * @OpenApi\Tag(name="User")
- * @Nelmio\Security(name="Bearer")
- */
+#[OA\Tag(name: 'User')]
+#[Nelmio\Security(name: 'Bearer')]
 #[Route(path: '/user')]
 #[IsGranted('ROLE_API', message: 'Access denied', statusCode: 403)]
 class UserController extends AbstractFOSRestController
@@ -29,47 +27,36 @@ class UserController extends AbstractFOSRestController
     use EntityManagerTrait;
     use UserPasswordHasherTrait;
 
-    /**
-     * @OpenApi\Get(
-     *     description="Current client information",
-     *     @OpenApi\Response(
-     *          response="200",
-     *          description="Client info",
-     *          @Nelmio\Model(type=Client::class)
-     *     )
-     * )
-     *
-     * @param Client $client
-     */
     #[Rest\Get('/me')]
+    #[OA\Get(
+        description: 'Current client information',
+        responses: [
+            new OA\Response(response: 200, description: 'Client info', content: new Nelmio\Model(type: Client::class)),
+        ]
+    )]
     public function me(UserInterface $client): Client
     {
+        /** @phpstan-var Client $client */
         return $client;
     }
 
-    /**
-     * @OpenApi\Post(
-     *     description="Update user password",
-     *     @OpenApi\RequestBody(
-     *         required=true,
-     *          @OpenApi\JsonContent(
-     *              required={"password"},
-     *              @OpenApi\Property(property="password", type="string", example="qwerty")
-     *          )
-     *     ),
-     *     @OpenApi\Response(
-     *          response="200",
-     *          description="OK",
-     *          @Nelmio\Model(type=Client::class)
-     *     ),
-     *     @OpenApi\Response(
-     *          response="400",
-     *          description="Invalid password",
-     *          @Nelmio\Model(type=Error::class)
-     *     )
-     * )
-     */
     #[Rest\Post('/change-password')]
+    #[OA\Post(
+        description: 'Update user password',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['password'],
+                properties: [
+                    new OA\Property(property: 'password', type: 'string', example: 'qwerty'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new Nelmio\Model(type: Client::class)),
+            new OA\Response(response: 400, description: 'Invalid password', content: new Nelmio\Model(type: Error::class)),
+        ]
+    )]
     public function changePassword(Request $request, UserInterface $client): Client
     {
         /** @var Client $client */

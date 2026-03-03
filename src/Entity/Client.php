@@ -13,12 +13,10 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @JMS\ExclusionPolicy("all")
- */
 #[UniqueEntity(fields: ['username'], errorPath: 'username', ignoreNull: false)]
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 #[ORM\Index(columns: ['confirmation_token'], name: 'confirmation_token')]
+#[JMS\ExclusionPolicy('all')]
 class Client implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public const ROLE = 'ROLE_API';
@@ -29,29 +27,23 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     // @phpstan-ignore property.unusedType
     private ?int $id = null;
 
-    /**
-     * @JMS\Expose()
-     */
     #[Assert\NotBlank]
     #[Assert\Email]
     #[ORM\Column(type: Types::STRING, length: 180, unique: true)]
+    #[JMS\Expose]
     private string $username;
 
     #[ORM\Column(type: Types::STRING)]
     private string $password;
 
-    /**
-     * @JMS\Expose()
-     */
     #[Assert\NotBlank]
     #[ORM\Column(type: Types::STRING, length: 64)]
+    #[JMS\Expose]
     private ?string $firstname = null;
 
-    /**
-     * @JMS\Expose()
-     */
     #[Assert\NotBlank]
     #[ORM\Column(type: Types::STRING, length: 64)]
+    #[JMS\Expose]
     private ?string $lastname = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]

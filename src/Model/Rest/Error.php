@@ -8,13 +8,9 @@ use JMS\Serializer\Annotation as JMS;
 
 abstract class Error
 {
-    /**
-     * @JMS\Type(name="string")
-     */
+    #[JMS\Type(name: 'string')]
     public string $code;
 
-    /**
-     * @JMS\Type(name="string")
-     */
+    #[JMS\Type(name: 'string')]
     public string $message;
 }

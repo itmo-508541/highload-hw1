@@ -8,7 +8,7 @@ use App\Traits\EntityManagerTrait;
 use App\Traits\SluggerTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(condition: "'dev' === '%kernel.environment%'")]
 class DebugController extends AbstractController

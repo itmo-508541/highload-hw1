@@ -45,7 +45,7 @@ class UserCreateCommand extends Command
         $this->em->persist($user);
         $this->em->flush();
 
-        $output->writeln(sprintf('Created user <comment>%s</comment>', $username));
+        $output->writeln(\sprintf('Created user <comment>%s</comment>', $username));
 
         return 0;
     }
