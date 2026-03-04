@@ -18,7 +18,7 @@ final class Version20210806095751 extends AbstractMigration
     {
         $this->addSql(
             <<< SQL
-                CREATE TABLE `sessions` (
+                CREATE TABLE IF NOT EXISTS `sessions` (
                     `sess_id` VARBINARY(128) NOT NULL PRIMARY KEY,
                     `sess_data` BLOB NOT NULL,
                     `sess_lifetime` INTEGER UNSIGNED NOT NULL,

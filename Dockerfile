@@ -28,25 +28,20 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* /usr/share/man/* /usr/share/doc/* /var/cache/* /var/log/* /tmp/*
 
 WORKDIR /srv
-
 COPY docker/php /etc/php/8.4/
-
+COPY --from=composer/composer:latest-bin /composer /usr/local/bin/composer
 EXPOSE 9000
-
 CMD ["php-fpm8.4"]
 
 
-
+# Используется для копирования файлов для prod образа
 FROM ${source_image} AS source_image
 
 
+# Используется для локальной разработки
+FROM php AS dev
 
-FROM php AS base
-
-COPY --from=composer/composer:latest-bin /composer /usr/local/bin/composer
-
-
-FROM base AS dev
+COPY docker/php-dev /etc/php/8.4/
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \
@@ -54,13 +49,11 @@ RUN apt-get update -y \
             bash \
     && adduser --system --no-create-home --uid 1000 --gid 50 docker
 
-COPY docker/php-dev /etc/php/8.4/
 
-
-FROM base AS source
+# Используется для подготовки кода и ассетов для prod образа
+FROM php AS source
 
 ENV APP_ENV="prod"
-
 COPY *.json *.lock ./
 
 RUN composer check-platform-reqs \
@@ -69,14 +62,14 @@ RUN composer check-platform-reqs \
         --prefer-dist \
         --no-scripts \
         --optimize-autoloader \
-        --no-interaction \
-    && composer clear-cache
+        --no-interaction
 
 COPY . .
 
 RUN phing app-deploy -Dsymfony.env=prod
 
 
+# Используется для конечного приложения
 FROM php AS prod
 
 ENV APP_ENV="prod"

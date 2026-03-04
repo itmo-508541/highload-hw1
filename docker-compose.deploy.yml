@@ -1,3 +1,5 @@
+name: "${DOCKER_COMPOSE_NAME}"
+
 services:
     nginx:
         image: "${CI_NGINX_IMAGE_WITH_TAG}"
@@ -15,10 +17,10 @@ services:
 
     php: &php-service
         image: "${CI_APP_IMAGE_WITH_TAG}"
-        command: "php-fpm8.0"
+        command: "php-fpm8.4"
         env_file:
             - .env
-            - .compose-env
+            - .env.local
         environment:
             APP_ENV: prod
             APP_DEBUG: ${ENV_debug}

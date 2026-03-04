@@ -1,7 +1,8 @@
-FROM debian:bullseye-20220711-slim
+FROM debian:trixie-slim
 
-RUN apt-get update && apt-get install -y git \
-    && rm -rf /var/lib/apt/lists/* /tmp/*
+RUN apt update \
+    && apt install -y git \
+    && apt clean
 
 COPY ./ssh_config /etc/ssh/ssh_config
 
