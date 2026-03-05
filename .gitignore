@@ -3,6 +3,7 @@
 .php_cs.cache
 /auth.json
 /build/
+/.composer-cache
 /docker-compose.override.yml
 /.php-cs-fixer.php
 /.php-cs-fixer.cache

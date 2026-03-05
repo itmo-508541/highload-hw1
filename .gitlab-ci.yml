@@ -151,6 +151,11 @@ qa:tests:
   needs:
     - job: build:docker-source-image
   image: $CI_SOURCE_IMAGE_WITH_TAG
+  cache:
+    paths:
+      - .composer-cache/
+  before_script:
+    - composer config -g cache-dir "$(pwd)/.composer-cache"
   script:
     - cd /srv
     - composer install --prefer-dist --no-scripts --no-interaction
