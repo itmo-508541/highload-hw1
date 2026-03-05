@@ -20,46 +20,25 @@ stages:
     - executor-docker
     - docker-in-docker
 
-.job-policy-all:
+.job-policy-branches:
   extends:
     - .job-tags
   only:
+    - branches
+
+.job-policy-mainline:
+  extends:
+    - .job-tags
+  only: &mainline
     - master
     - production
   environment:
     name: $CI_COMMIT_REF_SLUG
 
-.deploy-script:
-  image: $CI_GIT_IMAGE_WITH_TAG
-  variables:
-    GIT_STRATEGY: none
-  before_script:
-    - eval $(ssh-agent -s)
-    - ssh-add <(echo "$SSH_PRIVATE_KEY")
-
-qa:php-cs-fixer:
-  extends:
-    - .job-policy-all
+.prepare-env:
   stage: .pre
   needs: []
-  image: jakzal/phpqa:php8.4-alpine
   script:
-    - php-cs-fixer fix --diff --dry-run -v
-
-prepare:env:
-  extends:
-    - .job-policy-all
-  stage: .pre
-  needs: []
-  variables:
-    REQUIRED_VARS: SERVER_NAME DEPLOY_USER DEPLOY_HOST DEPLOY_DIRECTORY SSH_PRIVATE_KEY
-  script:
-    - |
-      for var_name in $REQUIRED_VARS; do
-        echo $var_name;
-        var_value=$(printenv "$var_name");
-        if [ -z "$var_value" ]; then exit 1; fi;
-      done;
     - touch .env.local;
     - |
       for var in $(env | grep '^ENV_'); do
@@ -72,9 +51,61 @@ prepare:env:
     paths:
       - .env.local
 
+.build-docker-source-image:
+  stage: build
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_SOURCE_IMAGE_CACHE || true
+    - docker build
+      --cache-from $CI_SOURCE_IMAGE_CACHE
+      --tag $CI_SOURCE_IMAGE_WITH_TAG
+      --target source .
+    - docker push $CI_SOURCE_IMAGE_WITH_TAG
+    - docker logout $CI_REGISTRY
+
+.deploy-script:
+  image: $CI_GIT_IMAGE_WITH_TAG
+  variables:
+    GIT_STRATEGY: none
+
+.deploy-script-ssh:
+  extends:
+    - .deploy-script
+  before_script:
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+
+qa:php-cs-fixer:
+  extends:
+    - .job-policy-branches
+  stage: .pre
+  needs: []
+  image: jakzal/phpqa:php8.4-alpine
+  script:
+    - php-cs-fixer fix --diff --dry-run -v
+
+prepare:env:
+  extends:
+    - .prepare-env
+    - .job-policy-branches
+
+prepare-mainline:env:
+  extends:
+    - .prepare-env
+    - .job-policy-mainline
+  variables:
+    REQUIRED_VARS: SERVER_NAME DEPLOY_USER DEPLOY_HOST DEPLOY_DIRECTORY SSH_PRIVATE_KEY
+  before_script:
+    - |
+      for var_name in $REQUIRED_VARS; do
+        echo $var_name;
+        var_value=$(printenv "$var_name");
+        if [ -z "$var_value" ]; then exit 1; fi;
+      done;
+
 build:docker-git-image:
   extends:
-    - .job-policy-all
+    - .job-policy-branches
   stage: build
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -86,12 +117,12 @@ build:docker-git-image:
     - docker push $CI_GIT_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
 
-build:docker-compose:
+build-mainline:docker-compose:
   extends:
-    - .job-policy-all
+    - .job-policy-mainline
   stage: build
   needs:
-    - job: prepare:env
+    - job: prepare-mainline:env
       artifacts: true
   script:
     - export DOCKER_COMPOSE_NAME="${SERVER_NAME//./_}"
@@ -105,28 +136,26 @@ build:docker-compose:
 
 build:docker-source-image:
   extends:
-    - .job-policy-all
-  stage: build
+    - .job-policy-branches
+    - .build-docker-source-image
   needs:
     - job: prepare:env
       artifacts: true
-    - job: qa:php-cs-fixer
-  script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker pull $CI_SOURCE_IMAGE_CACHE || true
-    - docker build
-          --cache-from $CI_SOURCE_IMAGE_CACHE
-          --tag $CI_SOURCE_IMAGE_WITH_TAG
-          --target source .
-    - docker push $CI_SOURCE_IMAGE_WITH_TAG
-    - docker logout $CI_REGISTRY
 
-build:docker-app-image:
+build-mainline:docker-source-image:
   extends:
-    - .job-policy-all
+    - .job-policy-mainline
+    - .build-docker-source-image
+  needs:
+    - job: prepare-mainline:env
+      artifacts: true
+
+build-mainline:docker-app-image:
+  extends:
+    - .job-policy-mainline
   stage: build
   needs:
-    - job: build:docker-source-image
+    - job: build-mainline:docker-source-image
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_SOURCE_IMAGE_WITH_TAG || true
@@ -138,12 +167,12 @@ build:docker-app-image:
     - docker push $CI_APP_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
 
-build:docker-nginx-image:
+build-mainline:docker-nginx-image:
   extends:
-    - .job-policy-all
+    - .job-policy-mainline
   stage: build
   needs:
-    - job: build:docker-source-image
+    - job: build-mainline:docker-source-image
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_NGINX_IMAGE_CACHE || true
@@ -158,10 +187,8 @@ build:docker-nginx-image:
 
 qa:tests:
   extends:
-    - .job-policy-all
+    - .job-policy-branches
   stage: test
-  needs:
-    - job: build:docker-source-image
   image: $CI_SOURCE_IMAGE_WITH_TAG
   cache:
     paths:
@@ -177,17 +204,14 @@ qa:tests:
     - vendor/bin/phpunit
   dependencies: []
 
-deploy:secure-copy:
+deploy-mainline:secure-copy:
   extends:
-    - .deploy-script
-    - .job-policy-all
+    - .deploy-script-ssh
+    - .job-policy-mainline
   stage: deploy
   needs:
-    - job: build:docker-compose
+    - job: build-mainline:docker-compose
       artifacts: true
-    - job: build:docker-app-image
-    - job: build:docker-nginx-image
-    - job: qa:tests
   script:
     - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
       rm -rf '"$DEPLOY_DIRECTORY"'_tmp ;
@@ -209,10 +233,10 @@ deploy:secure-copy:
       docker logout '"$CI_REGISTRY"' ;
       echo "[$(date -R)] web-server is up"'
 
-#deploy:production:
+#deploy-mainline:production:
 #  extends:
-#    - .deploy-script
-#    - .job-policy-all
+#    - .deploy-script-ssh
+#    - .job-policy-mainline
 #  stage: deploy
 #  script:
 #    - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
@@ -227,25 +251,18 @@ deploy:secure-copy:
 
 cleanup:docker-source-image:
   extends:
-    - .deploy-script
+    - .job-policy-branches
   stage: .post
-  rules:
-    - if: $CI_COMMIT_REF_NAME =~ /^production/
-      when: never
-    - if: $CI_COMMIT_REF_NAME == "master"
-      when: never
-    - if: $CI_COMMIT_REF_NAME == "dev"
-      when: never
-    - if: $CI_COMMIT_BRANCH
+  except:
+    *mainline
   variables:
     GIT_STRATEGY: none
     REGCTL_VERSION: v0.6.1
   script:
-    - apk update
-    - apk add curl
+    - apk update && apk add curl
     - curl --fail-with-body --location "https://github.com/regclient/regclient/releases/download/${REGCTL_VERSION}/regctl-linux-amd64" > /usr/bin/regctl
     - chmod 755 /usr/bin/regctl
     - regctl registry login ${CI_REGISTRY} -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD}
-    - regctl tag rm $CI_SOURCE_IMAGE_WITH_TAG
-    - docker rmi $CI_SOURCE_IMAGE_WITH_TAG
+    - regctl tag rm $CI_SOURCE_IMAGE_WITH_TAG || true
+    - docker rmi $CI_SOURCE_IMAGE_WITH_TAG || true
   allow_failure: true
