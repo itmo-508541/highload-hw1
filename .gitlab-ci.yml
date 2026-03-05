@@ -119,10 +119,22 @@ build:docker-source-image:
           --tag $CI_SOURCE_IMAGE_WITH_TAG
           --target source .
     - docker push $CI_SOURCE_IMAGE_WITH_TAG
+    - docker logout $CI_REGISTRY
+
+build:docker-app-image:
+  extends:
+    - .job-policy-all
+  stage: build
+  needs:
+    - job: build:docker-source-image
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_SOURCE_IMAGE_WITH_TAG || true
     - docker build
-          --tag $CI_APP_IMAGE_WITH_TAG
-          --build-arg source_image=$CI_SOURCE_IMAGE_WITH_TAG
-          --target prod .
+      --cache-from $CI_SOURCE_IMAGE_CACHE
+      --tag $CI_APP_IMAGE_WITH_TAG
+      --build-arg source_image=$CI_SOURCE_IMAGE_WITH_TAG
+      --target prod .
     - docker push $CI_APP_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
 
@@ -171,9 +183,11 @@ deploy:secure-copy:
     - .job-policy-all
   stage: deploy
   needs:
-    - job: qa:tests
     - job: build:docker-compose
       artifacts: true
+    - job: build:docker-app-image
+    - job: build:docker-nginx-image
+    - job: qa:tests
   script:
     - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
       rm -rf '"$DEPLOY_DIRECTORY"'_tmp ;
