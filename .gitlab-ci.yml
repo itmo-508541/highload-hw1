@@ -216,6 +216,7 @@ deploy-mainline:secure-copy:
   needs:
     - job: build-mainline:docker-compose
       artifacts: true
+    - job: qa:tests
   script:
     - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
       rm -rf '"$DEPLOY_DIRECTORY"'_tmp ;
