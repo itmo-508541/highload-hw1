@@ -195,6 +195,7 @@ qa:tests:
   stage: test
   image: $CI_SOURCE_IMAGE_WITH_TAG
   cache:
+    key: "composer-cache"
     paths:
       - .composer-cache/
   before_script:
