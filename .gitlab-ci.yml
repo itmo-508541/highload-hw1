@@ -88,6 +88,8 @@ prepare:env:
   extends:
     - .prepare-env
     - .job-policy-branches
+  except:
+    *mainline
 
 prepare-mainline:env:
   extends:
@@ -103,9 +105,9 @@ prepare-mainline:env:
         if [ -z "$var_value" ]; then exit 1; fi;
       done;
 
-build:docker-git-image:
+build-mainline:docker-git-image:
   extends:
-    - .job-policy-branches
+    - .job-policy-mainline
   stage: build
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -138,6 +140,8 @@ build:docker-source-image:
   extends:
     - .job-policy-branches
     - .build-docker-source-image
+  except:
+    *mainline
   needs:
     - job: prepare:env
       artifacts: true
