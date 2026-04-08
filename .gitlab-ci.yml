@@ -41,7 +41,7 @@ stages:
   stage: .pre
   needs: []
   script:
-    - touch .env.local;
+    - touch .env.local
     - |
       for var in $(env | grep '^ENV_'); do
         var_name=$(echo "$var" | cut -d'=' -f1);
@@ -59,11 +59,29 @@ stages:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_SOURCE_IMAGE_CACHE || true
     - docker build
-      --cache-from $CI_SOURCE_IMAGE_CACHE
-      --tag $CI_SOURCE_IMAGE_WITH_TAG
-      --target source .
+          --cache-from $CI_SOURCE_IMAGE_CACHE
+          --tag $CI_SOURCE_IMAGE_WITH_TAG
+          --target source .
     - docker push $CI_SOURCE_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
+
+.test-script:
+  extends:
+    - .job-policy-branches
+  stage: test
+  image: $CI_SOURCE_IMAGE_WITH_TAG
+  cache: &composer-cache
+    key: "composer-cache"
+    paths:
+      - .composer-cache/
+    policy: pull
+  variables:
+    XDEBUG_MODE: coverage
+  dependencies: []
+  before_script:
+    - composer config -g cache-dir "$(pwd)/.composer-cache"
+    - composer install --prefer-dist --no-scripts --no-interaction
+    - mkdir --parent build
 
 .deploy-script:
   image: $CI_GIT_IMAGE_WITH_TAG
@@ -76,15 +94,6 @@ stages:
   before_script:
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
-
-qa:php-cs-fixer:
-  extends:
-    - .job-policy-branches
-  stage: .pre
-  needs: []
-  image: jakzal/phpqa:php8.4-alpine
-  script:
-    - php-cs-fixer fix --diff --dry-run -v
 
 prepare:env:
   extends:
@@ -166,10 +175,10 @@ build-mainline:docker-app-image:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_SOURCE_IMAGE_WITH_TAG || true
     - docker build
-      --cache-from $CI_SOURCE_IMAGE_CACHE
-      --tag $CI_APP_IMAGE_WITH_TAG
-      --build-arg source_image=$CI_SOURCE_IMAGE_WITH_TAG
-      --target prod .
+          --cache-from $CI_SOURCE_IMAGE_CACHE
+          --tag $CI_APP_IMAGE_WITH_TAG
+          --build-arg source_image=$CI_SOURCE_IMAGE_WITH_TAG
+          --target prod .
     - docker push $CI_APP_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
 
@@ -191,25 +200,64 @@ build-mainline:docker-nginx-image:
     - docker push $CI_NGINX_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
 
-qa:tests:
+prepare:composer-cache:
   extends:
-    - .job-policy-branches
-  stage: test
-  image: $CI_SOURCE_IMAGE_WITH_TAG
+    - .test-script
   cache:
-    key: "composer-cache"
-    paths:
-      - .composer-cache/
-  before_script:
-    - composer config -g cache-dir "$(pwd)/.composer-cache"
+    <<: *composer-cache
+    policy: pull-push
   script:
-    - cd /srv
-    - composer install --prefer-dist --no-scripts --no-interaction
+    - echo Ok
+
+qa:php-cs-fixer:
+  extends:
+    - .test-script
+  needs:
+    - job: prepare:composer-cache
+  script:
+    - vendor/bin/php-cs-fixer fix -v --dry-run --format=gitlab --diff --using-cache=no > build/php-cs-fixer.json
+  artifacts:
+    reports:
+      codequality: build/php-cs-fixer.json
+
+qa:phpstan:
+  extends:
+    - .test-script
+  needs:
+    - job: prepare:composer-cache
+  script:
+    - vendor/bin/phpstan analyse --error-format=gitlab > build/phpstan-codequality.json
+  artifacts:
+    reports:
+      codequality: build/phpstan-codequality.json
+
+qa:rector:
+  extends:
+    - .test-script
+  needs:
+    - job: prepare:composer-cache
+  script:
+    - vendor/bin/rector --dry-run || true
+    - vendor/bin/rector --dry-run --output-format=gitlab > build/rector-codequality.json
+  artifacts:
+    reports:
+      codequality: build/rector-codequality.json
+
+qa:phpunit:
+  extends:
+    - .test-script
+  needs:
+    - job: prepare:composer-cache
+  script:
     - cp .env.test .env.local
-    - vendor/bin/phpstan
-    - vendor/bin/rector
-    - vendor/bin/phpunit
-  dependencies: []
+    - vendor/bin/phpunit --colors=never --coverage-text --coverage-cobertura=build/phpunit-coverage.xml --log-junit build/phpunit-junit.xml  --do-not-cache-result
+  artifacts:
+    reports:
+      junit: build/phpunit-junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: build/phpunit-coverage.xml
+  coverage: /^\s*Lines:\s*(\d+\.\d+)\%/
 
 deploy-mainline:secure-copy:
   extends:
@@ -219,7 +267,14 @@ deploy-mainline:secure-copy:
   needs:
     - job: build-mainline:docker-compose
       artifacts: true
-    - job: qa:tests
+    - job: qa:php-cs-fixer
+      artifacts: false
+    - job: qa:phpstan
+      artifacts: false
+    - job: qa:rector
+      artifacts: false
+    - job: qa:phpunit
+      artifacts: false
   script:
     - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
       rm -rf '"$DEPLOY_DIRECTORY"'_tmp ;

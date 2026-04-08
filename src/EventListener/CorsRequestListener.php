@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\EventSubscriber;
+namespace App\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 /**
  * @see https://qna.habr.com/q/684514
  */
-class CorsRequestSubscriber implements EventSubscriberInterface
+class CorsRequestListener implements EventSubscriberInterface
 {
     public static function getSubscribedEvents(): array
     {

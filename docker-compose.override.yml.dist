@@ -6,3 +6,5 @@ services:
         volumes:
             - .:/srv
             #- /srv/var
+#    mysql:
+#        image: mysql:8.0-oracle

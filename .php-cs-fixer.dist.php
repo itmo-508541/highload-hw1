@@ -3,24 +3,24 @@
 declare(strict_types=1);
 
 $rules = [
-    '@PHP80Migration' => true,
-    '@PHP80Migration:risky' => true,
-    '@PHPUnit84Migration:risky' => true,
+    '@PHP8x0Migration' => true,
+    '@PHP8x0Migration:risky' => true,
+    '@PHPUnit8x4Migration:risky' => true,
     '@PSR12' => true,
     '@PSR12:risky' => true,
     '@Symfony' => true,
     '@Symfony:risky' => true,
-    'array_syntax' => ['syntax' => 'short'],//
+    'array_syntax' => ['syntax' => 'short'],
     'combine_consecutive_issets' => true,
     'combine_consecutive_unsets' => true,
-    'compact_nullable_typehint' => true,//
+    'compact_nullable_type_declaration' => true,
     'global_namespace_import' => ['import_classes' => false, 'import_constants' => false, 'import_functions' => false],
     'list_syntax' => ['syntax' => 'short'],
-    'logical_operators' => true, //
+    'logical_operators' => true,
     'method_argument_space' => ['on_multiline' => 'ensure_fully_multiline'],
     'multiline_whitespace_before_semicolons' => ['strategy' => 'no_multi_line'],
-    'no_extra_blank_lines' => true, //
-    'no_php4_constructor' => true, //
+    'no_extra_blank_lines' => true,
+    'no_php4_constructor' => true,
     'no_superfluous_elseif' => true,
     'no_superfluous_phpdoc_tags' => ['allow_mixed' => true, 'remove_inheritdoc' => true],
     'no_useless_else' => true,

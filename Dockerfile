@@ -1,8 +1,8 @@
 ARG source_image=scratch
 FROM debian:trixie-slim AS php
 
-ENV TERM linux
-ENV DEBIAN_FRONTEND noninteractive
+ENV TERM=linux
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -29,7 +29,6 @@ RUN apt-get update \
 
 WORKDIR /srv
 COPY docker/php /etc/php/8.4/
-COPY --from=composer/composer:latest-bin /composer /usr/local/bin/composer
 EXPOSE 9000
 CMD ["php-fpm8.4"]
 
@@ -42,6 +41,7 @@ FROM ${source_image} AS source_image
 FROM php AS dev
 
 COPY docker/php-dev /etc/php/8.4/
+COPY --from=composer/composer:latest-bin /composer /usr/local/bin/composer
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \
@@ -51,7 +51,7 @@ RUN apt-get update -y \
 
 
 # Используется для подготовки кода и ассетов для prod образа
-FROM php AS source
+FROM dev AS source
 
 ENV APP_ENV="prod"
 COPY *.json *.lock ./

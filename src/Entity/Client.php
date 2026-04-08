@@ -7,151 +7,67 @@ namespace App\Entity;
 use App\Repository\ClientRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation as JMS;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[UniqueEntity(fields: ['username'], errorPath: 'username', ignoreNull: false)]
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
-#[ORM\Index(name: 'confirmation_token', columns: ['confirmation_token'])]
-#[JMS\ExclusionPolicy('all')]
-class Client implements UserInterface, PasswordAuthenticatedUserInterface
+#[ORM\Table(
+    uniqueConstraints: [
+        new ORM\UniqueConstraint(name: 'apiKey', columns: ['apiKey']),
+    ],
+)]
+#[UniqueEntity(fields: ['apiKey'], message: 'This apiKey is already in use.')]
+class Client extends UserProvider
 {
-    public const ROLE = 'ROLE_API';
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
-    // @phpstan-ignore property.unusedType
-    private ?int $id = null;
+    protected ?int $id = null;
 
-    #[Assert\NotBlank]
-    #[Assert\Email]
-    #[ORM\Column(type: Types::STRING, length: 180, unique: true)]
-    #[JMS\Expose]
-    private string $username;
+    #[ORM\Column(type: Types::JSON)]
+    protected array $roles = [self::ROLE_USER, self::ROLE_API];
 
-    #[ORM\Column(type: Types::STRING)]
-    private string $password;
+    #[ORM\Column(type: Types::STRING, length: 48, nullable: true)]
+    #[Assert\Length(max: 48)]
+    protected ?string $clientAccount = null;
 
-    #[Assert\NotBlank]
-    #[ORM\Column(type: Types::STRING, length: 64)]
-    #[JMS\Expose]
-    private ?string $firstname = null;
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    protected ?string $apiKey = null;
 
-    #[Assert\NotBlank]
-    #[ORM\Column(type: Types::STRING, length: 64)]
-    #[JMS\Expose]
-    private ?string $lastname = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private \DateTime $createdAt;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTime $confirmedAt = null;
-
-    #[ORM\Column(type: Types::STRING, length: 64, nullable: true)]
-    private ?string $confirmationToken = null;
-
-    public function __construct()
-    {
-        $this->createdAt = new \DateTime('now');
-    }
-
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    /** @internal used only inside sonata admin */
-    public function getToken(): ?string
+    public function getClientAccount(): ?string
+    {
+        return $this->clientAccount;
+    }
+
+    public function setClientAccount(?string $clientAccount): void
+    {
+        $this->clientAccount = $clientAccount;
+    }
+
+    public function getApiKey(): ?string
+    {
+        return $this->apiKey;
+    }
+
+    public function setApiKey(?string $apiKey): void
+    {
+        $this->apiKey = $apiKey;
+    }
+
+    /** @internal used only inside sonata admin, should not be used outside, always null */
+    public function getPermanentAccessToken(): ?string
     {
         return null;
     }
 
-    public function getUsername(): string
-    {
-        return $this->getUserIdentifier();
-    }
-
-    public function getUserIdentifier(): string
-    {
-        return $this->username;
-    }
-
-    public function setUsername(string $username): void
-    {
-        $this->username = $username;
-    }
-
-    public function getPassword(): ?string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): void
-    {
-        $this->password = $password;
-    }
-
-    public function getFirstname(): ?string
-    {
-        return $this->firstname;
-    }
-
-    public function setFirstname(string $firstname): void
-    {
-        $this->firstname = $firstname;
-    }
-
-    public function getLastname(): ?string
-    {
-        return $this->lastname;
-    }
-
-    public function setLastname(string $lastname): void
-    {
-        $this->lastname = $lastname;
-    }
-
-    public function getCreatedAt(): \DateTime
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTime $createdAt): void
-    {
-        $this->createdAt = $createdAt;
-    }
-
-    public function getConfirmedAt(): ?\DateTime
-    {
-        return $this->confirmedAt;
-    }
-
-    public function setConfirmedAt(?\DateTime $confirmedAt): void
-    {
-        $this->confirmedAt = $confirmedAt;
-    }
-
-    public function getConfirmationToken(): ?string
-    {
-        return $this->confirmationToken;
-    }
-
-    public function setConfirmationToken(?string $confirmationToken): void
-    {
-        $this->confirmationToken = $confirmationToken;
-    }
-
-    public function getRoles(): array
-    {
-        return [self::ROLE];
-    }
-
-    public function getSalt(): ?string
+    /** @internal used only inside sonata admin, should not be used outside, always null */
+    public function getTemporaryAccessToken(): ?string
     {
         return null;
     }

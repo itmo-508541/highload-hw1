@@ -1,4 +1,4 @@
-# See https://github.com/lexik/LexikJWTAuthenticationBundle/blob/HEAD/Resources/doc/1-configuration-reference.md
+# See https://github.com/lexik/LexikJWTAuthenticationBundle/blob/3.x/Resources/doc/1-configuration-reference.rst
 #
 # openssl genrsa -out config/jwt/private.prod.pem -aes256 4096
 # openssl rsa -pubout -in config/jwt/private.prod.pem -out config/jwt/public.prod.pem

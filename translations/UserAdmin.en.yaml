@@ -4,7 +4,7 @@ list:
   label_id: Id
   label_username: Username
   label_roles_as_string: Roles
-  label__action: Actions
+  label__actions: Actions
 
 filter:
   label_username: Username

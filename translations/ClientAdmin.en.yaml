@@ -2,13 +2,14 @@ ClientAdmin: Clients
 
 list:
   label_id: Id
-  label_username: Email
-  label_firstname: Firstname
-  label_lastname: Lastname
-  label__action: Actions
+  label_username: API Username
+  label_roles_as_string: Roles
+  label_client_account: Geotab Database
+  label__actions: Actions
 
 filter:
-  label_username: Email
+  label_username: API Username
+  label_client_account: Geotab Database
 
 breadcrumb:
   link_client_list: Clients
@@ -16,10 +17,21 @@ breadcrumb:
 show:
   group_client_admin: Client
   label_id: Id
-  label_username: Email
-  label_firstname: Firstname
-  label_lastname: Lastname
-  label_created_at: Created at
-  label_confirmation_token: Confirmation token
-  label_confirmed_at: Confirmed at
-  label_token: JWT token
+  label_username: API Username
+  label_client_account: Geotab Database
+  label_api_key: X-Api-Key
+  label_temporary_access_token: Temporary Access Token
+  label_permanent_access_token: Permanent Access Token
+  label_roles_as_string: Roles
+
+form:
+  group_client_admin: Client
+  label_username: API Username
+  label_api_key: X-Api-Key
+  label_client_account: Geotab Database
+  label_plain_password: Plain password
+  label_roles: Roles
+
+help:
+  form:
+    api_key: type random symbols

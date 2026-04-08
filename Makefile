@@ -1,9 +1,12 @@
 .DEFAULT_GOAL := init
 
-.PHONY: init deps test cs phpstan rector
+.PHONY: init up deps test cs phpstan rector qa
 
-init:
+init: up
 	docker compose exec php phing
+
+up:
+	docker compose up -d
 
 deps:
 	docker compose exec php composer install
@@ -19,3 +22,5 @@ phpstan:
 
 rector:
 	docker compose exec php vendor/bin/rector
+
+qa: up cs phpstan rector test
