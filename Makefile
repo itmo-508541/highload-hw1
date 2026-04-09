@@ -11,8 +11,9 @@ up:
 deps:
 	docker compose exec php composer install
 
+# Optional: ARGS="path/to/Test.php" (avoids GNU make treating extra CLI words as extra targets)
 test:
-	docker compose exec php vendor/bin/phpunit
+	docker compose exec -T php vendor/bin/phpunit $(if $(strip $(ARGS)),$(ARGS),$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)))
 
 cs:
 	docker compose exec php vendor/bin/php-cs-fixer fix
@@ -24,3 +25,8 @@ rector:
 	docker compose exec php vendor/bin/rector
 
 qa: up cs phpstan rector test
+
+# Extra paths after `make test` are forwarded to PHPUnit (GNU make also lists them as targets; harmless).
+# Alternatively: make test ARGS="tests/EventListener/CorsRequestListenerTest.php"
+%:
+	@:

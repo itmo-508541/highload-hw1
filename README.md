@@ -63,6 +63,28 @@ make rector
 make test
 ```
 
+### PHPUnit
+
+Конфигурация: `phpunit.dist.xml`, bootstrap: `tests/bootstrap.php`. Запуск из корня репозитория (контейнер `php` должен быть запущен, см. `make up`):
+
+```bash
+# весь набор тестов
+make test
+
+# один файл или каталог (пути относительно корня проекта)
+make test tests/EventListener/CorsRequestListenerTest.php
+
+# то же через переменную ARGS (удобно, если не хотите передавать путь второй «целью» make)
+make test ARGS="tests/EventListener/CorsRequestListenerTest.php"
+```
+
+Прямой вызов без Makefile:
+
+```bash
+docker compose exec php vendor/bin/phpunit
+docker compose exec php vendor/bin/phpunit tests/EventListener/CorsRequestListenerTest.php
+```
+
 ## Переменные окружения и конфигурация
 
 Порядок загрузки env в Symfony:
