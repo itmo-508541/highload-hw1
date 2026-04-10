@@ -27,7 +27,7 @@ final class CorsRequestListenerTest extends TestCase
     public function testOnRequestEventSetsResponseForApiOptionsRequest(): void
     {
         $listener = new CorsRequestListener();
-        $event = $this->createRequestEvent(Request::create('/api/foo', 'OPTIONS'));
+        $event = $this->createRequestEvent(Request::create('/api/foo', Request::METHOD_OPTIONS));
 
         $listener->onRequestEvent($event);
 
@@ -38,7 +38,7 @@ final class CorsRequestListenerTest extends TestCase
     public function testOnRequestEventDoesNotSetResponseForNonApiOptions(): void
     {
         $listener = new CorsRequestListener();
-        $event = $this->createRequestEvent(Request::create('/other', 'OPTIONS'));
+        $event = $this->createRequestEvent(Request::create('/other', Request::METHOD_OPTIONS));
 
         $listener->onRequestEvent($event);
 
@@ -48,7 +48,7 @@ final class CorsRequestListenerTest extends TestCase
     public function testOnRequestEventDoesNotSetResponseForApiNonOptions(): void
     {
         $listener = new CorsRequestListener();
-        $event = $this->createRequestEvent(Request::create('/api/foo', 'GET'));
+        $event = $this->createRequestEvent(Request::create('/api/foo', Request::METHOD_GET));
 
         $listener->onRequestEvent($event);
 
@@ -58,7 +58,7 @@ final class CorsRequestListenerTest extends TestCase
     public function testOnRequestEventDoesNotSetResponseForApiPathWithoutTrailingSegment(): void
     {
         $listener = new CorsRequestListener();
-        $event = $this->createRequestEvent(Request::create('/api', 'OPTIONS'));
+        $event = $this->createRequestEvent(Request::create('/api', Request::METHOD_OPTIONS));
 
         $listener->onRequestEvent($event);
 
@@ -69,7 +69,7 @@ final class CorsRequestListenerTest extends TestCase
     {
         $listener = new CorsRequestListener();
         $response = new Response();
-        $event = $this->createResponseEvent(Request::create('/', 'GET'), $response);
+        $event = $this->createResponseEvent(Request::create('/', Request::METHOD_GET), $response);
 
         $listener->onResponseEvent($event);
 
@@ -80,7 +80,7 @@ final class CorsRequestListenerTest extends TestCase
     {
         $listener = new CorsRequestListener();
         $response = new Response();
-        $event = $this->createResponseEvent(Request::create('/api/resource', 'OPTIONS'), $response);
+        $event = $this->createResponseEvent(Request::create('/api/resource', Request::METHOD_OPTIONS), $response);
 
         $listener->onResponseEvent($event);
 
@@ -102,7 +102,7 @@ final class CorsRequestListenerTest extends TestCase
     {
         $listener = new CorsRequestListener();
         $response = new Response();
-        $event = $this->createResponseEvent(Request::create('/api/users', 'GET'), $response);
+        $event = $this->createResponseEvent(Request::create('/api/users', Request::METHOD_GET), $response);
 
         $listener->onResponseEvent($event);
 
@@ -115,15 +115,11 @@ final class CorsRequestListenerTest extends TestCase
 
     private function createRequestEvent(Request $request): RequestEvent
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
-
-        return new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
+        return new RequestEvent(self::createStub(HttpKernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST);
     }
 
     private function createResponseEvent(Request $request, Response $response): ResponseEvent
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
-
-        return new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
+        return new ResponseEvent(self::createStub(HttpKernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST, $response);
     }
 }
