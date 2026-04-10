@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Controller\Rest;
 
 use App\Entity\Client;
-use App\Traits\EntityManagerTrait;
-use App\Traits\UserPasswordHasherTrait;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Attribute as Nelmio;
@@ -21,9 +19,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_API', message: 'Access denied', statusCode: 403)]
 class UserController extends AbstractFOSRestController
 {
-    use EntityManagerTrait;
-    use UserPasswordHasherTrait;
-
     #[Rest\Get('/me')]
     #[OA\Get(
         description: 'Current client information',
