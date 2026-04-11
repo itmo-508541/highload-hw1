@@ -1,11 +1,11 @@
 # gitlab-auto-reviewer backend
 
-Проект backend на Symfony 8 / PHP 8.4 с локальной разработкой в Docker и деплоем через GitLab CI/CD.
+Проект backend на Symfony 7.4 / PHP 8.4 с локальной разработкой в Docker и деплоем через GitLab CI/CD.
 
 ## Технологический стек
 
 - PHP `8.4`
-- Symfony `8.0.*`
+- Symfony `7.4.*`
 - MySQL `8.0`
 - Docker / Docker Compose
 - Composer

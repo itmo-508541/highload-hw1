@@ -95,8 +95,8 @@ abstract class UserProvider implements UserInterface, PasswordAuthenticatedUserI
         return null;
     }
 
-    public function serialize(): void
+    #[\Deprecated(message: 'Symfony 7.3, erase credentials using the "__serialize()" method instead')]
+    public function eraseCredentials(): void
     {
-        $this->plainPassword = null;
     }
 }
