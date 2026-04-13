@@ -25,7 +25,7 @@ abstract class UserProviderAdmin extends AbstractAdmin
         /** @var User $object */
         $plainPassword = $object->getPlainPassword();
         if (!empty($plainPassword)) {
-            $password = $this->userPassworsHasher->hashPassword($object, $plainPassword);
+            $password = $this->userPasswordHasher->hashPassword($object, $plainPassword);
 
             $object->setPassword($password);
         }

@@ -9,11 +9,11 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 trait UserPasswordHasherTrait
 {
-    protected UserPasswordHasherInterface $userPassworsHasher;
+    protected UserPasswordHasherInterface $userPasswordHasher;
 
     #[Required]
     public function setUserPasswordHasher(UserPasswordHasherInterface $userPasswordHasher): void
     {
-        $this->userPassworsHasher = $userPasswordHasher;
+        $this->userPasswordHasher = $userPasswordHasher;
     }
 }

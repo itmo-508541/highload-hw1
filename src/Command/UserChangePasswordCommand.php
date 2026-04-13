@@ -40,7 +40,7 @@ class UserChangePasswordCommand extends Command
         $user = $repository->findOneBy([
             'username' => $username,
         ]);
-        $password = $this->userPassworsHasher->hashPassword($user, $input->getArgument('password'));
+        $password = $this->userPasswordHasher->hashPassword($user, $input->getArgument('password'));
 
         $user->setPassword($password);
 

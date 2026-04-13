@@ -37,7 +37,7 @@ class UserCreateCommand extends Command
         $user = new User();
 
         $username = $input->getArgument('username');
-        $password = $this->userPassworsHasher->hashPassword($user, $input->getArgument('password'));
+        $password = $this->userPasswordHasher->hashPassword($user, $input->getArgument('password'));
 
         $user->setUsername($username);
         $user->setPassword($password);

@@ -1,4 +1,4 @@
-# gitlab-auto-reviewer backend
+# Symfony backend
 
 Проект backend на Symfony 7.4 / PHP 8.4 с локальной разработкой в Docker и деплоем через GitLab CI/CD.
 
@@ -10,7 +10,7 @@
 - Docker / Docker Compose
 - Composer
 - Phing (инициализация, подготовка storage, миграции, deploy-команды)
-- QA-инструменты: PHP CS Fixer, PHPStan, Rector, PHPUnit
+- QA-инструменты: PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat
 
 ## Принципы работы backend-разработчика
 
@@ -20,8 +20,11 @@
   - `docker compose exec php composer update <пакет>`
   - либо цель Makefile: `make deps` (внутри вызывает `composer install` в контейнере `php`).
 - **Владелец файлов после Composer в контейнере:** команды внутри контейнера часто выполняются от `root`, поэтому новые или обновлённые файлы и каталоги могут оказаться с владельцем `root` на хосте. Это касается в том числе `vendor/` и каталога `config/`: рецепты **Symfony Flex** подтягивают и обновляют конфигурационные файлы через плагин Composer, и они появляются там же. Тогда IDE и ваш пользователь не смогут их нормально менять. Исправление делается **вручную на хосте** через `sudo`, например: `sudo chown -R "$USER:$USER" vendor/ config/` (подставьте нужные пути; будьте осторожны с рекурсией по корню проекта).
+- Файлы репозитория лежат в директории /srv/ внутри контейнера
+- Структура таблиц и индексы создаются автоматически, создавать новые миграции для этого не нужно
+  - миграции Doctrine в нашем проекте используются для добавления или изменения данных
 - Соблюдайте единый стиль кода (`.editorconfig`, `.php-cs-fixer.dist.php`) и не обходите проверки качества.
-- Перед merge обязательно прогоняйте QA-набор (`php-cs-fixer`, `phpstan`, `rector`, `phpunit`).
+- Перед merge обязательно прогоняйте QA-набор (`php-cs-fixer`, `phpstan`, `rector`, `phpunit`, `behat`).
 - Любые изменения схемы БД сопровождайте корректным циклом миграций и проверкой на локальном окружении.
 - Не храните production-секреты в репозитории и в коммитах. Для production используются CI-переменные и серверные env-файлы.
 
@@ -74,6 +77,7 @@ make cs
 make phpstan
 make rector
 make test
+make behat
 ```
 
 ### PHPUnit
@@ -96,6 +100,28 @@ make test ARGS="tests/EventListener/CorsRequestListenerTest.php"
 ```bash
 docker compose exec php vendor/bin/phpunit
 docker compose exec php vendor/bin/phpunit tests/EventListener/CorsRequestListenerTest.php
+```
+
+### Behat
+
+Конфигурация: `behat.yml.dist`, bootstrap: `tests/bootstrap.php`. При необходимости локальных правок скопируйте `behat.yml.dist` в `behat.yml` (файл не коммитится). Запуск из корня репозитория (контейнер `php` должен быть запущен, см. `make up`):
+
+```bash
+# весь набор сценариев
+make behat
+
+# один feature-файл (пути относительно корня проекта)
+make behat features/demo.feature
+
+# то же через переменную ARGS (удобно, если не хотите передавать путь второй «целью» make)
+make behat ARGS="features/demo.feature"
+```
+
+Прямой вызов без Makefile:
+
+```bash
+docker compose exec php vendor/bin/behat
+docker compose exec php vendor/bin/behat features/demo.feature
 ```
 
 ## Переменные окружения и конфигурация
@@ -122,6 +148,7 @@ docker compose exec php vendor/bin/phpunit tests/EventListener/CorsRequestListen
   - `qa:phpstan`
   - `qa:rector`
   - `qa:phpunit`
+  - `qa:behat`
 - При падении любой QA-проверки деплой не начинается.
 
 ## Порядок деплоя на удаленный сервер
@@ -161,6 +188,7 @@ Job `prepare-mainline:env`:
 - `qa:phpstan`
 - `qa:rector`
 - `qa:phpunit`
+- `qa:behat`
 
 ### 4) Копирование release на удаленный сервер
 
@@ -178,7 +206,7 @@ Job `deploy-mainline:secure-copy`:
 - `docker compose exec -T spare phing storage-prepare database-deploy -Dsymfony.env=prod`
 - `docker compose up -d --force-recreate --no-deps php`
 
-Смысл `spare`: прогон миграций и подготовка storage до переключения основного `php` сервиса.
+Смысл `spare`: прогон миграций и сокращение downtime при деплое.
 
 ### 6) Перезапуск web-уровня
 

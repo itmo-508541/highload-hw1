@@ -259,6 +259,19 @@ qa:phpunit:
         path: build/phpunit-coverage.xml
   coverage: /^\s*Lines:\s*(\d+\.\d+)\%/
 
+qa:behat:
+  extends:
+    - .test-script
+  needs:
+    - job: prepare:composer-cache
+  script:
+    - cp .env.test .env.local
+    - vendor/bin/behat --format=junit --out=build/behat-junit --format=pretty --out=build/progress.txt --no-colors
+    - cat build/progress.txt
+  artifacts:
+    reports:
+      junit: build/behat-junit/*.xml
+
 deploy-mainline:secure-copy:
   extends:
     - .deploy-script-ssh
@@ -274,6 +287,8 @@ deploy-mainline:secure-copy:
     - job: qa:rector
       artifacts: false
     - job: qa:phpunit
+      artifacts: false
+    - job: qa:behat
       artifacts: false
   script:
     - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
