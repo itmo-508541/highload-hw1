@@ -50,8 +50,10 @@
     </target>
 
     <target name="storage-prepare">
+    <!--
         <mkdir dir="${project.storage.dir}/upload" />
         <chown file="${project.storage.dir}/upload" user="www-data" group="www-data" failonerror="false" />
+    -->
     </target>
 
     <target name="database-ready">

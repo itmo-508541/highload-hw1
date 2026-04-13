@@ -13,7 +13,7 @@ services:
             - mysql
         volumes:
             - ./public:/srv/public
-            - ./storage/upload:/srv/storage/upload
+            #- ./storage/upload:/srv/storage/upload
 
     php:
         build:
