@@ -1,0 +1,30 @@
+---
+description: Общие правила разработки (стек, Docker и команды PHP только в контейнере, приоритет make, обновление документации).
+alwaysApply: true
+---
+
+## Технологический стек
+
+Backend на Symfony 7.4 / PHP 8.4, локальная разработка в Docker, деплой через GitLab CI/CD.
+
+- PHP `8.4`
+- Symfony `7.4.*`
+- MySQL `8.0`
+- Docker / Docker Compose
+- Composer
+- Phing
+- QA-инструменты: PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat
+
+## Локальное выполнение команд (Docker)
+
+- Команды, затрагивающие PHP-код и PHP-окружение (Symfony Console, Composer, PHPUnit, Behat, Phing, PHP CS Fixer, PHPStan, Rector и аналоги), запускай **только** внутри сервиса **`php`**. Контейнеры должны быть подняты (см. `make up` в `README.md`).
+- **Сначала** подбирай цель **`make`** и/или следуй инструкциям в **`README.md`**. Не запускай PHP-бинарники и Composer **на хосте** из корня репозитория.
+- Если подходящей цели в Makefile нет и в README нет готовой команды — используй **`docker compose exec php <команда>`** из корня проекта (как в примерах в `README.md`).
+- Подробности, примеры и нюансы (в т.ч. владелец файлов после Composer) — в `README.md`.
+
+## Правила проекта
+
+- Используй skill `update-rules` для следующих действий:
+  - Занеси изменения в `CHANGELOG.md` в раздел Unreleased и проверь актуальность
+    `.cursor/rules/general-rules.mdc` после изменений в проекте
+    - **Перед** тем как описывать новую работу, **прочитай** существующие записи проекта в `CHANGELOG.md`
