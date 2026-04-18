@@ -9,6 +9,7 @@
 
 ### Added
 
+- `PHPSTORM.md`: краткая интеграция PhpStorm и агента Cursor (ACP), ссылки на [документацию Cursor](https://cursor.com/docs/integrations/jetbrains), CLI и миграцию с JetBrains.
 - `ABOUT.md`: двухуровневое описание — префикс **«Шаблон:»** для рамок репозитория-шаблона и **секции без префикса** с заглушками под продукт; HTML-комментарий для сопровождающих шаблон.
 - `Makefile`: цель `make owner` — выравнивание владельца файлов на хосте под текущего пользователя после работы в контейнере от root (см. комментарий в `Makefile`).
 - Cursor skill `.cursor/skills/phpunit-tests/SKILL.md`: работа с PHPUnit в Docker (`make test`), согласование с `phpunit.dist.xml` и `tests/`.
