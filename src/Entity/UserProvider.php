@@ -6,11 +6,11 @@ namespace App\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation as JMS;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\Ignore;
 
-#[JMS\ExclusionPolicy('all')]
 abstract class UserProvider implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public const string ROLE_USER = 'ROLE_USER';
@@ -18,15 +18,17 @@ abstract class UserProvider implements UserInterface, PasswordAuthenticatedUserI
     public const string ROLE_API = 'ROLE_API';
 
     #[ORM\Column(type: Types::STRING, length: 180, unique: true)]
-    #[JMS\Expose]
+    #[Groups(['api'])]
     protected string $username = '';
 
     #[ORM\Column(type: Types::JSON)]
     protected array $roles = [];
 
     #[ORM\Column(type: Types::STRING)]
+    #[Ignore]
     protected string $password = '';
 
+    #[Ignore]
     protected ?string $plainPassword = '';
 
     public function getUsername(): string

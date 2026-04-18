@@ -7,7 +7,7 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation as JMS;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User extends UserProvider
@@ -15,7 +15,7 @@ class User extends UserProvider
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
-    #[JMS\Expose]
+    #[Groups(['api'])]
     protected ?int $id = null;
 
     public function getId(): ?int

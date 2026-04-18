@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Model\Rest;
 
-use JMS\Serializer\Annotation as JMS;
+use Symfony\Component\Serializer\Attribute\Groups;
 
-#[JMS\ExclusionPolicy('all')]
 class AuthToken
 {
     public function __construct(
-        #[JMS\Expose]
-        #[JMS\Type(name: 'string')]
+        #[Groups(['api'])]
         private readonly string $token,
     ) {
     }

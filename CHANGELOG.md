@@ -11,6 +11,7 @@
 
 ### Added
 
+- `tests/Serialization/RestApiSerializationKernelTest.php`: интеграционные тесты JSON-формы REST-объектов через `serializer` и группу `api` (согласовано с FOSRest `fos_rest.serializer.groups`).
 - Подготовка окружения для Behat с доступом к MySQL: цель `make behat` перед `vendor/bin/behat` вызывает Phing с `-Dsymfony.env=test` и `-Denv.local.file=.env.test` (согласовано с job `qa:behat` в GitLab CI).
 - `build.xml`: свойства `env.file` и `env.local.file`, чтобы подставлять нужные файлы окружения при загрузке переменных для Phing/Docker Compose.
 - `.env.test`: `ENV_database_name=db_name_test` для имени тестовой БД в связке с Compose/CI.
@@ -19,6 +20,8 @@
 
 ### Changed
 
+- REST-сериализация переведена на **Symfony Serializer**: `fos_rest.service.serializer: fos_rest.serializer.symfony`, `fos_rest.serializer.groups: ['api']`; `framework.serializer.enabled: true`. JMS-атрибуты на сущностях и `App\Model\Rest\*` заменены на `Symfony\Component\Serializer\Attribute` (`Groups`, `Ignore`).
+- `composer.json`: зависимость `jms/serializer-bundle` удалена; добавлена явная зависимость `symfony/serializer` (`7.4.*`).
 - `.cursor/rules/php-map-and-test.mdc`, `.cursor/rules/php-new-implementation-testing.mdc`: тексты правил переведены на русский язык (включая поле `description` в заголовках YAML); во втором правиле ссылка на парное правило приведена к фактическому имени файла `php-map-and-test.mdc`; добавлена отсылка к скиллу `.cursor/skills/phpunit-tests/SKILL.md` для раскладки тестов и запуска в Docker.
 - `.cursor/rules/php-map-and-test.mdc`: для крупных многошаговых задач добавлена отсылка к скиллу `.cursor/skills/subagent-workflow/SKILL.md` (оркестрация planner → worker → reviewer → documenter, HITL).
 - `config/packages/test/doctrine.yaml`: `dbname_suffix` без литерала `_test` — только `%env(default::TEST_TOKEN)%` (имя тестовой БД задаётся через окружение).

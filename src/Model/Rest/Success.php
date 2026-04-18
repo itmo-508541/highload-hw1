@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Model\Rest;
 
-use JMS\Serializer\Annotation as JMS;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 class Success
 {
     public function __construct(
-        #[JMS\Type(name: 'string')]
+        #[Groups(['api'])]
         private readonly string $message = '',
     ) {
     }

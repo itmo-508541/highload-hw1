@@ -13,7 +13,6 @@
         "doctrine/orm": "^3.6",
         "friendsofsymfony/rest-bundle": "^3.3",
         "gedmo/doctrine-extensions": "^3.7",
-        "jms/serializer-bundle": "^5",
         "lexik/jwt-authentication-bundle": "^3.2",
         "nelmio/api-doc-bundle": "^5",
         "sonata-project/doctrine-orm-admin-bundle": "^4.0",
@@ -22,6 +21,7 @@
         "symfony/flex": "^2",
         "symfony/framework-bundle": "^7.4",
         "symfony/runtime": "^7.4",
+        "symfony/serializer": "7.4.*",
         "symfony/uid": "^7.4",
         "symfony/yaml": "^7.4"
     },

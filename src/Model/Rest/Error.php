@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Model\Rest;
 
-use JMS\Serializer\Annotation as JMS;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 abstract class Error
 {
-    #[JMS\Type(name: 'string')]
+    #[Groups(['api'])]
     public string $code;
 
-    #[JMS\Type(name: 'string')]
+    #[Groups(['api'])]
     public string $message;
 }

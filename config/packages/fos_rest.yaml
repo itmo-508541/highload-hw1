@@ -2,8 +2,12 @@
 fos_rest:
     #    allowed_methods_listener:  true
     #    routing_loader: true
+    # Use Symfony Serializer even if JMSSerializerBundle is installed (see SerializerConfigurationPass).
+    service:
+        serializer: fos_rest.serializer.symfony
     serializer:
         serialize_null: true
+        groups: ['api']
     param_fetcher_listener:
         enabled: true
     body_listener:
