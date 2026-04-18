@@ -7,6 +7,10 @@
 
 ## [Unreleased]
 
+<!-- Изменения в шаблоне Symfony backend: -->
+
+## [0.0.1-aplha]
+
 ### Added
 
 - `PHPSTORM.md`: краткая интеграция PhpStorm и агента Cursor (ACP), ссылки на [документацию Cursor](https://cursor.com/docs/integrations/jetbrains), CLI и миграцию с JetBrains.
