@@ -21,6 +21,7 @@ test:
 
 # Optional: ARGS="path/to/feature.feature" (avoids GNU make treating extra CLI words as extra targets)
 behat:
+	docker compose exec php phing -Dsymfony.env=test -Denv.local.file=.env.test
 	docker compose exec php vendor/bin/behat $(if $(strip $(ARGS)),$(ARGS),$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)))
 
 cs:

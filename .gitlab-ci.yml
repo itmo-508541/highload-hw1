@@ -249,7 +249,6 @@ qa:phpunit:
   needs:
     - job: prepare:composer-cache
   script:
-    - cp .env.test .env.local
     - vendor/bin/phpunit --colors=never --coverage-text --coverage-cobertura=build/phpunit-coverage.xml --log-junit build/phpunit-junit.xml  --do-not-cache-result
   artifacts:
     reports:
@@ -264,8 +263,13 @@ qa:behat:
     - .test-script
   needs:
     - job: prepare:composer-cache
+  services:
+    - name: mysql:8.0-debian
+      alias: mysql
+      variables:
+        MYSQL_ROOT_PASSWORD: "root"
   script:
-    - cp .env.test .env.local
+    - phing -Dsymfony.env=test -Denv.local.file=.env.test
     - vendor/bin/behat --format=junit --out=build/behat-junit --format=pretty --out=build/progress.txt --no-colors
     - cat build/progress.txt
   artifacts:

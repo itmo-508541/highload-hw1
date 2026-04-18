@@ -2,9 +2,11 @@
 <project name="Docker Symfony App" default="init" basedir=".">
     <property name="symfony.console" value="bin/console" />
     <property name="symfony.env" value="dev" />
+    <property name="env.file" value=".env" />
+    <property name="env.local.file" value=".env.local" />
     <property name="project.storage.dir" value="${project.basedir}/storage" />
-    <property file=".env" prefix="docker-compose" />
-    <property file=".env.local" prefix="docker-compose" override="true" />
+    <property file="${env.file}" prefix="docker-compose" />
+    <property file="${env.local.file}" prefix="docker-compose" override="true" />
 
     <target name="init" depends="database-deploy,storage-prepare">
         <echo message="${phing.project.name} Init - OK" />
