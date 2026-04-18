@@ -19,6 +19,8 @@
 
 ### Changed
 
+- `.cursor/rules/php-map-and-test.mdc`, `.cursor/rules/php-new-implementation-testing.mdc`: тексты правил переведены на русский язык (включая поле `description` в заголовках YAML); во втором правиле ссылка на парное правило приведена к фактическому имени файла `php-map-and-test.mdc`; добавлена отсылка к скиллу `.cursor/skills/phpunit-tests/SKILL.md` для раскладки тестов и запуска в Docker.
+- `.cursor/rules/php-map-and-test.mdc`: для крупных многошаговых задач добавлена отсылка к скиллу `.cursor/skills/subagent-workflow/SKILL.md` (оркестрация planner → worker → reviewer → documenter, HITL).
 - `config/packages/test/doctrine.yaml`: `dbname_suffix` без литерала `_test` — только `%env(default::TEST_TOKEN)%` (имя тестовой БД задаётся через окружение).
 - `tests/bootstrap.php`: явно `APP_ENV=test`, загрузка `.env` через `Dotenv::loadEnv(..., 'test', 'test')`, без подключения `config/bootstrap.php`.
 
