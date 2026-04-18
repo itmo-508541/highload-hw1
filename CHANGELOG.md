@@ -9,6 +9,21 @@
 
 <!-- Изменения в шаблоне Symfony backend: -->
 
+### Added
+
+- Подготовка окружения для Behat с доступом к MySQL: цель `make behat` перед `vendor/bin/behat` вызывает Phing с `-Dsymfony.env=test` и `-Denv.local.file=.env.test` (согласовано с job `qa:behat` в GitLab CI).
+- `build.xml`: свойства `env.file` и `env.local.file`, чтобы подставлять нужные файлы окружения при загрузке переменных для Phing/Docker Compose.
+- `.env.test`: `ENV_database_name=db_name_test` для имени тестовой БД в связке с Compose/CI.
+- GitLab CI (`qa:behat`): сервис `mysql:8.0-debian` (alias `mysql`, `MYSQL_ROOT_PASSWORD`), подготовка через `phing` вместо копирования `.env.test` в `.env.local`.
+- `src/Controller/IndexController.php`: маршрут `/` с пустым ответом — базовый HTTP-эндпоинт для сценариев.
+
+### Changed
+
+- `config/packages/test/doctrine.yaml`: `dbname_suffix` без литерала `_test` — только `%env(default::TEST_TOKEN)%` (имя тестовой БД задаётся через окружение).
+- `tests/bootstrap.php`: явно `APP_ENV=test`, загрузка `.env` через `Dotenv::loadEnv(..., 'test', 'test')`, без подключения `config/bootstrap.php`.
+
+**Затронутые пути:** `.env.test`, `.gitlab-ci.yml`, `Makefile`, `bin/console`, `build.xml`, `config/packages/test/doctrine.yaml`, `public/index.php`, `src/Controller/IndexController.php`, `tests/bootstrap.php`.
+
 ## [0.0.1-aplha]
 
 ### Added

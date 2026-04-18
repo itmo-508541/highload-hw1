@@ -101,7 +101,7 @@ docker compose exec php vendor/bin/phpunit tests/EventListener/CorsRequestListen
 
 ### Behat
 
-Конфигурация: `behat.yml.dist`, bootstrap: `tests/bootstrap.php`. При необходимости локальных правок скопируйте `behat.yml.dist` в `behat.yml` (файл не коммитится). Запуск из корня репозитория (контейнер `php` должен быть запущен, см. `make up`):
+Конфигурация: `behat.yml.dist`, bootstrap: `tests/bootstrap.php`. При необходимости локальных правок скопируйте `behat.yml.dist` в `behat.yml` (файл не коммитится). Цель `make behat` перед `vendor/bin/behat` запускает Phing с `-Dsymfony.env=test` и `-Denv.local.file=.env.test`, чтобы подготовить тестовое окружение и доступ к БД (как в CI). Запуск из корня репозитория (контейнер `php` должен быть запущен, см. `make up`):
 
 ```bash
 # весь набор сценариев
