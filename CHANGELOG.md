@@ -9,6 +9,8 @@
 
 <!-- Изменения в шаблоне Symfony backend: -->
 
+## [0.0.3-alpha]
+
 ### Changed
 
 - Always-applied правило `.cursor/rules/skills.mdc` переименовано в `.cursor/rules/run-php-in-docker.mdc` (содержимое без изменений); обновлены ссылки в `ABOUT.md`, `.cursor/agents/documenter.md`, `.cursor/rules/update-changelog.mdc`, `.cursor/skills/update-rules/SKILL.md`, `.cursor/skills/brainstorming-workflow/SKILL.md`; в `CHANGELOG.md` в списке **Затронутые пути** для `[0.0.2-alpha]` путь к этому правилу приведён к новому имени.
