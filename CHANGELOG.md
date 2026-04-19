@@ -9,6 +9,8 @@
 
 <!-- Изменения в шаблоне Symfony backend: -->
 
+## [0.0.2-alpha]
+
 ### Added
 
 - `.cursor/skills/run-php-in-docker/SKILL.md`: единый скилл для агента — запуск Symfony Console, Composer, PHPUnit, Behat, Phing, PHP CS Fixer, PHPStan, Rector только в контейнере `php`, приоритет `make` и `README.md`; подробности в `README.md`.
