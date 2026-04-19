@@ -9,6 +9,11 @@
 
 <!-- Изменения в шаблоне Symfony backend: -->
 
+### Changed
+
+- Always-applied правило `.cursor/rules/skills.mdc` переименовано в `.cursor/rules/run-php-in-docker.mdc` (содержимое без изменений); обновлены ссылки в `ABOUT.md`, `.cursor/agents/documenter.md`, `.cursor/rules/update-changelog.mdc`, `.cursor/skills/update-rules/SKILL.md`, `.cursor/skills/brainstorming-workflow/SKILL.md`; в `CHANGELOG.md` в списке **Затронутые пути** для `[0.0.2-alpha]` путь к этому правилу приведён к новому имени.
+- `.cursor/rules/update-changelog.mdc`: явные триггеры «когда применять», отсылка к `.cursor/skills/update-rules/SKILL.md`, `globs` на `src/`, `tests/`, `config/`, `migrations/`, `public/` для чащего подключения правила при правках кода.
+
 ## [0.0.2-alpha]
 
 ### Added
@@ -34,7 +39,7 @@
 - `config/packages/test/doctrine.yaml`: `dbname_suffix` без литерала `_test` — только `%env(default::TEST_TOKEN)%` (имя тестовой БД задаётся через окружение).
 - `tests/bootstrap.php`: явно `APP_ENV=test`, загрузка `.env` через `Dotenv::loadEnv(..., 'test', 'test')`, без подключения `config/bootstrap.php`.
 
-**Затронутые пути:** `ABOUT.md`, `.cursor/agents/documenter.md`, `.cursor/rules/skills.mdc`, `.cursor/skills/behat-tests/SKILL.md`, `.cursor/skills/phpunit-tests/SKILL.md`, `.cursor/skills/run-php-in-docker/SKILL.md`, `.cursor/skills/brainstorming-workflow/SKILL.md`, `.cursor/skills/update-rules/SKILL.md`, `.env.test`, `.gitlab-ci.yml`, `Makefile`, `bin/console`, `build.xml`, `config/packages/test/doctrine.yaml`, `public/index.php`, `src/Controller/IndexController.php`, `tests/bootstrap.php`.
+**Затронутые пути:** `ABOUT.md`, `.cursor/agents/documenter.md`, `.cursor/rules/run-php-in-docker.mdc`, `.cursor/skills/behat-tests/SKILL.md`, `.cursor/skills/phpunit-tests/SKILL.md`, `.cursor/skills/run-php-in-docker/SKILL.md`, `.cursor/skills/brainstorming-workflow/SKILL.md`, `.cursor/skills/update-rules/SKILL.md`, `.env.test`, `.gitlab-ci.yml`, `Makefile`, `bin/console`, `build.xml`, `config/packages/test/doctrine.yaml`, `public/index.php`, `src/Controller/IndexController.php`, `tests/bootstrap.php`.
 
 ## [0.0.1-aplha]
 

@@ -1,0 +1,21 @@
+---
+description: >
+  Запись в CHANGELOG.md (Unreleased) после правок в src/, tests/, config/, migrations/, public/:
+  поведение, API, инфраструктура, БД, тесты; перед коммитом или мерджем; skill update-rules.
+globs: "{src,tests,config,migrations,public}/**"
+alwaysApply: false
+---
+
+# История изменений (CHANGELOG)
+
+## Когда применять
+
+- Нетривиальные изменения поведения, контракта или публичного API, конфигурации, инфраструктуры, схемы БД или заметный рефакторинг.
+- Новые, изменённые или удалённые тесты; правки в `migrations/` или публичных ресурсах.
+- Перед коммитом, перед завершением задачи или PR, если в сессии менялись исходники или конфигурация выше.
+- Когда пользователь просит: «запиши в changelog», «обнови Unreleased», «подведи итоги изменений».
+
+## Действия
+
+1. **Открой и следуй** skill [`.cursor/skills/update-rules/SKILL.md`](.cursor/skills/update-rules/SKILL.md) — там формат Keep a Changelog, при необходимости проверка `README.md` и `.cursor/rules/run-php-in-docker.mdc`.
+2. **Перед** новой записью **прочитай** текущий [`CHANGELOG.md`](CHANGELOG.md), чтобы не дублировать формулировки и соблюдать стиль раздела **Unreleased**.
