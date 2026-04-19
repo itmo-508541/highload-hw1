@@ -12,6 +12,13 @@
 - Phing (инициализация, подготовка storage, миграции, deploy-команды)
 - QA-инструменты: PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat
 
+## Основные бандлы
+
+- [FOSRestBundle](https://github.com/FriendsOfSymfony/FOSRestBundle) — RESTful API для приложения
+- [LexikJWTAuthenticationBundle](https://github.com/lexik/LexikJWTAuthenticationBundle) — JSON Web Token аутентификация
+- [NelmioApiDocBundle](https://github.com/nelmio/NelmioApiDocBundle) — Документация для REST API в формате OpenAPI/Swagger
+- [SonataAdminBundle](https://github.com/sonata-project/SonataAdminBundle) — Административный CRUD-интерфейс для сущностей Doctrine
+
 ## Принципы работы backend-разработчика
 
 - Пишите и проверяйте код в Docker-контуре проекта, чтобы окружение совпадало у команды и в CI.
