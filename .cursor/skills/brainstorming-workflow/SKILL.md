@@ -1,5 +1,5 @@
 ---
-name: subagent-workflow
+name: brainstorming-workflow
 description: Описывает последовательность работы субагентов planner → worker → reviewer → documenter с Human in the loop (ворота согласования плана, рискованных шагов, спорных замечаний). Использовать при получении сложной задачи, требующей планирования, реализации, ревью и актуализации документации.
 ---
 

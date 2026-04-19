@@ -21,17 +21,18 @@
 
 ### Changed
 
-- `.cursor/rules/skills.mdc` (переименован из `general-rules.mdc`): always-applied правило сфокусировано на инструкции использовать проектные Cursor skills для типовых операций; перечень skills (`update-rules`, `run-php-in-docker`, …) и самоссылка при сопровождении — в этом файле; обновлены `.cursor/skills/update-rules/SKILL.md`, `.cursor/skills/subagent-workflow/SKILL.md`, `.cursor/agents/documenter.md`.
+- Скилл оркестрации planner → worker → reviewer → documenter: каталог `.cursor/skills/subagent-workflow/` переименован в `.cursor/skills/brainstorming-workflow/` (`name` во frontmatter `brainstorming-workflow`), ссылка в `.cursor/rules/php-map-and-test.mdc` обновлена.
+- `.cursor/rules/skills.mdc` (переименован из `general-rules.mdc`): always-applied правило сфокусировано на инструкции использовать проектные Cursor skills для типовых операций; перечень skills (`update-rules`, `run-php-in-docker`, …) и самоссылка при сопровождении — в этом файле; обновлены `.cursor/skills/update-rules/SKILL.md`, `.cursor/skills/brainstorming-workflow/SKILL.md`, `.cursor/agents/documenter.md`.
 - `ABOUT.md`: цель шаблона — подробности для людей в `README.md`, для агента — перечень skills в `.cursor/rules/skills.mdc` без дублирования README; комментарий сопровождения шаблона — с учётом `skills.mdc`.
 - `.cursor/skills/run-php-in-docker/SKILL.md`, `README.md`, `ABOUT.md`, `.cursor/skills/phpunit-tests/SKILL.md`, `.cursor/skills/behat-tests/SKILL.md`: скилл снова компактный со ссылками на `README.md` для подробностей; откат эксперимента с «только односторонними» ссылками на скилл; описание в YAML правила skills — краткое, как раньше.
 - REST-сериализация переведена на **Symfony Serializer**: `fos_rest.service.serializer: fos_rest.serializer.symfony`, `fos_rest.serializer.groups: ['api']`; `framework.serializer.enabled: true`. JMS-атрибуты на сущностях и `App\Model\Rest\*` заменены на `Symfony\Component\Serializer\Attribute` (`Groups`, `Ignore`).
 - `composer.json`: зависимость `jms/serializer-bundle` удалена; добавлена явная зависимость `symfony/serializer` (`7.4.*`).
 - `.cursor/rules/php-map-and-test.mdc`, `.cursor/rules/php-new-implementation-testing.mdc`: тексты правил переведены на русский язык (включая поле `description` в заголовках YAML); во втором правиле ссылка на парное правило приведена к фактическому имени файла `php-map-and-test.mdc`; добавлена отсылка к скиллу `.cursor/skills/phpunit-tests/SKILL.md` для раскладки тестов и запуска в Docker.
-- `.cursor/rules/php-map-and-test.mdc`: для крупных многошаговых задач добавлена отсылка к скиллу `.cursor/skills/subagent-workflow/SKILL.md` (оркестрация planner → worker → reviewer → documenter, HITL).
+- `.cursor/rules/php-map-and-test.mdc`: для крупных многошаговых задач добавлена отсылка к скиллу `.cursor/skills/brainstorming-workflow/SKILL.md` (оркестрация planner → worker → reviewer → documenter, HITL).
 - `config/packages/test/doctrine.yaml`: `dbname_suffix` без литерала `_test` — только `%env(default::TEST_TOKEN)%` (имя тестовой БД задаётся через окружение).
 - `tests/bootstrap.php`: явно `APP_ENV=test`, загрузка `.env` через `Dotenv::loadEnv(..., 'test', 'test')`, без подключения `config/bootstrap.php`.
 
-**Затронутые пути:** `ABOUT.md`, `.cursor/agents/documenter.md`, `.cursor/rules/skills.mdc`, `.cursor/skills/behat-tests/SKILL.md`, `.cursor/skills/phpunit-tests/SKILL.md`, `.cursor/skills/run-php-in-docker/SKILL.md`, `.cursor/skills/subagent-workflow/SKILL.md`, `.cursor/skills/update-rules/SKILL.md`, `.env.test`, `.gitlab-ci.yml`, `Makefile`, `bin/console`, `build.xml`, `config/packages/test/doctrine.yaml`, `public/index.php`, `src/Controller/IndexController.php`, `tests/bootstrap.php`.
+**Затронутые пути:** `ABOUT.md`, `.cursor/agents/documenter.md`, `.cursor/rules/skills.mdc`, `.cursor/skills/behat-tests/SKILL.md`, `.cursor/skills/phpunit-tests/SKILL.md`, `.cursor/skills/run-php-in-docker/SKILL.md`, `.cursor/skills/brainstorming-workflow/SKILL.md`, `.cursor/skills/update-rules/SKILL.md`, `.env.test`, `.gitlab-ci.yml`, `Makefile`, `bin/console`, `build.xml`, `config/packages/test/doctrine.yaml`, `public/index.php`, `src/Controller/IndexController.php`, `tests/bootstrap.php`.
 
 ## [0.0.1-aplha]
 
