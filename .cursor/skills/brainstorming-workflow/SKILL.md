@@ -70,7 +70,7 @@ worker (в т.ч. стопы на рискованных шагах) → reviewe
 
 - Вызывать **только** после одобрения reviewer (замечаний нет)
 - Читай агента и выполни скилл `@.cursor/skills/update-rules/SKILL.md`
-- Обновляет: `CHANGELOG.md`, `run-php-in-docker.mdc`, `README.md`
+- Обновляет: `CHANGELOG.md` и `run-php-in-docker.mdc`
 - Сообщает о завершении задачи
 
 ## Чеклист выполнения

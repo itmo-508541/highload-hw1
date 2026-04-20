@@ -1,6 +1,6 @@
 ---
 name: run-php-in-docker
-description: Запускает команды PHP и связанных инструментов только в Docker-сервисе `php` из корня репозитория: приоритет целей `make` и `README.md`, иначе `docker compose exec php`. Использовать при Symfony Console, Composer, PHPUnit, Behat, Phing, PHP CS Fixer, PHPStan, Rector, при упоминании контейнера `php`, `make up`, или когда агент собирается выполнить PHP/Composer на хосте.
+description: Запускает команды PHP и связанных инструментов только в Docker-сервисе `php` из корня репозитория: приоритет целей `make`, иначе `docker compose exec php`. Использовать при Symfony Console, Composer, PHPUnit, Behat, Phing, PHP CS Fixer, PHPStan, Rector, при упоминании контейнера `php`, `make up`, или когда агент собирается выполнить PHP/Composer на хосте.
 ---
 
 # Запуск PHP-команд в Docker
@@ -14,7 +14,7 @@ description: Запускает команды PHP и связанных инс�
 ## Порядок выбора команды
 
 1. Контейнеры подняты: `make up` (если не запущены).
-2. **Сначала** ищи цель в **`Makefile`** и инструкции в **`README.md`**.
+2. **Сначала** ищи цель в **`Makefile`**.
 3. Если готовой цели нет — **`docker compose exec php <команда>`** (из корня репозитория).
 
 Для неинтерактивного ввода в скриптах/CI к `exec` иногда добавляют `-T` (см. цель `test` в `Makefile`).
@@ -52,6 +52,4 @@ docker compose exec php vendor/bin/rector <args>
 ## Заметки
 
 - **Behat:** цель `make behat` перед `behat` вызывает Phing с тестовым окружением — для полного соответствия CI предпочитай её, а не голый `vendor/bin/behat`.
-- **Права на хосте:** команды в контейнере часто от `root`; новые файлы в смонтированных каталогах могут стать `root` на хосте — см. `make owner` и `README.md`.
-
-Подробности и примеры — в **`README.md`** (разделы про PHPUnit, Behat, быстрые команды).
+- **Права на хосте:** команды в контейнере часто от `root`; новые файлы в смонтированных каталогах могут стать `root` на хосте — см. `make owner`.

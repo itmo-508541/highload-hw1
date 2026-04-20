@@ -22,7 +22,7 @@ description: Описывает написание и обновление сц�
    - один feature: `make behat features/demo.feature` или `make behat ARGS="features/demo.feature"`
 5. Исправить падения до зелёного прогона, если это в рамках задачи.
 
-## Команды (эталон из README)
+## Команды
 
 ```bash
 make behat
@@ -43,7 +43,3 @@ docker compose exec php vendor/bin/behat features/demo.feature
 - [ ] Контекст подключён в конфиге Behat при добавлении нового класса
 - [ ] Выполнен `make behat` (или узкий прогон одного feature) в запущенном контейнере `php`
 - [ ] Пользователю при сдаче указаны пути к feature/контексту и результат прогона
-
-## Дополнительно
-
-Подробные сценарии и копирование `behat.yml` — в разделе «Behat» файла `README.md`.
