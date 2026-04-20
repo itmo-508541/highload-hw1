@@ -7,6 +7,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `.cursor/rules/vendor-class-lookup.mdc` (опциональное правило, `alwaysApply: false`): как агенту разрешать FQCN к файлам **без** поиска определений в интернете и **без** рекурсивного обхода `vendor/` — только по артефактам Composer (`autoload_classmap.php` / при пустоте `autoload_psr4.php`, при необходимости `composer.lock`). Учтены классы приложения: префиксы `App\` / `App\Tests\` и `composer.json` (`autoload` / `autoload-dev`, корни `src/`, `tests/`), пути в classmap через `$baseDir`; отдельно зафиксировано, что новый класс в `src/` может **не попасть** в classmap до `composer dump-autoload`, но путь задаётся PSR-4. В начале — краткий алгоритм (§1 → §2 → §3), **Human in the Loop** при отсутствии символа или файла по карте; терминальный `grep` по абсолютным путям к файлам под `vendor/composer/`, т.к. индекс workspace часто не видит `vendor/`.
+
 <!-- Изменения в шаблоне Symfony backend: -->
 
 ## [0.0.3-alpha]
