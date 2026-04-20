@@ -11,6 +11,10 @@
 
 - `.cursor/rules/vendor-class-lookup.mdc` (опциональное правило, `alwaysApply: false`): как агенту разрешать FQCN к файлам **без** поиска определений в интернете и **без** рекурсивного обхода `vendor/` — только по артефактам Composer (`autoload_classmap.php` / при пустоте `autoload_psr4.php`, при необходимости `composer.lock`). Учтены классы приложения: префиксы `App\` / `App\Tests\` и `composer.json` (`autoload` / `autoload-dev`, корни `src/`, `tests/`), пути в classmap через `$baseDir`; отдельно зафиксировано, что новый класс в `src/` может **не попасть** в classmap до `composer dump-autoload`, но путь задаётся PSR-4. В начале — краткий алгоритм (§1 → §2 → §3), **Human in the Loop** при отсутствии символа или файла по карте; терминальный `grep` по абсолютным путям к файлам под `vendor/composer/`, т.к. индекс workspace часто не видит `vendor/`.
 
+### Changed
+
+- Документация: обновлён `DOCUMENTATION.md` (три среза уровней, вершины `README.md` и `DEPLOYMENT.md`, правила ссылок в `docs/`); наполнены `docs/00-symfony.md` (этап Symfony: что установлено, стек, основные бандлы, ссылка на шаг) и `docs/symfony/init.md` (локальный цикл, QA, PHPUnit, Behat, переменные окружения — перенос из `README.md`); `README.md` сокращён до точки входа для разработчика; заготовка `docs/symfony/template.md` заменена на `docs/symfony/init.md`. Содержимое `DEPLOYMENT.md` в `docs/` в этой итерации не переносилось.
+
 <!-- Изменения в шаблоне Symfony backend: -->
 
 ## [0.0.3-alpha]
