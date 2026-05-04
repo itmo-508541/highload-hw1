@@ -192,7 +192,7 @@ build-mainline:docker-nginx-image:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_NGINX_IMAGE_CACHE || true
     - docker pull $CI_SOURCE_IMAGE_WITH_TAG || true
-    - docker build --build-arg server_name=$SERVER_NAME --build-arg server_upstream=prod --build-arg app_image=$CI_SOURCE_IMAGE_WITH_TAG
+    - docker build --build-arg app_image=$CI_SOURCE_IMAGE_WITH_TAG
           --cache-from $CI_NGINX_IMAGE_CACHE
           --tag $CI_NGINX_IMAGE_WITH_TAG
           --target prod

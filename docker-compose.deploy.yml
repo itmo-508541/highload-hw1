@@ -9,6 +9,13 @@ services:
           - 80
         depends_on:
             - mysql
+        read_only: true
+        cap_drop:
+            - ALL
+        security_opt:
+            - no-new-privileges:true
+        tmpfs:
+            - /tmp:rw,noexec,nosuid,size=128M
         #volumes:
         #  - "storage:/srv/storage:ro"
         restart: always

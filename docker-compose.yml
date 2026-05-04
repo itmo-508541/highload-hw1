@@ -3,7 +3,7 @@ services:
         build:
             context: "."
             dockerfile: Dockerfile-nginx
-            target: base
+            target: dev
         entrypoint: ["/docker-entrypoint.sh"]
         command: ["nginx", "-g", "daemon off;"]
         ports:
@@ -11,6 +11,13 @@ services:
         depends_on:
             - php
             - mysql
+        read_only: true
+        cap_drop:
+            - ALL
+        security_opt:
+            - no-new-privileges:true
+        tmpfs:
+            - /tmp:rw,noexec,nosuid,size=128M
         volumes:
             - ./public:/srv/public
             #- ./storage/upload:/srv/storage/upload

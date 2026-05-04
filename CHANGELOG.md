@@ -9,6 +9,10 @@
 
 <!-- Изменения в шаблоне Symfony backend: -->
 
+### Changed
+
+- Контейнер **nginx** (dev: `docker-compose.yml`, deploy: `docker-compose.deploy.yml`): корневая файловая система в режиме read-only (`read_only: true`); для записи временных файлов и pid — `tmpfs` на `/tmp` (`rw`, `noexec`, `nosuid`, лимит 128M); снижение привилегий процесса — `cap_drop: [ALL]`, `security_opt: no-new-privileges:true`. Образ собирается с запуском от непривилегированного пользователя `nginx` (`Dockerfile-nginx`: `USER nginx` после копирования конфигов); в `docker/nginx/nginx.conf` заданы `pid` и `*_temp_path` под `/tmp`, чтобы не требовать записи в read-only пути. Доступ к логам по-прежнему через симлинки базового образа `nginx` (`access.log` → `/dev/stdout`, `error.log` → `/dev/stderr`).
+
 ## [0.0.4-alpha]
 
 ### Added
