@@ -13,6 +13,8 @@
 
 - Контейнер **nginx** (dev: `docker-compose.yml`, deploy: `docker-compose.deploy.yml`): корневая файловая система в режиме read-only (`read_only: true`); для записи временных файлов и pid — `tmpfs` на `/tmp` (`rw`, `noexec`, `nosuid`, лимит 128M); снижение привилегий процесса — `cap_drop: [ALL]`, `security_opt: no-new-privileges:true`. Образ собирается с запуском от непривилегированного пользователя `nginx` (`Dockerfile-nginx`: `USER nginx` после копирования конфигов); в `docker/nginx/nginx.conf` заданы `pid` и `*_temp_path` под `/tmp`, чтобы не требовать записи в read-only пути. Доступ к логам по-прежнему через симлинки базового образа `nginx` (`access.log` → `/dev/stdout`, `error.log` → `/dev/stderr`).
 
+- Контейнер **php** (локально в `docker-compose.yml`): снижение привилегий — `cap_drop: [ALL]`, `cap_add: [SETUID, SETGID]` (чтобы php-fpm мог запускать воркеры пула под `user`/`group` из конфигурации при полном сбросе capability), `security_opt: no-new-privileges:true`, `tmpfs` на `/tmp`; режим read-only корня для `php` отложен (`read_only` закомментирован). Образ `Dockerfile`: после установки пакетов задано **`USER www-data`** (базовый стейдж `php` и стейдж `dev`). Обновлён `docker/php/fpm/pool.d/www.conf` (в т.ч. `pid` в `/tmp`, логи в stdout/stderr, динамический `pm`). Шаблон **`docker-compose.override.yml.dist`** (файл копируют в **`docker-compose.override.yml`**, он в `.gitignore`): опционально **`user: "<uid>:<gid>"`** под пользователя хоста и переменные Xdebug; без этого переопределения процессы и файлы на томе создаются от **`www-data`**. Запуск контейнеров **`php`** и **`spare`** на удалённом сервере (`docker-compose.deploy.yml`) в этой итерации не менялся — следует отдельный шаг.
+
 ## [0.0.4-alpha]
 
 ### Added

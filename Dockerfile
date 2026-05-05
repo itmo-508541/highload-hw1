@@ -30,6 +30,7 @@ RUN apt-get update \
 WORKDIR /srv
 COPY docker/php /etc/php/8.4/
 EXPOSE 9000
+USER www-data
 CMD ["php-fpm8.4"]
 
 
@@ -40,15 +41,13 @@ FROM ${source_image} AS source_image
 # Используется для локальной разработки
 FROM php AS dev
 
+USER root
 COPY docker/php-dev /etc/php/8.4/
 COPY --from=composer/composer:latest-bin /composer /usr/local/bin/composer
 
 RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends \
-            php8.4-xdebug \
-            bash \
-    && adduser --system --no-create-home --uid 1000 --gid 50 docker
-
+    && apt-get install -y --no-install-recommends php8.4-xdebug
+USER www-data
 
 # Используется для подготовки кода и ассетов для prod образа
 FROM dev AS source

@@ -27,6 +27,16 @@ services:
             context: "."
             dockerfile: Dockerfile
             target: dev
+        #read_only: true
+        cap_drop:
+            - ALL
+        cap_add:
+            - SETUID
+            - SETGID
+        security_opt:
+            - no-new-privileges:true
+        tmpfs:
+            - /tmp:rw,noexec,nosuid
         environment:
             APP_ENV: dev
             APP_DEBUG: 1
