@@ -9,7 +9,7 @@ services:
           - 80
         depends_on:
             - mysql
-        #read_only: true
+        read_only: true
         cap_drop:
             - ALL
         security_opt:
@@ -25,7 +25,7 @@ services:
     php: &php-service
         image: "${CI_APP_IMAGE_WITH_TAG}"
         command: "php-fpm8.4"
-        #read_only: true
+        read_only: true
         cap_drop:
             - ALL
         security_opt:
