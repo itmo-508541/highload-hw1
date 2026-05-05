@@ -9,11 +9,15 @@
 
 <!-- Изменения в шаблоне Symfony backend: -->
 
+## [0.0.5-alpha]
+
 ### Changed
 
-- Контейнер **nginx**: в **dev** (`docker-compose.yml`) по-прежнему read-only корень, `tmpfs` на `/tmp` с лимитом **128M**, `cap_drop: [ALL]`, `no-new-privileges`. В **deploy** (`docker-compose.deploy.yml`) режим **`read_only` временно отключён** (закомментирован), `tmpfs` на `/tmp` без явного лимита размера; остальное как ранее. Образ и конфиги nginx без изменений этой записи; логи базового образа через stdout/stderr.
+- Контейнер **nginx**: в **dev** (`docker-compose.yml`) и в **deploy** (`docker-compose.deploy.yml`) включён **`read_only: true`** для корня ФС контейнера; **`cap_drop: [ALL]`**, **`security_opt: no-new-privileges:true`**, **`tmpfs`** на **`/tmp`** (`rw`, `noexec`, `nosuid`; в dev у **`/tmp`** задан лимит **128M**, в deploy — без явного лимита). Логи базового образа через stdout/stderr.
 
-- Контейнеры **`php`** и **`spare`** в **deploy** (`docker-compose.deploy.yml`): как у локального сервиса — **`cap_drop: [ALL]`**, **`security_opt: no-new-privileges:true`**, **`tmpfs`** на **`/tmp`**; **`read_only` закомментирован** до стабилизации. Локально в **`docker-compose.yml`** у **`php`** убраны **`cap_add`** (при **`user:`** в override мастер и воркеры под одним uid, SETUID/SETGID не нужны).
+- Контейнеры **`php`** и **`spare`**: в **dev** (`docker-compose.yml`) у **`php`** включён **`read_only: true`**, **`cap_drop: [ALL]`**, **`security_opt: no-new-privileges:true`**, **`tmpfs`** на **`/tmp`**; **`cap_add`** не используется (при **`user:`** в override мастер и воркеры под одним uid). В **deploy** (`docker-compose.deploy.yml`) то же для **`php`** и **`spare`** (якорь **`&php-service`**).
+
+- **Эксперимент read-only:** режим **`read_only`** для **`php`** (локально и на сервере) и для **nginx** на deploy рассматривается как пробный; при ошибках записи в образ нужны отдельные **`tmpfs`** или **`volumes`**. В **`README.md`** добавлен раздел **«Эксперимент с файловой системой»** — последствия для **`php`**, куда писать при read-only и как различать **`tmpfs`** и тома.
 
 - **`Dockerfile`** (образ приложения / CI): **`ENV HOME=/srv`** (глобальный конфиг Composer и пр. не пишут в `/var/www/.config` под **`www-data`**); **`chown www-data:www-data /srv`** перед **`WORKDIR /srv`**; стейдж **`source`**: **`COPY --chown=www-data:www-data`** для зависимостей и кода, стейдж **`prod`**: **`COPY --from=source_image --chown=www-data:www-data`**, чтобы сборка и runtime под **`www-data`** согласованы с пайплайном.
 
