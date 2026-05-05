@@ -11,9 +11,15 @@
 
 ### Changed
 
-- Контейнер **nginx** (dev: `docker-compose.yml`, deploy: `docker-compose.deploy.yml`): корневая файловая система в режиме read-only (`read_only: true`); для записи временных файлов и pid — `tmpfs` на `/tmp` (`rw`, `noexec`, `nosuid`, лимит 128M); снижение привилегий процесса — `cap_drop: [ALL]`, `security_opt: no-new-privileges:true`. Образ собирается с запуском от непривилегированного пользователя `nginx` (`Dockerfile-nginx`: `USER nginx` после копирования конфигов); в `docker/nginx/nginx.conf` заданы `pid` и `*_temp_path` под `/tmp`, чтобы не требовать записи в read-only пути. Доступ к логам по-прежнему через симлинки базового образа `nginx` (`access.log` → `/dev/stdout`, `error.log` → `/dev/stderr`).
+- Контейнер **nginx**: в **dev** (`docker-compose.yml`) по-прежнему read-only корень, `tmpfs` на `/tmp` с лимитом **128M**, `cap_drop: [ALL]`, `no-new-privileges`. В **deploy** (`docker-compose.deploy.yml`) режим **`read_only` временно отключён** (закомментирован), `tmpfs` на `/tmp` без явного лимита размера; остальное как ранее. Образ и конфиги nginx без изменений этой записи; логи базового образа через stdout/stderr.
 
-- Контейнер **php** (локально в `docker-compose.yml`): снижение привилегий — `cap_drop: [ALL]`, `cap_add: [SETUID, SETGID]` (чтобы php-fpm мог запускать воркеры пула под `user`/`group` из конфигурации при полном сбросе capability), `security_opt: no-new-privileges:true`, `tmpfs` на `/tmp`; режим read-only корня для `php` отложен (`read_only` закомментирован). Образ `Dockerfile`: после установки пакетов задано **`USER www-data`** (базовый стейдж `php` и стейдж `dev`). Обновлён `docker/php/fpm/pool.d/www.conf` (в т.ч. `pid` в `/tmp`, логи в stdout/stderr, динамический `pm`). Шаблон **`docker-compose.override.yml.dist`** (файл копируют в **`docker-compose.override.yml`**, он в `.gitignore`): опционально **`user: "<uid>:<gid>"`** под пользователя хоста и переменные Xdebug; без этого переопределения процессы и файлы на томе создаются от **`www-data`**. Запуск контейнеров **`php`** и **`spare`** на удалённом сервере (`docker-compose.deploy.yml`) в этой итерации не менялся — следует отдельный шаг.
+- Контейнеры **`php`** и **`spare`** в **deploy** (`docker-compose.deploy.yml`): как у локального сервиса — **`cap_drop: [ALL]`**, **`security_opt: no-new-privileges:true`**, **`tmpfs`** на **`/tmp`**; **`read_only` закомментирован** до стабилизации. Локально в **`docker-compose.yml`** у **`php`** убраны **`cap_add`** (при **`user:`** в override мастер и воркеры под одним uid, SETUID/SETGID не нужны).
+
+- **`Dockerfile`** (образ приложения / CI): **`ENV HOME=/srv`** (глобальный конфиг Composer и пр. не пишут в `/var/www/.config` под **`www-data`**); **`chown www-data:www-data /srv`** перед **`WORKDIR /srv`**; стейдж **`source`**: **`COPY --chown=www-data:www-data`** для зависимостей и кода, стейдж **`prod`**: **`COPY --from=source_image --chown=www-data:www-data`**, чтобы сборка и runtime под **`www-data`** согласованы с пайплайном.
+
+- **`README.md`**: в «Быстрый старт» добавлено копирование **`docker-compose.override.yml.dist`**; новый раздел **«Начало работы»** про поле **`user`** и **`make owner`**; из «Принципов…» убран дублирующий блок про владельца файлов, удалён отдельный пункт про цикл миграций/схему БД, сокращены отсылки в пункте про команды в контейнере **`php`**.
+
+- **`docker-compose.override.yml.dist`**: **`XDEBUG_CONFIG`** с **`client_host=host.docker.internal`** и **`extra_hosts: host.docker.internal:host-gateway`** для Linux Docker Engine.
 
 ## [0.0.4-alpha]
 

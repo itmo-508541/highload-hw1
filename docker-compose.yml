@@ -30,9 +30,6 @@ services:
         #read_only: true
         cap_drop:
             - ALL
-        cap_add:
-            - SETUID
-            - SETGID
         security_opt:
             - no-new-privileges:true
         tmpfs:

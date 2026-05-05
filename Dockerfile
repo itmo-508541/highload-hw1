@@ -3,6 +3,7 @@ FROM debian:trixie-slim AS php
 
 ENV TERM=linux
 ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/srv
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -25,7 +26,8 @@ RUN apt-get update \
     && apt-get clean -y \
     && curl -sS -L -o /usr/local/bin/phing https://github.com/phingofficial/phing/releases/download/3.1.2/phing-3.1.2.phar \
     && chmod +x /usr/local/bin/phing \
-    && rm -rf /var/lib/apt/lists/* /usr/share/man/* /usr/share/doc/* /var/cache/* /var/log/* /tmp/*
+    && rm -rf /var/lib/apt/lists/* /usr/share/man/* /usr/share/doc/* /var/cache/* /var/log/* /tmp/* \
+    && chown www-data:www-data /srv
 
 WORKDIR /srv
 COPY docker/php /etc/php/8.4/
@@ -53,7 +55,7 @@ USER www-data
 FROM dev AS source
 
 ENV APP_ENV="prod"
-COPY *.json *.lock ./
+COPY --chown=www-data:www-data *.json *.lock ./
 
 RUN composer check-platform-reqs \
     && composer install \
@@ -63,7 +65,7 @@ RUN composer check-platform-reqs \
         --optimize-autoloader \
         --no-interaction
 
-COPY . .
+COPY --chown=www-data:www-data . .
 
 RUN phing app-deploy -Dsymfony.env=prod
 
@@ -73,4 +75,4 @@ FROM php AS prod
 
 ENV APP_ENV="prod"
 
-COPY --from=source_image /srv/ .
+COPY --from=source_image --chown=www-data:www-data /srv/ .
