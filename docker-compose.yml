@@ -35,6 +35,7 @@ services:
         tmpfs:
             - /tmp:rw,noexec,nosuid
         environment:
+            HOME: /tmp
             APP_ENV: dev
             APP_DEBUG: 1
             DOCTRINE_PROXY_AUTO_GENERATE: 1

@@ -77,6 +77,7 @@ stages:
     policy: pull
   variables:
     XDEBUG_MODE: coverage
+    HOME: /srv
   dependencies: []
   before_script:
     - composer config -g cache-dir "$(pwd)/.composer-cache"
