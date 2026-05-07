@@ -112,7 +112,6 @@ prepare-mainline:env:
   before_script:
     - |
       for var_name in $REQUIRED_VARS; do
-        echo $var_name;
         var_value=$(printenv "$var_name");
         if [ -z "$var_value" ]; then exit 1; fi;
       done;
@@ -140,7 +139,6 @@ build-mainline:docker-compose:
       artifacts: true
   script:
     - export DOCKER_COMPOSE_NAME="${SERVER_NAME//./_}"
-    - echo $DOCKER_COMPOSE_NAME
     - mkdir --parent build
     - docker compose -f docker-compose.deploy.yml config > build/docker-compose.yml
     - sed -i 's/\/builds\/'"$CI_PROJECT_NAMESPACE"'\/'"$CI_PROJECT_NAME"'/\./g' build/docker-compose.yml

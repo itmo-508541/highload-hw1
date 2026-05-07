@@ -31,11 +31,6 @@ class Client extends UserProvider
     #[Groups(['api'])]
     protected array $roles = [self::ROLE_USER, self::ROLE_API];
 
-    #[ORM\Column(type: Types::STRING, length: 48, nullable: true)]
-    #[Assert\Length(max: 48)]
-    #[Ignore]
-    protected ?string $clientAccount = null;
-
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     #[Assert\Length(max: 255)]
     #[Ignore]
@@ -44,16 +39,6 @@ class Client extends UserProvider
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getClientAccount(): ?string
-    {
-        return $this->clientAccount;
-    }
-
-    public function setClientAccount(?string $clientAccount): void
-    {
-        $this->clientAccount = $clientAccount;
     }
 
     public function getApiKey(): ?string

@@ -4,12 +4,10 @@ list:
   label_id: Id
   label_username: API Username
   label_roles_as_string: Roles
-  label_client_account: Geotab Database
   label__actions: Actions
 
 filter:
   label_username: API Username
-  label_client_account: Geotab Database
 
 breadcrumb:
   link_client_list: Clients
@@ -18,7 +16,6 @@ show:
   group_client_admin: Client
   label_id: Id
   label_username: API Username
-  label_client_account: Geotab Database
   label_api_key: X-Api-Key
   label_temporary_access_token: Temporary Access Token
   label_permanent_access_token: Permanent Access Token
@@ -28,7 +25,6 @@ form:
   group_client_admin: Client
   label_username: API Username
   label_api_key: X-Api-Key
-  label_client_account: Geotab Database
   label_plain_password: Plain password
   label_roles: Roles
 

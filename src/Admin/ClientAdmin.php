@@ -21,7 +21,6 @@ class ClientAdmin extends UserProviderAdmin
     {
         $list
             ->addIdentifier('username')
-            ->add('clientAccount')
             ->add('rolesAsString')
             ->add(ListMapper::NAME_ACTIONS, ListMapper::TYPE_ACTIONS, [
                 'actions' => [
@@ -34,15 +33,13 @@ class ClientAdmin extends UserProviderAdmin
     protected function configureDatagridFilters(DatagridMapper $filter): void
     {
         $filter
-            ->add('username')
-            ->add('clientAccount');
+            ->add('username');
     }
 
     protected function configureFormFields(FormMapper $form): void
     {
         $form
             ->add('username')
-            ->add('clientAccount')
             ->add('apiKey', null, [
                 'help' => 'help.form.api_key',
             ])
