@@ -112,6 +112,7 @@ prepare-mainline:env:
   before_script:
     - |
       for var_name in $REQUIRED_VARS; do
+        echo "Checking $var_name";
         var_value=$(printenv "$var_name");
         if [ -z "$var_value" ]; then exit 1; fi;
       done;
