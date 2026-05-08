@@ -20,7 +20,6 @@ services:
             - /tmp:rw,noexec,nosuid,size=128M
         volumes:
             - ./public:/srv/public
-            #- ./storage/upload:/srv/storage/upload
 
     php:
         build:

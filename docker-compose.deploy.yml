@@ -16,8 +16,6 @@ services:
             - no-new-privileges:true
         tmpfs:
             - /tmp:rw,noexec,nosuid
-        #volumes:
-        #  - "storage:/srv/storage:ro"
         restart: always
         labels:
             docker-gen.host: ${SERVER_NAME}
@@ -39,8 +37,6 @@ services:
             APP_ENV: prod
             APP_DEBUG: ${ENV_debug}
             TRUSTED_PROXIES: "0.0.0.0/0"
-        #volumes:
-        #  - "storage:/srv/storage:rw"
         restart: always
 
     spare:
@@ -59,4 +55,3 @@ services:
 
 volumes:
     database:
-    #storage:

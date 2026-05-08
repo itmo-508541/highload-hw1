@@ -306,7 +306,7 @@ deploy-mainline:secure-copy:
       docker compose pull ;
       docker compose up -d --no-recreate mysql ;
       docker compose up -d --force-recreate --no-deps spare ;
-      docker compose exec -T spare phing storage-prepare database-deploy -Dsymfony.env=prod ;
+      docker compose exec -T spare phing database-deploy -Dsymfony.env=prod ;
       docker compose up -d --force-recreate --no-deps php ;
       echo "[$(date -R)] web-server is down" ;
       docker compose stop nginx ;
@@ -326,7 +326,6 @@ deploy-mainline:secure-copy:
 #          git fetch --all --prune ;
 #          git checkout origin/production ;
 #          composer install --no-dev --prefer-dist --no-scripts --optimize-autoloader --no-interaction --no-plugins ;
-#          sudo phing storage-prepare ;
 #          phing app-deploy database-deploy -Dsymfony.env=prod ;
 #          sudo service nginx start'
 

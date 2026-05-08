@@ -24,7 +24,7 @@ description: Запускает команды PHP и связанных инс�
 | Задача | Команда |
 |--------|---------|
 | Поднять контейнеры | `make up` |
-| Инициализация (Phing: storage, БД, миграции) | `make init` |
+| Инициализация (Phing: БД, миграции) | `make init` |
 | Зависимости Composer | `make deps` |
 | PHPUnit | `make test` — узкий прогон: `make test path/to/Test.php` или `make test ARGS="..."` |
 | Behat | `make behat` — узкий прогон: `make behat features/foo.feature` или `make behat ARGS="..."` |

@@ -7,8 +7,6 @@
 /docker-compose.override.yml
 /.php-cs-fixer.php
 /.php-cs-fixer.cache
-/public/upload
-/storage
 
 ###> symfony/framework-bundle ###
 /.env.local

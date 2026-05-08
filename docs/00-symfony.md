@@ -13,7 +13,7 @@
 - MySQL `8.0`
 - Docker / Docker Compose
 - Composer
-- Phing (инициализация, подготовка storage, миграции, deploy-команды)
+- Phing (инициализация, подготовка миграции, deploy-команды)
 - QA-инструменты: PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat
 
 ### Основные бандлы

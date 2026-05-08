@@ -53,7 +53,6 @@ $finder = PhpCsFixer\Finder::create()
     ->exclude('config')
     ->exclude('vendor')
     ->exclude('public/bundles')
-    ->exclude('storage')
     ->exclude('build')
     ->exclude('var')
 ;

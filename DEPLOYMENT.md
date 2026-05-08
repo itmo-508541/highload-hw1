@@ -63,7 +63,7 @@ Job `deploy-mainline:secure-copy`:
 - `docker compose pull`
 - `docker compose up -d --no-recreate mysql`
 - `docker compose up -d --force-recreate --no-deps spare`
-- `docker compose exec -T spare phing storage-prepare database-deploy -Dsymfony.env=prod`
+- `docker compose exec -T spare phing database-deploy -Dsymfony.env=prod`
 - `docker compose up -d --force-recreate --no-deps php`
 
 Смысл `spare`: прогон миграций и сокращение downtime при деплое.

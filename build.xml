@@ -4,11 +4,10 @@
     <property name="symfony.env" value="dev" />
     <property name="env.file" value=".env" />
     <property name="env.local.file" value=".env.local" />
-    <property name="project.storage.dir" value="${project.basedir}/storage" />
     <property file="${env.file}" prefix="docker-compose" />
     <property file="${env.local.file}" prefix="docker-compose" override="true" />
 
-    <target name="init" depends="database-deploy,storage-prepare">
+    <target name="init" depends="database-deploy">
         <echo message="${phing.project.name} Init - OK" />
     </target>
 
@@ -49,13 +48,6 @@
         </exec>
 
         <echo message="${phing.project.name} DatabaseDeploy - OK" />
-    </target>
-
-    <target name="storage-prepare">
-    <!--
-        <mkdir dir="${project.storage.dir}/upload" />
-        <chown file="${project.storage.dir}/upload" user="www-data" group="www-data" failonerror="false" />
-    -->
     </target>
 
     <target name="database-ready">
