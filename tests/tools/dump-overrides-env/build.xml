@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<project name="Fixture: .env.local.php перекрывает .env" default="show" basedir=".">
+    <autoloader autoloaderpath="../autoload.php" />
+    <taskdef name="symfonyenv" classname="tools\dotEnvPropertyTask" />
+
+    <symfonyenv prefix="dotenv" />
+
+    <target name="show">
+        <echo message="[dump] dotenv.FIXTURE_VALUE=${dotenv.FIXTURE_VALUE}" />
+        <echo message="[dump] dotenv.APP_ENV=${dotenv.APP_ENV}" />
+    </target>
+</project>

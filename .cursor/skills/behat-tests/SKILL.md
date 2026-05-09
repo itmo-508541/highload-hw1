@@ -16,26 +16,26 @@ description: Описывает написание и обновление сц�
 ## Рабочий цикл
 
 1. Уточнить по плану, какие сценарии или шаги нужны (новый `.feature`, доработка существующего, новые шаги в контексте).
-2. Добавить или изменить Gherkin в `features/`, реализовать шаги в контексте в `tests/Behat/` — **сохранять стиль** соседних контекстов (атрибуты `#[When]` / `#[Then]` и т.д., как в `DemoContext`).
+2. Добавить или изменить Gherkin в `features/`, реализовать шаги в контексте в `tests/Behat/` — **сохранять стиль** соседних контекстов (атрибуты `#[When]` / `#[Then]` и т.д., как в `PhingDotEnvContext`).
 3. При необходимости зарегистрировать новый класс контекста в `behat.yml.dist` (или в локальном `behat.yml`).
 4. Запустить прогон:
    - весь набор: `make behat`
-   - один feature: `make behat features/demo.feature` или `make behat ARGS="features/demo.feature"`
+   - один feature: `make behat features/phing_dotenv_property_task.feature` или `make behat ARGS="features/phing_dotenv_property_task.feature"`
 5. Исправить падения до зелёного прогона, если это в рамках задачи.
 
 ## Команды
 
 ```bash
 make behat
-make behat features/demo.feature
-make behat ARGS="features/demo.feature"
+make behat features/phing_dotenv_property_task.feature
+make behat ARGS="features/phing_dotenv_property_task.feature"
 ```
 
 Прямой вызов (если Makefile неудобен):
 
 ```bash
 docker compose exec -T php vendor/bin/behat --no-interaction
-docker compose exec -T php vendor/bin/behat --no-interaction features/demo.feature
+docker compose exec -T php vendor/bin/behat --no-interaction features/phing_dotenv_property_task.feature
 ```
 
 ## Мини-чеклист

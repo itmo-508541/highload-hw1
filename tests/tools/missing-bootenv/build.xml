@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<project name="Fixture: bootEnv не вызван — symfonyenv должна упасть" default="show" basedir=".">
+    <autoloader autoloaderpath="../autoload-without-bootenv.php" />
+    <taskdef name="symfonyenv" classname="tools\dotEnvPropertyTask" />
+
+    <symfonyenv prefix="dotenv" />
+
+    <target name="show">
+        <echo message="[noboot] этот шаг не должен быть достигнут" />
+    </target>
+</project>

@@ -78,7 +78,7 @@
 | Область | Содержание |
 |--------|------------|
 | Runtime | PHP 8.4, Symfony 7.4.* |
-| Данные | MySQL 8.0; миграции Doctrine — по договорённостям проекта (см. `README.md` про схему и данные) |
+| Данные | MySQL 8.0 и Redis 8 |
 | Окружение | Docker / Docker Compose, сервис `php`; команды PHP/Composer/QA — в контейнере |
 | Сборка и задачи | Composer, Phing (`make init` и связанные цели) |
 | Качество | PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat (`make qa` и отдельные цели) |

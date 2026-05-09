@@ -9,6 +9,37 @@
 
 <!-- Изменения в шаблоне Symfony backend: -->
 
+### Added
+
+- **Redis 8 как хранилище сессий**: сервис `redis:8-trixie` в **`docker-compose.yml`** и **`docker-compose.deploy.yml`** (`requirepass` через `${ENV_redis_password}` на deploy, healthcheck, persistence через volume `redis-data`, `read_only` + `cap_drop: ALL` + `security_opt: no-new-privileges:true`, `tmpfs:/tmp`); `php8.4-redis` добавлен в **`Dockerfile`** и `ext-redis: *` — в **`composer.json`**. В **`config/packages/framework.yaml`** подключён `Symfony\Component\HttpFoundation\Session\Storage\Handler\RedisSessionHandler` (с `prefix: 'sf_s:'`); в **`config/services.yaml`** сервис `Redis` собирается через `Symfony\Component\Cache\Adapter\RedisAdapter::createConnection(%env(REDIS_URL)%)`, дефолты `env(REDIS_URL)` и `env(ENV_redis_*)` оставлены для CI-окружения. В **`.env`** добавлены `ENV_redis_host`, `ENV_redis_port`, `ENV_redis_password`. В **`.gitlab-ci.yml`** у `qa:behat` поднимается дополнительный сервис `redis:8-trixie` (alias `redis`, пароль в CI — **`root`**, см. **Changed**); в скрипте `deploy-mainline:secure-copy` шаг `docker compose up -d --no-recreate mysql` дополнен `redis`, чтобы Redis был доступен до пересоздания `spare`/`php`. Fail-fast проверки секретов GitLab для mainline — в **Changed** («GitLab CI — `prepare-mainline:env`»). Описание стека и шага — **`README.md`**, **`ABOUT.md`**, [`docs/00-symfony.md`](docs/00-symfony.md), [`docs/symfony/init.md`](docs/symfony/init.md), [`DEPLOYMENT.md`](DEPLOYMENT.md).
+- **Phing-задача `symfonyenv` — зеркало переменных Symfony Dotenv** ([`tools/dotEnvPropertyTask.php`](tools/dotEnvPropertyTask.php), новый [`tools/phing-bootstrap.php`](tools/phing-bootstrap.php), задача переименована в `symfonyenv` через `<taskdef>` в **`build.xml`**). Bootstrap из `<autoloader>` читает Phing-свойства `-Dapp.env=...`/`-Dapp.debug=...`, выставляет соответствующие `$_SERVER['APP_ENV']`/`$_SERVER['APP_DEBUG']` и вызывает `Symfony\Component\Dotenv\Dotenv::bootEnv()` так же, как Symfony Runtime для приложения — поэтому `.env.local.php` (создаваемый `composer dump-env <env>` для прод-артефакта) подхватывается одинаково в Phing и в приложении. После `bootEnv` в `$_SERVER['SYMFONY_DOTENV_VARS']` добираются `APP_ENV`/`APP_DEBUG` (`bootEnv` сама их в этот список не вносит, если они уже были в `$_ENV` до её вызова), чтобы свойства `${dotenv.APP_ENV}`/`${dotenv.APP_DEBUG}` всегда были доступны в `build.xml`. Сам Phing-таск `symfonyenv` копирует имена из `SYMFONY_DOTENV_VARS` в свойства проекта с префиксом `dotenv` (значения берутся из `$_SERVER`, без `getenv`/`putenv`). Описание стека и шага — [`docs/00-symfony.md`](docs/00-symfony.md), [`docs/symfony/init.md`](docs/symfony/init.md).
+
+### Changed
+
+- **Загрузка `.env` через Symfony Runtime**: убран ручной вызов `Dotenv::loadEnv` из **`bin/console`** и **`public/index.php`** — переменные подставляет только **`symfony/runtime`**; в **`composer.json`** в `extra.runtime` добавлено **`dotenv_overload: true`**, чтобы локально значения из **`.env.local`** перекрывали уже заданные в окружении. В **`tests/bootstrap.php`** вместо `loadEnv(..., 'test', 'test', ...)` используется **`Dotenv::bootEnv()`** для согласованной загрузки цепочки env-файлов в PHPUnit.
+
+- **Секреты приложения и JWT в конфигурации**: в **`.env`** `ENV_secret` переименован в **`ENV_app_secret`**, добавлен **`ENV_jwt_passphrase`**; шаблонные блоки Flex для Doctrine/Lexik в **`.env`** убраны — пути к ключам JWT заданы в **`config/packages/lexik_jwt_authentication.yaml`** как **`%kernel.project_dir%/config/jwt/private.pem`** и **`public.pem`**, passphrase — **`%env(ENV_jwt_passphrase)%`**. В **`docs/symfony/init.md`** обновлено описание переменных приложения.
+
+- **`docker-compose.yml` (локальный dev)**: для сервиса **Redis** пароль в **`command`** и **`REDISCLI_AUTH`** зафиксирован литералом **`root`**, чтобы совпадать с дефолтами в **`.env`** и с Redis в job **`qa:behat`**.
+
+- **`docker-compose.deploy.yml`**: для **`php`** / **`spare`** снова используются **`env_file: [.env, .env.local]`** (временный откат после эксперимента с явным блоком `environment` без файлов — конфигурация на сервере снова подхватывается из сгенерированных при деплое файлов).
+
+- **GitLab CI — `prepare-mainline:env`**: списки **`REQUIRED_VARS`** и **`REQUIRED_FILES`** оформлены многострочным YAML; добавлены проверки **`ENV_app_secret`**, **`ENV_database_password`**, **`ENV_jwt_passphrase`** и файловых переменных **`JWT_PRIVATE_KEY`**, **`JWT_PUBLIC_KEY`**; **`SSH_PRIVATE_KEY`** перенесён в **`REQUIRED_FILES`** (тип **File** в GitLab Variables); сообщения об ошибках уточнены; убран временный **`exit 1`** после проверок.
+
+- **GitLab CI — деплой по SSH**: шаблон **`.deploy-script-ssh`** — **`ssh-add`** получает путь из File-переменной **`SSH_PRIVATE_KEY`**, перед этим **`chmod 600 "$SSH_PRIVATE_KEY"`** (требования OpenSSH к правам на приватный ключ).
+
+- **GitLab CI — `qa:behat`**: у сервиса Redis в **`services`** параметр **`--requirepass`** приведён к **`root`**, удалены **`variables: REDISCLI_AUTH`** у этого сервиса.
+
+- **`public/index.php`**: удалён неиспользуемый **`use Symfony\Component\Dotenv\Dotenv`**.
+
+- **`build.xml`**: вместо двух `<dotenvproperty file=".env"/>` + `<dotenvproperty file=".env.local" override="true"/>` теперь единственный `<symfonyenv prefix="dotenv" />`; удалены свойства `env.file` / `env.local.file`, отладочный `<target name="tmp">`; все ссылки `${docker-compose.*}` приведены к `${dotenv.*}`. Атрибуты `file`/`override` у задачи больше не нужны (см. **Removed**).
+
+- **`Makefile`**, **`.gitlab-ci.yml`** (`qa:behat`, `deploy-mainline:secure-copy`), **`Dockerfile`** (`RUN phing app-deploy`): прежние флаги `-Dsymfony.env=...` / `-Denv.local.file=...` заменены на единственный **`-Dapp.env=...`** (`-Dapp.debug=true|false` — опционально). Подключение `.env.local.php` / `.env.test` теперь определяет сам `bootEnv` по тем же правилам, что и Symfony Runtime в приложении.
+
+### Removed
+
+- Сессии в MySQL: удалены миграция **`migrations/Version20210806095751.php`** (создание таблицы `sessions`) и сервис `PdoSessionHandler` в **`config/packages/framework.yaml`**. Хранение сессий полностью переехало в Redis; в шаблонном репозитории «двушаговая» история (создать → удалить таблицу) не имеет смысла, поэтому миграция удалена напрямую, а таблица `sessions` чистится вручную на действующих стендах (см. [`docs/symfony/init.md`](docs/symfony/init.md)).
+
 ## [0.0.8-alpha]
 
 ### Changed

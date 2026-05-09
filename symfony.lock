@@ -84,8 +84,8 @@
         "files": [
             "behat.yml.dist",
             "config/services_test.yaml",
-            "features/demo.feature",
-            "tests/Behat/DemoContext.php"
+            "features/phing_dotenv_property_task.feature",
+            "tests/Behat/PhingDotEnvContext.php"
         ]
     },
     "friendsofphp/php-cs-fixer": {

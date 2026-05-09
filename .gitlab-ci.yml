@@ -94,7 +94,8 @@ stages:
     - .deploy-script
   before_script:
     - eval $(ssh-agent -s)
-    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - chmod 600 "$SSH_PRIVATE_KEY"
+    - ssh-add "$SSH_PRIVATE_KEY"
 
 prepare:env:
   extends:
@@ -108,14 +109,47 @@ prepare-mainline:env:
     - .prepare-env
     - .job-policy-mainline
   variables:
-    REQUIRED_VARS: SERVER_NAME DEPLOY_USER DEPLOY_HOST DEPLOY_DIRECTORY SSH_PRIVATE_KEY ENV_database_root_password ENV_redis_password
+    REQUIRED_VARS: >-
+        SERVER_NAME
+        DEPLOY_USER
+        DEPLOY_HOST
+        DEPLOY_DIRECTORY
+        ENV_app_secret
+        ENV_database_password
+        ENV_database_root_password
+        ENV_jwt_passphrase
+        ENV_redis_password
+    REQUIRED_FILES: >-
+        JWT_PRIVATE_KEY
+        JWT_PUBLIC_KEY
+        SSH_PRIVATE_KEY
   before_script:
     - |
-      for var_name in $REQUIRED_VARS; do
-        echo "Checking $var_name";
-        var_value=$(printenv "$var_name");
-        if [ -z "$var_value" ]; then exit 1; fi;
-      done;
+        set -eu
+        for var_name in $REQUIRED_VARS; do
+          echo "Checking CI variable $var_name";
+          var_value=$(printenv "$var_name" || true);
+          if [ -z "$var_value" ]; then
+            echo "Missing or empty variable: $var_name (Settings -> CI/CD -> Variables, type Variable)" >&2;
+            exit 1;
+          fi;
+        done;
+        for var_name in $REQUIRED_FILES; do
+          echo "Checking CI file variable $var_name";
+          file_path=$(printenv "$var_name" || true);
+          if [ -z "$file_path" ]; then
+            echo "Missing or empty: $var_name (Settings -> CI/CD -> Variables, type File)" >&2;
+            exit 1;
+          fi;
+          if [ ! -f "$file_path" ]; then
+            echo "$var_name must be a File variable: value is not a path to a regular file (got non-file or inline secret?)." >&2;
+            exit 1;
+          fi;
+          if [ ! -r "$file_path" ]; then
+            echo "$var_name file path is not readable" >&2;
+            exit 1;
+          fi;
+        done;
 
 build-mainline:docker-git-image:
   extends:
@@ -269,12 +303,10 @@ qa:behat:
       variables:
         MYSQL_ROOT_PASSWORD: "root"
     - name: redis:8-trixie
-      command: ["redis-server", "--requirepass", "redis_password"]
+      command: ["redis-server", "--requirepass", "root"]
       alias: redis
-      variables:
-        REDISCLI_AUTH: "redis_password"
   script:
-    - phing -Dsymfony.env=test -Denv.local.file=.env.test
+    - phing -Dapp.env=test
     - vendor/bin/behat --format=junit --out=build/behat-junit --format=pretty --out=build/progress.txt --no-colors
     - cat build/progress.txt
   artifacts:
@@ -312,7 +344,7 @@ deploy-mainline:secure-copy:
       docker compose pull ;
       docker compose up -d --no-recreate mysql redis ;
       docker compose up -d --force-recreate --no-deps spare ;
-      docker compose exec -T spare phing database-deploy -Dsymfony.env=prod ;
+      docker compose exec -T spare phing database-deploy -Dapp.env=prod ;
       docker compose up -d --force-recreate --no-deps php ;
       echo "[$(date -R)] web-server is down" ;
       docker compose stop nginx ;

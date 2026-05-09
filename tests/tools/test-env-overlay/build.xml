@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<project name="Fixture: -Dapp.env=test читает .env + .env.test" default="show" basedir=".">
+    <autoloader autoloaderpath="../autoload.php" />
+    <taskdef name="symfonyenv" classname="tools\dotEnvPropertyTask" />
+
+    <symfonyenv prefix="dotenv" />
+
+    <target name="show">
+        <echo message="[overlay] dotenv.APP_ENV=${dotenv.APP_ENV}" />
+        <echo message="[overlay] dotenv.FIXTURE_VALUE=${dotenv.FIXTURE_VALUE}" />
+    </target>
+</project>

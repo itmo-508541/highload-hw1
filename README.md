@@ -7,6 +7,7 @@
 - PHP `8.4`
 - Symfony `7.4.*`
 - MySQL `8.0`
+- Redis `8`
 - Docker / Docker Compose
 - Composer
 - Phing (инициализация, миграции, deploy-команды)

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<project name="Fixture: префикс зеркалит SYMFONY_DOTENV_VARS" default="show" basedir=".">
+    <autoloader autoloaderpath="../autoload.php" />
+    <taskdef name="symfonyenv" classname="tools\dotEnvPropertyTask" />
+
+    <symfonyenv prefix="myapp" />
+
+    <target name="show">
+        <echo message="[prefix] myapp.FIXTURE_HOST=${myapp.FIXTURE_HOST}" />
+        <echo message="[prefix] myapp.FIXTURE_PORT=${myapp.FIXTURE_PORT}" />
+    </target>
+</project>

@@ -54,11 +54,11 @@ services:
     redis:
         image: redis:8-trixie
         user: "999:999"
-        command: ["redis-server", "--requirepass", "${ENV_redis_password}"]
+        command: ["redis-server", "--requirepass", "root"]
         networks:
             - redis
         environment:
-            REDISCLI_AUTH: "${ENV_redis_password}"
+            REDISCLI_AUTH: "root"
         volumes:
             - redis-data:/data
         <<: *default-security

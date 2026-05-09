@@ -17,12 +17,19 @@
 
 ### 0) Предусловия для mainline-деплоя
 
-В CI должны быть заданы:
+В CI должны быть заданы (Settings → CI/CD → Variables, флаги Protected/Masked по применимости):
+
 - `SERVER_NAME`
 - `DEPLOY_USER`
 - `DEPLOY_HOST`
 - `DEPLOY_DIRECTORY`
 - `SSH_PRIVATE_KEY`
+- `ENV_database_root_password` — root-пароль MySQL; используется при создании БД и пользователя через `phing database-deploy` и при интерполяции `${...}` в `docker-compose.deploy.yml`.
+- `ENV_redis_password` — пароль Redis; попадает в `--requirepass` сервиса `redis` и в `REDIS_URL` приложения.
+
+Список проверяется `prepare-mainline:env` через `REQUIRED_VARS` (см. [`.gitlab-ci.yml`](.gitlab-ci.yml)) — пайплайн падает на стадии `.pre`, если хотя бы одна переменная не задана.
+
+> Любая переменная с префиксом `ENV_*` шаблоном `.prepare-env` попадает в `.env.local`, который потом летит на сервер. Чтобы переменная была доступна ещё и для интерполяции `${...}` в `docker-compose.deploy.yml` (например, `--requirepass ${ENV_redis_password}`), её нужно завести именно в GitLab Variables: команда `docker compose config` запускается на CI-job-е и читает окружение оттуда, а не из `.env.local` сервера.
 
 Также используется доступ к GitLab Container Registry через CI-токены.
 
@@ -61,12 +68,14 @@ Job `deploy-mainline:secure-copy`:
 
 После переключения release на сервере выполняется:
 - `docker compose pull`
-- `docker compose up -d --no-recreate mysql`
+- `docker compose up -d --no-recreate mysql redis`
 - `docker compose up -d --force-recreate --no-deps spare`
-- `docker compose exec -T spare phing database-deploy -Dsymfony.env=prod`
+- `docker compose exec -T spare phing database-deploy -Dapp.env=prod`
 - `docker compose up -d --force-recreate --no-deps php`
 
 Смысл `spare`: прогон миграций и сокращение downtime при деплое.
+
+`mysql` и `redis` поднимаются явно одной командой `up -d --no-recreate` до пересоздания `spare`/`php`, чтобы Redis был доступен к моменту, когда `php-fpm` начнёт обслуживать первые HTTP-запросы (после рестарта `nginx` в шаге 6). Persistence через именованный том `redis-data` — активные пользовательские сессии переживают редеплой.
 
 ### 6) Перезапуск web-уровня
 

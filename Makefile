@@ -23,7 +23,7 @@ test:
 # -T: без псевдо-TTY (CI/агенты), без интерактивных ожиданий со стороны Docker
 # --no-interaction: Behat не задаёт вопросы в терминал (сниппеты и т.п.)
 behat:
-	docker compose exec -T php phing -Dsymfony.env=test -Denv.local.file=.env.test
+	docker compose exec -T php phing -Dapp.env=test
 	docker compose exec -T php vendor/bin/behat --no-interaction $(if $(strip $(ARGS)),$(ARGS),$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)))
 
 cs:
@@ -40,6 +40,6 @@ qa: up cs phpstan rector test behat
 # Extra paths after `make test` are forwarded to PHPUnit (GNU make also lists them as targets; harmless).
 # Alternatively: make test ARGS="tests/EventListener/CorsRequestListenerTest.php"
 # Extra paths after `make behat` are forwarded to Behat (GNU make also lists them as targets; harmless).
-# Alternatively: make behat ARGS="features/demo.feature"
+# Alternatively: make behat ARGS="features/phing_dotenv_property_task.feature"
 %:
 	@:

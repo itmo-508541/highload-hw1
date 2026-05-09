@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
 <project name="Docker Symfony App" default="init" basedir=".">
+    <autoloader autoloaderpath="tools/phing-bootstrap.php" />
+    <taskdef name="symfonyenv" classpath="tools/dotEnvPropertyTask.php" classname="tools\dotEnvPropertyTask" />
+
     <property name="symfony.console" value="bin/console" />
-    <property name="symfony.env" value="dev" />
-    <property name="env.file" value=".env" />
-    <property name="env.local.file" value=".env.local" />
-    <property file="${env.file}" prefix="docker-compose" />
-    <property file="${env.local.file}" prefix="docker-compose" override="true" />
+    <symfonyenv prefix="dotenv" />
 
     <target name="init" depends="database-deploy">
         <echo message="${phing.project.name} Init - OK" />
@@ -13,46 +12,46 @@
 
     <target name="app-deploy">
         <exec executable="${symfony.console}" passthru="true" checkreturn="true">
-            <arg line="cache:clear --env=${symfony.env} --no-warmup" />
+            <arg line="cache:clear --env=${dotenv.APP_ENV} --no-warmup" />
         </exec>
         <exec executable="${symfony.console}" passthru="true" checkreturn="true">
-            <arg line="cache:warmup --env=${symfony.env}" />
+            <arg line="cache:warmup --env=${dotenv.APP_ENV}" />
         </exec>
         <exec executable="${symfony.console}" passthru="true" checkreturn="true">
-            <arg line="assets:install --env=${symfony.env} public" />
+            <arg line="assets:install --env=${dotenv.APP_ENV} public" />
         </exec>
 
         <echo message="${phing.project.name} AppDeploy - OK" />
     </target>
 
     <target name="database-deploy" depends="database-ready">
-        <pdosqlexec url="mysql:host=${docker-compose.ENV_database_host}" userid="root" password="${docker-compose.ENV_database_root_password}" autocommit="true">
+        <pdosqlexec url="mysql:host=${dotenv.ENV_database_host}" userid="root" password="${dotenv.ENV_database_root_password}" autocommit="true">
             <transaction>
-                CREATE DATABASE IF NOT EXISTS ${docker-compose.ENV_database_name} CHARACTER SET utf8 COLLATE utf8_general_ci;
-                CREATE USER IF NOT EXISTS ${docker-compose.ENV_database_user}@"%" IDENTIFIED BY "${docker-compose.ENV_database_password}";
-                GRANT ALL PRIVILEGES ON ${docker-compose.ENV_database_name}.* TO ${docker-compose.ENV_database_user}@"%" WITH GRANT OPTION;
+                CREATE DATABASE IF NOT EXISTS ${dotenv.ENV_database_name} CHARACTER SET utf8 COLLATE utf8_general_ci;
+                CREATE USER IF NOT EXISTS ${dotenv.ENV_database_user}@"%" IDENTIFIED BY "${dotenv.ENV_database_password}";
+                GRANT ALL PRIVILEGES ON ${dotenv.ENV_database_name}.* TO ${dotenv.ENV_database_user}@"%" WITH GRANT OPTION;
             </transaction>
         </pdosqlexec>
 
         <exec executable="${symfony.console}" passthru="true" checkreturn="true">
-            <arg line="doctrine:cache:clear-metadata --env=${symfony.env}" />
+            <arg line="doctrine:cache:clear-metadata --env=${dotenv.APP_ENV}" />
         </exec>
         <exec executable="${symfony.console}" passthru="true" checkreturn="true">
-            <arg line="doctrine:schema:update --env=${symfony.env} --force --dump-sql --no-interaction" />
+            <arg line="doctrine:schema:update --env=${dotenv.APP_ENV} --force --dump-sql --no-interaction" />
         </exec>
         <exec executable="${symfony.console}" passthru="true" checkreturn="true">
-            <arg line="doctrine:migrations:status --env=${symfony.env}" />
+            <arg line="doctrine:migrations:status --env=${dotenv.APP_ENV}" />
         </exec>
         <exec executable="${symfony.console}" passthru="true" checkreturn="true">
-            <arg line="doctrine:migrations:migrate --env=${symfony.env} --allow-no-migration --no-interaction" />
+            <arg line="doctrine:migrations:migrate --env=${dotenv.APP_ENV} --allow-no-migration --no-interaction" />
         </exec>
 
         <echo message="${phing.project.name} DatabaseDeploy - OK" />
     </target>
 
     <target name="database-ready">
-        <property name="env.ENV_database_host" value="${docker-compose.ENV_database_host}" override="false" />
-        <property name="env.ENV_database_port" value="${docker-compose.ENV_database_port}" override="false" />
+        <property name="env.ENV_database_host" value="${dotenv.ENV_database_host}" override="false" />
+        <property name="env.ENV_database_port" value="${dotenv.ENV_database_port}" override="false" />
 
         <echo message="Waiting for a database on '${env.ENV_database_host}:${env.ENV_database_port}'..." />
         <retry retryCount="120" retryDelay="1">

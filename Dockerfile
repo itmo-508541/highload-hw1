@@ -67,7 +67,7 @@ RUN composer check-platform-reqs \
 
 COPY --chown=www-data:www-data . .
 
-RUN phing app-deploy -Dsymfony.env=prod
+RUN phing app-deploy -Dapp.env=prod
 
 
 # Используется для конечного приложения
