@@ -1,19 +1,27 @@
 name: "${DOCKER_COMPOSE_NAME}"
 
+x-security: &default-security
+    read_only: true
+    cap_drop:
+        - ALL
+    security_opt:
+        - no-new-privileges:true
+
 services:
     nginx:
         image: "${CI_NGINX_IMAGE_WITH_TAG}"
         entrypoint: ["/docker-entrypoint.sh"]
         command: ["nginx", "-g", "daemon off;"]
+        networks:
+            - nginx
         ports:
           - 80
         depends_on:
-            - mysql
-        read_only: true
-        cap_drop:
-            - ALL
-        security_opt:
-            - no-new-privileges:true
+            mysql:
+                condition: service_started
+            redis:
+                condition: service_healthy
+        <<: *default-security
         tmpfs:
             - /tmp:rw,noexec,nosuid
         restart: always
@@ -23,11 +31,11 @@ services:
     php: &php-service
         image: "${CI_APP_IMAGE_WITH_TAG}"
         command: "php-fpm8.4"
-        read_only: true
-        cap_drop:
-            - ALL
-        security_opt:
-            - no-new-privileges:true
+        networks:
+            - nginx
+            - mysql
+            - redis
+        <<: *default-security
         tmpfs:
             - /tmp:rw,noexec,nosuid
         env_file:
@@ -42,11 +50,32 @@ services:
     spare:
         << : *php-service
 
+    redis:
+        image: redis:8-trixie
+        user: "999:999"
+        command: ["redis-server", "--requirepass", "${ENV_redis_password}"]
+        networks:
+            - redis
+        environment:
+            REDISCLI_AUTH: "${ENV_redis_password}"
+        volumes:
+            - redis-data:/data
+        <<: *default-security
+        tmpfs:
+            - /tmp:rw,noexec,nosuid,size=16M
+        restart: always
+        healthcheck:
+            test: ["CMD-SHELL", "redis-cli --no-auth-warning PING | grep -q PONG"]
+            interval: 10s
+            timeout: 3s
+            retries: 5
+            start_period: 3s
+
     mysql:
         image: mysql:8.0-debian
         command: mysqld --sql_mode=""
-        expose:
-          - 3306
+        networks:
+            - mysql
         environment:
             MYSQL_ROOT_PASSWORD: "${ENV_database_root_password}"
         volumes:
@@ -55,3 +84,9 @@ services:
 
 volumes:
     database:
+    redis-data:
+
+networks:
+    nginx:
+    mysql:
+    redis:

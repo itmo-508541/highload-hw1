@@ -108,7 +108,7 @@ prepare-mainline:env:
     - .prepare-env
     - .job-policy-mainline
   variables:
-    REQUIRED_VARS: SERVER_NAME DEPLOY_USER DEPLOY_HOST DEPLOY_DIRECTORY SSH_PRIVATE_KEY
+    REQUIRED_VARS: SERVER_NAME DEPLOY_USER DEPLOY_HOST DEPLOY_DIRECTORY SSH_PRIVATE_KEY ENV_database_root_password ENV_redis_password
   before_script:
     - |
       for var_name in $REQUIRED_VARS; do
@@ -268,6 +268,11 @@ qa:behat:
       alias: mysql
       variables:
         MYSQL_ROOT_PASSWORD: "root"
+    - name: redis:8-trixie
+      command: ["redis-server", "--requirepass", "redis_password"]
+      alias: redis
+      variables:
+        REDISCLI_AUTH: "redis_password"
   script:
     - phing -Dsymfony.env=test -Denv.local.file=.env.test
     - vendor/bin/behat --format=junit --out=build/behat-junit --format=pretty --out=build/progress.txt --no-colors
@@ -305,7 +310,7 @@ deploy-mainline:secure-copy:
       cd '"$DEPLOY_DIRECTORY"' ;
       docker login -u gitlab-ci-token -p '"$CI_JOB_TOKEN"' '"$CI_REGISTRY"' ;
       docker compose pull ;
-      docker compose up -d --no-recreate mysql ;
+      docker compose up -d --no-recreate mysql redis ;
       docker compose up -d --force-recreate --no-deps spare ;
       docker compose exec -T spare phing database-deploy -Dsymfony.env=prod ;
       docker compose up -d --force-recreate --no-deps php ;
@@ -314,21 +319,6 @@ deploy-mainline:secure-copy:
       docker compose up -d nginx ;
       docker logout '"$CI_REGISTRY"' ;
       echo "[$(date -R)] web-server is up"'
-
-#deploy-mainline:production:
-#  extends:
-#    - .deploy-script-ssh
-#    - .job-policy-mainline
-#  stage: deploy
-#  script:
-#    - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
-#          sudo service nginx stop ;
-#          cd '"$DEPLOY_DIRECTORY"';
-#          git fetch --all --prune ;
-#          git checkout origin/production ;
-#          composer install --no-dev --prefer-dist --no-scripts --optimize-autoloader --no-interaction --no-plugins ;
-#          phing app-deploy database-deploy -Dsymfony.env=prod ;
-#          sudo service nginx start'
 
 cleanup:docker-source-image:
   extends:

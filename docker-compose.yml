@@ -1,3 +1,10 @@
+x-security: &default-security
+    read_only: true
+    cap_drop:
+        - ALL
+    security_opt:
+        - no-new-privileges:true
+
 services:
     nginx:
         build:
@@ -6,16 +13,14 @@ services:
             target: dev
         entrypoint: ["/docker-entrypoint.sh"]
         command: ["nginx", "-g", "daemon off;"]
+        networks:
+            - nginx
         ports:
             - "80:80"
         depends_on:
-            - php
-            - mysql
-        read_only: true
-        cap_drop:
-            - ALL
-        security_opt:
-            - no-new-privileges:true
+            php:
+                condition: service_started
+        <<: *default-security
         tmpfs:
             - /tmp:rw,noexec,nosuid,size=128M
         volumes:
@@ -26,11 +31,16 @@ services:
             context: "."
             dockerfile: Dockerfile
             target: dev
-        read_only: true
-        cap_drop:
-            - ALL
-        security_opt:
-            - no-new-privileges:true
+        networks:
+            - nginx
+            - mysql
+            - redis
+        depends_on:
+            redis:
+                condition: service_healthy
+            mysql:
+                condition: service_started
+        <<: *default-security
         tmpfs:
             - /tmp:rw,noexec,nosuid
         environment:
@@ -41,10 +51,32 @@ services:
         volumes:
             - .:/srv
 
+    redis:
+        image: redis:8-trixie
+        user: "999:999"
+        command: ["redis-server", "--requirepass", "${ENV_redis_password}"]
+        networks:
+            - redis
+        environment:
+            REDISCLI_AUTH: "${ENV_redis_password}"
+        volumes:
+            - redis-data:/data
+        <<: *default-security
+        tmpfs:
+            - /tmp:rw,noexec,nosuid,size=16M
+        healthcheck:
+            test: ["CMD-SHELL", "redis-cli --no-auth-warning PING | grep -q PONG"]
+            interval: 10s
+            timeout: 3s
+            retries: 5
+            start_period: 3s
+
     phpmyadmin:
         image: phpmyadmin:latest
         ports:
             - 8080:80
+        networks:
+            - mysql
         depends_on:
             - mysql
         environment:
@@ -58,6 +90,8 @@ services:
         command: mysqld --sql_mode=""
         ports:
             - "3306:3306"
+        networks:
+            - mysql
         environment:
             MYSQL_ROOT_PASSWORD: "root"
         volumes:
@@ -65,3 +99,9 @@ services:
 
 volumes:
     database:
+    redis-data:
+
+networks:
+    nginx:
+    mysql:
+    redis:
