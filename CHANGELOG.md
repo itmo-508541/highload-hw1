@@ -9,6 +9,8 @@
 
 <!-- Изменения в шаблоне Symfony backend: -->
 
+## [0.0.8-alpha]
+
 ### Changed
 
 - **`Makefile`**: цель **`behat`** — **`docker compose exec -T`** для шагов Phing и Behat (без псевдо-TTY, удобно для CI и агентов); **`vendor/bin/behat`** вызывается с **`--no-interaction`**, чтобы Behat не ждал ввода (сниппеты и т.п.); в Makefile добавлены поясняющие комментарии.
