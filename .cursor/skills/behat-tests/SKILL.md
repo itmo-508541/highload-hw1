@@ -11,6 +11,7 @@ description: Описывает написание и обновление сц�
 - Локальные правки: копия `behat.yml.dist` → `behat.yml` (не коммитится).
 - Сценарии: каталог `features/` (`*.feature`), контексты шагов: `tests/Behat/`, пространства имён вида `App\Tests\Behat\...`, регистрация контекстов в `behat.yml.dist` (или в `behat.yml`).
 - Запуск **только в Docker**: контейнер `php` должен быть поднят (`make up`).
+- Прямой `docker compose exec`: для неинтерактивного режима (скрипты, агенты, CI) используйте **`exec -T`** — без псевдо-TTY, как в цели `make behat` в `Makefile`.
 
 ## Рабочий цикл
 
@@ -33,8 +34,8 @@ make behat ARGS="features/demo.feature"
 Прямой вызов (если Makefile неудобен):
 
 ```bash
-docker compose exec php vendor/bin/behat
-docker compose exec php vendor/bin/behat features/demo.feature
+docker compose exec -T php vendor/bin/behat --no-interaction
+docker compose exec -T php vendor/bin/behat --no-interaction features/demo.feature
 ```
 
 ## Мини-чеклист

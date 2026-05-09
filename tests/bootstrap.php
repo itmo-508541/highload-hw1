@@ -9,4 +9,4 @@ require dirname(__DIR__).'/vendor/autoload.php';
 $_SERVER['APP_ENV'] = 'test';
 $_SERVER['APP_DEBUG'] = true;
 
-new Dotenv('test')->loadEnv(__DIR__.'/../.env', 'test', 'test');
+new Dotenv('test')->loadEnv(__DIR__.'/../.env', 'test', 'test', [], true);

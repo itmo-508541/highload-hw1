@@ -20,9 +20,11 @@ test:
 	docker compose exec -T php vendor/bin/phpunit $(if $(strip $(ARGS)),$(ARGS),$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)))
 
 # Optional: ARGS="path/to/feature.feature" (avoids GNU make treating extra CLI words as extra targets)
+# -T: без псевдо-TTY (CI/агенты), без интерактивных ожиданий со стороны Docker
+# --no-interaction: Behat не задаёт вопросы в терминал (сниппеты и т.п.)
 behat:
-	docker compose exec php phing -Dsymfony.env=test -Denv.local.file=.env.test
-	docker compose exec php vendor/bin/behat $(if $(strip $(ARGS)),$(ARGS),$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)))
+	docker compose exec -T php phing -Dsymfony.env=test -Denv.local.file=.env.test
+	docker compose exec -T php vendor/bin/behat --no-interaction $(if $(strip $(ARGS)),$(ARGS),$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)))
 
 cs:
 	docker compose exec php vendor/bin/php-cs-fixer fix

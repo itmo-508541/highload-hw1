@@ -10,6 +10,7 @@ description: Описывает написание и обновление PHPUn
 - Конфигурация: `phpunit.dist.xml`, bootstrap: `tests/bootstrap.php`, окружение тестов: `APP_ENV=test` (задано в конфиге PHPUnit).
 - Тесты: каталог `tests/`, пространства имён вида `App\Tests\...` для классов из `App\...`.
 - Запуск **только в Docker**: контейнер `php` должен быть поднят (`make up`). На хосте без контейнера не полагаться на совпадение PHP/расширений с CI.
+- Прямой `docker compose exec`: для неинтерактивного режима (скрипты, агенты, CI) используйте **`exec -T`** — без псевдо-TTY, как в цели `make test` в `Makefile`.
 
 ## Рабочий цикл
 
@@ -32,8 +33,8 @@ make test ARGS="tests/EventListener/CorsRequestListenerTest.php"
 Прямой вызов (если Makefile неудобен):
 
 ```bash
-docker compose exec php vendor/bin/phpunit
-docker compose exec php vendor/bin/phpunit tests/EventListener/CorsRequestListenerTest.php
+docker compose exec -T php vendor/bin/phpunit
+docker compose exec -T php vendor/bin/phpunit tests/EventListener/CorsRequestListenerTest.php
 ```
 
 ## Мини-чеклист

@@ -9,6 +9,12 @@
 
 <!-- Изменения в шаблоне Symfony backend: -->
 
+### Changed
+
+- **`Makefile`**: цель **`behat`** — **`docker compose exec -T`** для шагов Phing и Behat (без псевдо-TTY, удобно для CI и агентов); **`vendor/bin/behat`** вызывается с **`--no-interaction`**, чтобы Behat не ждал ввода (сниппеты и т.п.); в Makefile добавлены поясняющие комментарии.
+- **`.cursor/skills/behat-tests/SKILL.md`**, **`.cursor/skills/phpunit-tests/SKILL.md`**: для прямого **`docker compose exec`** в неинтерактивном режиме зафиксировано использование **`exec -T`** (как в целях **`make behat`** / **`make test`**); в примерах Behat добавлен флаг **`--no-interaction`**.
+- **`tests/bootstrap.php`**: в **`Dotenv::loadEnv`** включено переопределение уже заданных переменных окружения значениями из **`.env`** (последний аргумент **`true`**), чтобы PHPUnit-прогон был предсказуемее при наследовании env от хоста или CI.
+
 ## [0.0.7-alpha]
 
 ### Changed
