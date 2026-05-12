@@ -17,11 +17,6 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
-###> symfony/phpunit-bridge ###
-.phpunit.result.cache
-/phpunit.xml
-###< symfony/phpunit-bridge ###
-
 ###> lexik/jwt-authentication-bundle ###
 /config/jwt/*_prod.pem
 ###< lexik/jwt-authentication-bundle ###
@@ -31,6 +26,7 @@ phpstan.neon
 ###< phpstan/phpstan ###
 
 ###> phpunit/phpunit ###
+.phpunit.result.cache
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###

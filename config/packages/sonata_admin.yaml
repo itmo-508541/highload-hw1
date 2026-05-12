@@ -12,8 +12,3 @@ sonata_admin:
             - { type: sonata.admin.block.admin_list, position: left }
     templates:
         user_block: 'Admin/Core/user_block.html.twig'
-
-sonata_block:
-    blocks:
-        sonata.admin.block.admin_list:
-            contexts: [admin]
