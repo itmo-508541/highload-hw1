@@ -38,9 +38,10 @@ services:
         <<: *default-security
         tmpfs:
             - /tmp:rw,noexec,nosuid
-        env_file:
-            - .env
-            - .env.local
+        secrets:
+            - .env.local.php
+            - jwt_public.pem
+            - jwt_private.pem
         restart: always
 
     spare:
@@ -88,3 +89,11 @@ networks:
     nginx:
     mysql:
     redis:
+
+secrets:
+    .env.local.php:
+        file: secrets/.env.local.php
+    jwt_public.pem:
+        file: secrets/jwt_public.pem
+    jwt_private.pem:
+        file: secrets/jwt_private.pem

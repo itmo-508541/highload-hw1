@@ -41,17 +41,17 @@ stages:
   stage: .pre
   needs: []
   script:
-    - touch .env.local
+    - touch .env.prod.local
     - |
       for var in $(env | grep '^ENV_'); do
         var_name=$(echo "$var" | cut -d'=' -f1);
         var_value=$(printenv "$var_name");
         var_value=$(printf '%s' "$var_value" | sed 's/\\/\\\\/g; s/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g');
-        printf '%s="%s"\n' "$var_name" "$var_value" >> .env.local;
+        printf '%s="%s"\n' "$var_name" "$var_value" >> .env.prod.local;
       done
   artifacts:
     paths:
-      - .env.local
+      - .env.prod.local
 
 .build-docker-source-image:
   stage: build
@@ -65,7 +65,7 @@ stages:
     - docker push $CI_SOURCE_IMAGE_WITH_TAG
     - docker logout $CI_REGISTRY
 
-.test-script:
+.app-script:
   extends:
     - .job-policy-branches
   stage: test
@@ -78,7 +78,6 @@ stages:
   variables:
     XDEBUG_MODE: coverage
     HOME: /srv
-  dependencies: []
   before_script:
     - composer config -g cache-dir "$(pwd)/.composer-cache"
     - composer install --prefer-dist --no-scripts --no-interaction
@@ -236,7 +235,7 @@ build-mainline:docker-nginx-image:
 
 prepare:composer-cache:
   extends:
-    - .test-script
+    - .app-script
   cache:
     <<: *composer-cache
     policy: pull-push
@@ -245,7 +244,7 @@ prepare:composer-cache:
 
 qa:php-cs-fixer:
   extends:
-    - .test-script
+    - .app-script
   needs:
     - job: prepare:composer-cache
   script:
@@ -256,7 +255,7 @@ qa:php-cs-fixer:
 
 qa:phpstan:
   extends:
-    - .test-script
+    - .app-script
   needs:
     - job: prepare:composer-cache
   script:
@@ -267,7 +266,7 @@ qa:phpstan:
 
 qa:rector:
   extends:
-    - .test-script
+    - .app-script
   needs:
     - job: prepare:composer-cache
   script:
@@ -279,7 +278,7 @@ qa:rector:
 
 qa:phpunit:
   extends:
-    - .test-script
+    - .app-script
   needs:
     - job: prepare:composer-cache
   script:
@@ -294,7 +293,7 @@ qa:phpunit:
 
 qa:behat:
   extends:
-    - .test-script
+    - .app-script
   needs:
     - job: prepare:composer-cache
   services:
@@ -313,6 +312,35 @@ qa:behat:
     reports:
       junit: build/behat-junit/*.xml
 
+deploy-mainline:prepare-secrets:
+    extends:
+      - .app-script
+    stage: deploy
+    needs:
+      - job: prepare-mainline:env
+        artifacts: true
+      - job: prepare:composer-cache
+        artifacts: false
+      - job: qa:php-cs-fixer
+        artifacts: false
+      - job: qa:phpstan
+        artifacts: false
+      - job: qa:rector
+        artifacts: false
+      - job: qa:phpunit
+        artifacts: false
+      - job: qa:behat
+        artifacts: false
+    script:
+      - mkdir --parent build/secrets
+      - composer symfony:dump-env prod
+      - mv .env.local.php build/secrets
+      - cp $JWT_PRIVATE_KEY build/secrets/jwt_private.pem
+      - cp $JWT_PUBLIC_KEY build/secrets/jwt_public.pem
+    artifacts:
+      paths:
+        - build/
+
 deploy-mainline:secure-copy:
   extends:
     - .deploy-script-ssh
@@ -321,16 +349,8 @@ deploy-mainline:secure-copy:
   needs:
     - job: build-mainline:docker-compose
       artifacts: true
-    - job: qa:php-cs-fixer
-      artifacts: false
-    - job: qa:phpstan
-      artifacts: false
-    - job: qa:rector
-      artifacts: false
-    - job: qa:phpunit
-      artifacts: false
-    - job: qa:behat
-      artifacts: false
+    - job: deploy-mainline:prepare-secrets
+      artifacts: true
   script:
     - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
       rm -rf '"$DEPLOY_DIRECTORY"'_tmp ;
