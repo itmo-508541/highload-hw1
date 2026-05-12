@@ -323,6 +323,7 @@ deploy-mainline:prepare-secrets:
       - mkdir --parent build/secrets
       - composer symfony:dump-env prod
       - mv .env.local.php build/secrets
+      - cp secrets/env.php build/
       - cp $JWT_PRIVATE_KEY build/secrets/jwt_private.pem
       - cp $JWT_PUBLIC_KEY build/secrets/jwt_public.pem
     artifacts:

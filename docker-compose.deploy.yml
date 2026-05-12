@@ -38,6 +38,9 @@ services:
         <<: *default-security
         tmpfs:
             - /tmp:rw,noexec,nosuid
+        configs:
+            - source: env.php
+              target: /srv/.env.local.php
         secrets:
             - .env.local.php
             - jwt_public.pem
@@ -89,6 +92,10 @@ networks:
     nginx:
     mysql:
     redis:
+
+configs:
+    env.php:
+        file: env.php
 
 secrets:
     .env.local.php:
