@@ -37,22 +37,6 @@ stages:
   environment:
     name: $CI_COMMIT_REF_SLUG
 
-.prepare-env:
-  stage: .pre
-  needs: []
-  script:
-    - touch .env.prod.local
-    - |
-      for var in $(env | grep '^ENV_'); do
-        var_name=$(echo "$var" | cut -d'=' -f1);
-        var_value=$(printenv "$var_name");
-        var_value=$(printf '%s' "$var_value" | sed 's/\\/\\\\/g; s/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g');
-        printf '%s="%s"\n' "$var_name" "$var_value" >> .env.prod.local;
-      done
-  artifacts:
-    paths:
-      - .env.prod.local
-
 .build-docker-source-image:
   stage: build
   script:
@@ -96,17 +80,11 @@ stages:
     - chmod 600 "$SSH_PRIVATE_KEY"
     - ssh-add "$SSH_PRIVATE_KEY"
 
-prepare:env:
-  extends:
-    - .prepare-env
-    - .job-policy-branches
-  except:
-    *mainline
-
 prepare-mainline:env:
   extends:
-    - .prepare-env
     - .job-policy-mainline
+  stage: .pre
+  needs: []
   variables:
     REQUIRED_VARS: >-
         SERVER_NAME
@@ -149,6 +127,18 @@ prepare-mainline:env:
             exit 1;
           fi;
         done;
+  script:
+    - touch .env.prod.local
+    - |
+      for var in $(env | grep '^ENV_'); do
+        var_name=$(echo "$var" | cut -d'=' -f1);
+        var_value=$(printenv "$var_name");
+        var_value=$(printf '%s' "$var_value" | sed 's/\\/\\\\/g; s/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g');
+        printf '%s="%s"\n' "$var_name" "$var_value" >> .env.prod.local;
+      done
+  artifacts:
+    paths:
+      - .env.prod.local
 
 build-mainline:docker-git-image:
   extends:
@@ -186,9 +176,6 @@ build:docker-source-image:
     - .build-docker-source-image
   except:
     *mainline
-  needs:
-    - job: prepare:env
-      artifacts: true
 
 build-mainline:docker-source-image:
   extends:
@@ -315,6 +302,7 @@ qa:behat:
 deploy-mainline:prepare-secrets:
     extends:
       - .app-script
+      - .job-policy-mainline
     stage: deploy
     needs:
       - job: prepare-mainline:env
