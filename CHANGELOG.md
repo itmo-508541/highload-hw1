@@ -39,6 +39,8 @@
 
 - **`Makefile`**, **`.gitlab-ci.yml`** (`qa:behat`, `deploy-mainline:secure-copy`), **`Dockerfile`** (`RUN phing app-deploy`): прежние флаги `-Dsymfony.env=...` / `-Denv.local.file=...` заменены на единственный **`-Dapp.env=...`** (`-Dapp.debug=true|false` — опционально). Подключение `.env.local.php` / `.env.test` теперь определяет сам `bootEnv` по тем же правилам, что и Symfony Runtime в приложении.
 
+- **`Dockerfile` (образ `php` / target `prod`)**: в начале файла задана директива **`# syntax=docker/dockerfile:1.19`**, чтобы в CI на **`docker:26`** использовался Dockerfile frontend BuildKit с поддержкой **`COPY --exclude=...`** (без неё сборка падает с `unknown flag: exclude`). Стадия **`prod`** копирует **`/srv/`** из source-образа с исключениями **`.env`**, **`.env.*`**, **`.cursor`**, **`config/jwt`**, **`docs`**, **`features`**, **`secrets`**, **`tests`** — в конечном prod-контейнере нет репозиторных dotenv-файлов и перечисленных каталогов.
+
 ### Removed
 
 - Сессии в MySQL: удалены миграция **`migrations/Version20210806095751.php`** (создание таблицы `sessions`) и сервис `PdoSessionHandler` в **`config/packages/framework.yaml`**. Хранение сессий полностью переехало в Redis; в шаблонном репозитории «двушаговая» история (создать → удалить таблицу) не имеет смысла, поэтому миграция удалена напрямую, а таблица `sessions` чистится вручную на действующих стендах (см. [`docs/symfony/init.md`](docs/symfony/init.md)).

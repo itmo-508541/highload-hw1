@@ -64,6 +64,11 @@ Job **`prepare-mainline:env`**:
 - nginx image;
 - **`build/docker-compose.yml`** — job `build-mainline:docker-compose` выполняет `docker compose -f docker-compose.deploy.yml config` в окружении CI и кладёт результат в `build/` (пути в YAML подменяются под layout на сервере).
 
+**Prod-образ приложения (`Dockerfile`, target `prod`):**
+
+- В первой строке [`Dockerfile`](Dockerfile) задана директива **`# syntax=docker/dockerfile:1.19`**. Она подключает актуальный Dockerfile frontend BuildKit: на раннере с образом **`docker:26`** иначе парсер не знает флаг **`COPY --exclude=...`**, и сборка падает с `unknown flag: exclude`.
+- Стадия **`prod`** копирует дерево `/srv/` из source-образа с исключениями: **`.env`**, **`.env.*`**, **`.cursor`**, **`config/jwt`**, **`docs`**, **`features`**, **`secrets`**, **`tests`**. В контейнере на проде в **`/srv`** нет репозиторных dotenv-файлов и перечисленных каталогов; секреты приложения не зашиваются в образ и не подставляются через `environment:` сервиса `php` — Symfony загружает окружение из **`/srv/.env.local.php`** (config-шим) и **`/run/secrets/.env.local.php`** (дамп), см. блок выше про `configs:` / `secrets:`.
+
 ### 3) QA-блок (обязательный gate)
 
 Перед деплоем должны успешно завершиться:

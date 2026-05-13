@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.19
 ARG source_image=scratch
 FROM debian:trixie-slim AS php
 
@@ -75,4 +76,15 @@ FROM php AS prod
 
 ENV APP_ENV="prod"
 
-COPY --from=source_image --chown=www-data:www-data /srv/ .
+COPY \
+    --exclude=.cursor \
+    --exclude=.env \
+    --exclude=.env.* \
+    --exclude=config/jwt \
+    --exclude=docs \
+    --exclude=features \
+    --exclude=secrets \
+    --exclude=tests \
+    --from=source_image \
+    --chown=www-data:www-data \
+    /srv/ .
