@@ -16,8 +16,8 @@
 Соглашения, которым нужно следовать:
 
 - Имя тома — **kebab-case** (`uploads`, `report-cache`, `media-store`).
-- Имя ENV для пути в контейнере — **snake_case** с префиксом **`ENV_`** и суффиксом **`_storage`**: `ENV_uploads_storage`, `ENV_report_cache_storage`. Префикс `ENV_*` важен, его читает шаблон **`.prepare-env`** из [`.gitlab-ci.yml`](../../.gitlab-ci.yml) и пробрасывает в `.env.local` контейнеров.
-- Имя CI/CD-переменной для **хостового** пути — **SCREAMING_SNAKE_CASE** **без** префикса `ENV_`: `UPLOADS_STORAGE`. Префикс `ENV_*` тут запрещён — иначе хостовый путь окажется в `.env.local` приложения, а это путь хоста, не путь контейнера.
+- Имя ENV для пути в контейнере — **snake_case** с префиксом **`ENV_`** и суффиксом **`_storage`**: `ENV_uploads_storage`, `ENV_report_cache_storage`. Префикс `ENV_*` важен: в job **`prepare-mainline:env`** ([`.gitlab-ci.yml`](../../.gitlab-ci.yml)) в `script` все переменные окружения с именем, начинающимся на `ENV_`, попадают в артефакт **`.env.prod.local`** (dotenv-строки) для последующего **`composer symfony:dump-env prod`** и выкладки на сервер; см. [`DEPLOYMENT.md`](../../DEPLOYMENT.md), §0–1.
+- Имя CI/CD-переменной для **хостового** пути — **SCREAMING_SNAKE_CASE** **без** префикса `ENV_`: `UPLOADS_STORAGE`. Префикс `ENV_*` тут запрещён — иначе путь на хосте сервера окажется в **`.env.prod.local`** и далее в прод-окружении приложения, хотя это путь хоста, а не путь внутри контейнера.
 - По умолчанию путь монтирования в контейнере — `/var/local/<имя-тома>` (для нашего примера `/var/local/uploads`).
 
 ## Шаги
@@ -37,6 +37,8 @@ ENV_uploads_storage=/var/local/uploads
 ### 2) `docker-compose.yml` — локальное объявление и монтирование
 
 В [`docker-compose.yml`](../../docker-compose.yml) сделать **две** правки.
+
+**Сейчас в репозитории** (до применения рецепта): у `php` обычно только том `.:/srv`; в верхнем `volumes:` уже объявлены **`database`** и **`redis-data`** — это обычные именованные тома без bind на каталог хоста. Фрагменты YAML ниже показывают **целевое состояние после** добавления тома с примерным именем `uploads`: к существующим объявлениям и строкам в `volumes:` у `php` нужно **добавить** новые, а не заменять файл целиком.
 
 В сервисе `php` (или другом, где том нужен) — подключить именованный том:
 
@@ -63,9 +65,13 @@ volumes:
 
 Дефолт `/tmp/uploads` — заглушка, чтобы локальный `make up` работал «из коробки» сразу после `git clone`. Содержимое `/tmp` не переживёт перезагрузку хоста, поэтому на любой длительной работе путь надо переопределить локально (см. шаг 4).
 
+Этот рецепт — про **bind** на каталог хоста через `driver_opts` (единый путь в контейнере на локалке и на prod). Тома **`database`** / **`redis-data`** в проекте остаются как есть: отдельная модель персистентности, без сопоставления с этим шагом.
+
 ### 3) `docker-compose.deploy.yml` — prod-объявление
 
 В [`docker-compose.deploy.yml`](../../docker-compose.deploy.yml) — две симметричные правки.
+
+**Сейчас в репозитории** у якоря `php: &php-service` может не быть секции `volumes:` — её нужно **добавить** (или дополнить списком), не удаляя `configs:` / `secrets:` и прочие поля.
 
 В якоре `php: &php-service` (так маунт автоматически унаследуют все сервисы, объявленные через `<< : *php-service`, например `spare`):
 
@@ -94,7 +100,7 @@ volumes:
 
 ### 4) `docker-compose.override.yml.dist` — шаблон локальной настройки
 
-В [`docker-compose.override.yml.dist`](../../docker-compose.override.yml.dist) добавить **закомментированный** блок (или дополнить уже существующий блок `volumes:` записью про новый том):
+В [`docker-compose.override.yml.dist`](../../docker-compose.override.yml.dist) добавить **закомментированный** блок (или дополнить уже существующий блок `volumes:` записью про новый том). **Сейчас** в репозитории в этом файле может не быть раздела `volumes:` — блок ниже это шаблон **после** применения рецепта, а не копия текущего файла целиком.
 
 ```yaml
 # volumes:
@@ -109,15 +115,30 @@ volumes:
 
 ### 5) `.gitlab-ci.yml` — обязательная переменная для деплоя
 
-В [`.gitlab-ci.yml`](../../.gitlab-ci.yml) добавить новую переменную в `REQUIRED_VARS` job `prepare-mainline:env`:
+В [`.gitlab-ci.yml`](../../.gitlab-ci.yml) в job **`prepare-mainline:env`** добавить имя **`UPLOADS_STORAGE`** в список **`REQUIRED_VARS`** (многострочный блок `>-`), **не** трогая **`REQUIRED_FILES`** — ключ **`SSH_PRIVATE_KEY`** по-прежнему проверяется там, а не в `REQUIRED_VARS`. Фрагмент ниже отражает актуальную структуру job; достаточно вставить одну строку с новой переменной рядом с остальными в `REQUIRED_VARS`:
 
 ```yaml
 prepare-mainline:env:
   extends:
-    - .prepare-env
     - .job-policy-mainline
+  stage: .pre
+  needs: []
   variables:
-    REQUIRED_VARS: SERVER_NAME DEPLOY_USER DEPLOY_HOST DEPLOY_DIRECTORY SSH_PRIVATE_KEY UPLOADS_STORAGE
+    REQUIRED_VARS: >-
+        SERVER_NAME
+        DEPLOY_USER
+        DEPLOY_HOST
+        DEPLOY_DIRECTORY
+        ENV_app_secret
+        ENV_database_password
+        ENV_database_root_password
+        ENV_jwt_passphrase
+        ENV_redis_password
+        UPLOADS_STORAGE
+    REQUIRED_FILES: >-
+        JWT_PRIVATE_KEY
+        JWT_PUBLIC_KEY
+        SSH_PRIVATE_KEY
 ```
 
 Это даёт fail-fast: если переменная для окружения не задана в GitLab, пайплайн упадёт на стадии `.pre`, а не при `docker compose up` на сервере с пустым `device:`.
@@ -191,7 +212,7 @@ docker compose exec php sh -lc 'id; ls -la /var/local/uploads && touch /var/loca
 - **Относительный путь в `device:`.** Драйвер `local` с `o: bind` принимает только абсолютные пути.
 - **Каталог не существует на хосте.** Драйвер не создаёт точку монтирования; `up` упадёт.
 - **Каталог без бита execute.** `0600` запрещает заходить в каталог — внутрь нельзя ни прочитать, ни записать. Минимум `0700`.
-- **Имя CI-переменной с префиксом `ENV_`.** Шаблон `.prepare-env` запишет хостовый путь в `.env.local` контейнера; путь хоста окажется доступен приложению как обычная переменная окружения, что почти всегда нежелательно.
+- **Имя CI-переменной с префиксом `ENV_`.** Job **`prepare-mainline:env`** соберёт все `ENV_*` из окружения CI в **`.env.prod.local`**; если назвать хостовый путь с префиксом `ENV_`, он попадёт в этот файл и далее в прод-дамп окружения, что почти всегда нежелательно.
 - **`.env.local` для интерполяции `${...}` в Compose.** Compose читает `.env.local` **только** через `services.<name>.env_file` для прокидывания переменных **внутрь контейнера**; для интерполяции в самом compose-файле используется проектный `.env` (или флаг `--env-file`). Поэтому `ENV_uploads_storage` определяется именно в `.env`.
 
 ## Документирование нового тома
@@ -199,5 +220,5 @@ docker compose exec php sh -lc 'id; ls -la /var/local/uploads && touch /var/loca
 После применения этой инструкции по соглашениям из [`DOCUMENTATION.md`](../../DOCUMENTATION.md):
 
 - если том — часть конкретного **этапа реализации** (`docs/NN-*.md`), краткое упоминание добавляется в раздел «Технические детали реализации» обзора этапа, а технический разбор шага живёт во вложенном файле каталога этапа (например `docs/<этап>/volume.md`) со ссылкой обратно на обзор;
-- в [`DEPLOYMENT.md`](../../DEPLOYMENT.md), в раздел «Предусловия для mainline-деплоя», добавляется новая CI-переменная (`UPLOADS_STORAGE`) и пометка о подготовке каталога на сервере;
+- в [`DEPLOYMENT.md`](../../DEPLOYMENT.md), в раздел «Предусловия для mainline-деплоя», добавляется новая CI-переменная (`UPLOADS_STORAGE`) и пометка о подготовке каталога на сервере; перечень переменных в тексте **DEPLOYMENT** имеет смысл держать в соответствии с актуальным **`REQUIRED_VARS`** в **`prepare-mainline:env`**;
 - в `CHANGELOG.md` под `[Unreleased]` фиксируется добавление тома (локально и на prod) со ссылками на соответствующие документы этапа.
