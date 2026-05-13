@@ -9,6 +9,8 @@
 
 <!-- Изменения в шаблоне Symfony backend: -->
 
+## [0.0.9-alpha]
+
 ### Added
 
 - **Redis 8 как хранилище сессий**: сервис **`redis:8-trixie`** в **`docker-compose.yml`** (локально **`--requirepass`** и **`REDISCLI_AUTH: "root"`**) и в **`docker-compose.deploy.yml`** (на проде пароль только в secret **`/run/secrets/redis.conf`**, см. **Changed** про **`redis_healthcheck`** и отсутствие **`ENV_*`** в **`environment:`**); persistence через **`redis-data`**, **`read_only`** + **`cap_drop: ALL`** + **`security_opt: no-new-privileges:true`**, **`tmpfs:/tmp`**; **`php8.4-redis`** в **`Dockerfile`** и **`ext-redis: *`** в **`composer.json`**. В **`config/packages/framework.yaml`** — **`RedisSessionHandler`** (префикс **`sf_s:`**); в **`config/services.yaml`** — **`RedisAdapter::createConnection(%env(resolve:REDIS_URL)%)`**; **`REDIS_URL`** и параметры Redis в **`.env`**. В **`.gitlab-ci.yml`** у **`qa:behat`** сервис **`redis:8-trixie`** (alias **`redis`**, **`--requirepass`** **`root`**); в **`deploy-mainline:secure-copy`** перед пересозданием **`spare`/`php`** поднимаются **`mysql`** и **`redis`**. Fail-fast **`REQUIRED_VARS`** — в **Changed** («**`prepare-mainline:env`**»). Документация: **`README.md`**, **`ABOUT.md`**, [`docs/00-symfony.md`](docs/00-symfony.md), [`docs/symfony/init.md`](docs/symfony/init.md), [`DEPLOYMENT.md`](DEPLOYMENT.md).
