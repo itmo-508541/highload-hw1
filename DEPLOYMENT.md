@@ -36,13 +36,19 @@
 - `JWT_PRIVATE_KEY`, `JWT_PUBLIC_KEY` — ключи JWT для копирования в `build/secrets/` на этапе подготовки секретов.
 - `SSH_PRIVATE_KEY` — ключ для `deploy-mainline:secure-copy`.
 
+**Учётная запись на сервере (`DEPLOY_USER`):**
+
+- Пользователь **`DEPLOY_USER`** должен входить в группу **`docker`**, иначе по SSH из job **`deploy-mainline:secure-copy`** не выполнятся команды **`docker compose`** / **`docker login`** без дополнительного **`sudo`**. Обычно: **`sudo usermod -aG docker "$DEPLOY_USER"`** и новый сеанс SSH (или перелогин).
+- **`DEPLOY_USER`** должен иметь право вызывать **`sudo`** в неинтерактивной SSH-сессии из CI. Это настраивается не «членством в группе», а записями **sudoers**: файл **`/etc/sudoers`** или отдельный файл в **`/etc/sudoers.d/`** (часто **`/etc/sudoers.d/<имя_пользователя>`** или **`/etc/sudoers.d/deploy`**). Для GitLab job без TTY обычно нужны правила с **`NOPASSWD`** хотя бы для **`chgrp`** (числовые gid **33** и **999**), которые выполняет **`deploy-mainline:secure-copy`** (см. [`.gitlab-ci.yml`](.gitlab-ci.yml), удалённый **`script`** после **`cd`** в **`$DEPLOY_DIRECTORY`**); иначе деплой остановится на запросе пароля **`sudo`**. **`chmod`** на свои файлы после **`scp`** **`DEPLOY_USER`** выполняет без **`sudo`**.
+- У **`docker compose`** (режим без Swarm) поля **`uid`**, **`gid`**, **`mode`** у **`secrets:`** и **`configs:`** в сервисах **не поддерживаются** (Compose пишет предупреждение и игнорирует их). Права на файлы релиза на хосте должны давать чтение процессам в контейнерах при bind-mount. В **`deploy-mainline:secure-copy`** после **`cd`** в каталог релиза: **`chmod 0750 secrets configs`**, **`find secrets`/`find configs`** с **`-maxdepth 1 -type f -exec chmod 0640 {} +`**; две команды **`sudo chgrp`**: сначала **`33`** для **`configs/env.php`**, **`secrets/.env.local.php`**, **`secrets/jwt_public.pem`**, **`secrets/jwt_private.pem`**, затем **`999`** для **`configs/redis-healthcheck.sh`**, **`secrets/redis.conf`**, **`secrets/mysql_root_password`** (списки в [`.gitlab-ci.yml`](.gitlab-ci.yml) — при новых секретах их нужно дописать в соответствующую строку). Вызовы **`sudo chgrp`** — под **NOPASSWD** (см. выше); при нетипичном **`gid`** у MySQL — **`docker compose exec mysql id`** и отдельная правка второй команды.
+
 Список обязательных имён задаётся в job `prepare-mainline:env` (см. [`.gitlab-ci.yml`](.gitlab-ci.yml)) — пайплайн падает на стадии `.pre`, если что-то не задано или файл недоступен.
 
 **Как связаны `ENV_*`, CI и сервер:**
 
 - В job `prepare-mainline:env` все переменные окружения с префиксом `ENV_*` записываются в артефакт **`.env.prod.local`** (dotenv-строки). Этот файл нужен дальше для **`composer symfony:dump-env prod`**: в итоговый PHP-дамп окружения попадают все prod-секреты и параметры, которые должны оказаться в **`.env.local.php`** на сервере.
 - Интерполяция **`${...}`** в `docker-compose.deploy.yml` при выполнении **`docker compose … config`** на CI (job **`deploy-mainline:prepare-docker-compose`**, стадия **`deploy`**) читает значения из **окружения того же CI-job**, то есть переменные с такими именами должны быть заведены в GitLab Variables (или иначе оказаться в `printenv` раннера). Этот job **не** подтягивает артефакт **`.env.prod.local`** (он не нужен для `config`); стадии идут в порядке **`.pre` → `build` → `test` → `deploy`**, при этом **`prepare-mainline:env`** выполняется в **`.pre`**. На сервере для этого отдельный `env_file` у сервисов приложения **не используется** — на сервер уезжает уже **отрендеренный** `build/docker-compose.yml` без `${…}`.
-- На сервер в каталоге релиза копируются **`build/secrets/*.pem`**, **`build/secrets/.env.local.php`** (дамп) и **`build/env.php`** (шим для Symfony, см. ниже). В [docker-compose.deploy.yml](docker-compose.deploy.yml) для `php` / `spare` заданы **Docker secrets** (файлы под `./secrets/` на хосте релиза) и **config** `env.php` → **`/srv/.env.local.php`**: небольшой файл из репозитория [`secrets/env.php`](secrets/env.php) делает `return include '/run/secrets/.env.local.php';`, чтобы Symfony Runtime загружал стандартный путь **`.env.local.php`**, а фактические значения лежали в секрете.
+- На сервер в каталоге релиза копируются **`build/secrets/*.pem`**, **`build/secrets/.env.local.php`** (дамп), каталог **`build/configs/`** (**`env.php`**, **`redis-healthcheck.sh`** — шим Symfony и скрипт healthcheck для Redis). В [docker-compose.deploy.yml](docker-compose.deploy.yml) для `php` / `spare` заданы **Docker secrets** (файлы под **`./secrets/`** на хосте релиза) и **config** `env.php` → **`/srv/.env.local.php`**: небольшой файл из репозитория [`secrets/env.php`](secrets/env.php) делает `return include '/run/secrets/.env.local.php';`, чтобы Symfony Runtime загружал стандартный путь **`.env.local.php`**, а фактические значения лежали в секрете. Пути **`configs/env.php`** и **`configs/redis-healthcheck.sh`** в compose относительны каталогу, где лежит **`docker-compose.yml`** на сервере (рядом каталог **`configs/`**).
 
 Также используется доступ к GitLab Container Registry через CI-токены.
 
@@ -89,10 +95,10 @@ Job **`deploy-mainline:prepare-secrets`** (стадия `deploy`, после QA)
 - подтягивает артефакт **`.env.prod.local`** из `prepare-mainline:env` и зависимости Composer из кэша;
 - выполняет **`composer symfony:dump-env prod`** (читаются `.env`, `.env.prod`, `.env.prod.local` и т.д. по правилам Symfony);
 - переносит сгенерированный **`.env.local.php`** в **`build/secrets/.env.local.php`**;
-- копирует в **`build/`** шим **[`secrets/env.php`](secrets/env.php)** как **`build/env.php`** (его подхватывает `configs:` в compose на сервере);
-- копирует **[`secrets/redis-healthcheck.sh`](secrets/redis-healthcheck.sh)** в **`build/redis-healthcheck.sh`** (config **`redis_healthcheck`** в [docker-compose.deploy.yml](docker-compose.deploy.yml) ссылается на этот файл рядом с `docker-compose.yml` на сервере);
+- копирует в **`build/configs/`** шим **[`secrets/env.php`](secrets/env.php)** как **`build/configs/env.php`** (его подхватывает `configs:` в compose на сервере);
+- копирует **[`secrets/redis-healthcheck.sh`](secrets/redis-healthcheck.sh)** в **`build/configs/redis-healthcheck.sh`** (config **`redis_healthcheck`** в [docker-compose.deploy.yml](docker-compose.deploy.yml) ссылается на этот файл в каталоге **`configs/`** рядом с `docker-compose.yml` на сервере);
 - копирует ключи JWT в **`build/secrets/jwt_private.pem`** и **`build/secrets/jwt_public.pem`**;
-- публикует артефакт **`build/`** (каталог `secrets/`, `env.php` и `redis-healthcheck.sh` в корне `build/`).
+- публикует артефакт **`build/`** (каталоги **`secrets/`**, **`configs/`**).
 
 ### 5) Копирование release на удаленный сервер
 
@@ -101,12 +107,12 @@ Job **`deploy-mainline:secure-copy`**:
 - **`image: $CI_GIT_IMAGE_WITH_TAG`** (образ из **`deploy-mainline:deploy-image`**, уже в registry);
 - **`variables: GIT_STRATEGY: none`** — без checkout репозитория в job;
 - в **`before_script`**: **`ssh-agent`**, **`chmod 600`** на путь File-переменной **`SSH_PRIVATE_KEY`**, **`ssh-add`** этого ключа;
-- по **`needs`** ждёт успешного завершения **`deploy-mainline:deploy-image`** (**`artifacts: false`** — нужен только push образа), **`deploy-mainline:prepare-docker-compose`** (артефакт в т.ч. **`build/docker-compose.yml`**) и **`deploy-mainline:prepare-secrets`** (`build/secrets/`, **`build/env.php`**, **`build/redis-healthcheck.sh`**); содержимое **`build/`** из артефактов сливается в рабочем каталоге job;
+- по **`needs`** ждёт успешного завершения **`deploy-mainline:deploy-image`** (**`artifacts: false`** — нужен только push образа), **`deploy-mainline:prepare-docker-compose`** (артефакт в т.ч. **`build/docker-compose.yml`**) и **`deploy-mainline:prepare-secrets`** (`build/secrets/`, **`build/configs/`**); содержимое **`build/`** из артефактов сливается в рабочем каталоге job;
 - по SSH создаёт временный каталог `${DEPLOY_DIRECTORY}_tmp`;
 - копирует туда содержимое **`build/`** (`scp -r build/*`);
 - атомарно переключает директорию release: удаляет старую и переименовывает `_tmp` в `${DEPLOY_DIRECTORY}`.
 
-На сервере рядом с `docker-compose.yml` оказываются **`env.php`**, **`redis-healthcheck.sh`** и каталог **`secrets/`** с файлами, на которые ссылаются `configs:` и `secrets:` в сгенерированном compose.
+На сервере рядом с `docker-compose.yml` оказываются каталоги **`configs/`** (**`env.php`**, **`redis-healthcheck.sh`**) и **`secrets/`** с файлами, на которые ссылаются `configs:` и `secrets:` в сгенерированном compose. Права и группы на хосте после деплоя выставляет удалённый скрипт **`deploy-mainline:secure-copy`** (**`chmod 0750`/`0640`**, **`sudo chgrp 33`/`999`** — см. §0).
 
 ### 6) Запуск контейнеров и миграций на сервере
 

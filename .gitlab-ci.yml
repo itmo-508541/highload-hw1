@@ -274,7 +274,9 @@ deploy-mainline:prepare-docker-compose:
     stage: deploy
     script:
         - export DOCKER_COMPOSE_NAME="${SERVER_NAME//./_}"
-        - mkdir --parent build
+        - mkdir --parent build configs
+        - cp secrets/env.php configs/env.php
+        - cp secrets/redis-healthcheck.sh configs/redis-healthcheck.sh
         - docker compose -f docker-compose.deploy.yml config > build/docker-compose.yml
         - sed -i 's/\/builds\/'"$CI_PROJECT_NAMESPACE"'\/'"$CI_PROJECT_NAME"'/\./g' build/docker-compose.yml
     artifacts:
@@ -304,11 +306,11 @@ deploy-mainline:prepare-secrets:
     - job: qa:tools
       artifacts: false
   script:
-    - mkdir --parent build/secrets
+    - mkdir --parent build/secrets build/configs
     - composer symfony:dump-env prod
     - mv .env.local.php build/secrets
-    - cp secrets/env.php build/
-    - cp secrets/redis-healthcheck.sh build/
+    - cp secrets/env.php build/configs
+    - cp secrets/redis-healthcheck.sh build/configs
     - cp $JWT_PRIVATE_KEY build/secrets/jwt_private.pem
     - cp $JWT_PUBLIC_KEY build/secrets/jwt_public.pem
     - bin/console app:generate-secrets secrets/mysql-password.twig > build/secrets/mysql_root_password
@@ -358,6 +360,11 @@ deploy-mainline:secure-copy:
       if [ -d '"$DEPLOY_DIRECTORY"' ]; then rm -rf '"$DEPLOY_DIRECTORY"'; fi ;
       mv '"$DEPLOY_DIRECTORY"'_tmp '"$DEPLOY_DIRECTORY"' ;
       cd '"$DEPLOY_DIRECTORY"' ;
+      chmod 0750 secrets configs ;
+      find secrets -maxdepth 1 -type f -exec chmod 0640 {} + ;
+      find configs -maxdepth 1 -type f -exec chmod 0640 {} + ;
+      sudo chgrp 33 configs/env.php secrets/.env.local.php secrets/jwt_public.pem secrets/jwt_private.pem ;
+      sudo chgrp 999 configs/redis-healthcheck.sh secrets/redis.conf secrets/mysql_root_password ;
       docker login -u gitlab-ci-token -p '"$CI_JOB_TOKEN"' '"$CI_REGISTRY"' ;
       docker compose pull ;
       docker compose up -d --no-recreate mysql redis ;
