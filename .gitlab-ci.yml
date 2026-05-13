@@ -299,6 +299,20 @@ qa:behat:
     reports:
       junit: build/behat-junit/*.xml
 
+# холостой прогон утилит для подготовки секретов и окружения
+qa:tools:
+  extends:
+    - .app-script
+    - .job-policy-mainline
+  needs:
+    - job: prepare:composer-cache
+      artifacts: false
+    - job: prepare-mainline:env
+      artifacts: true
+  script:
+    - composer symfony:dump-env prod
+    - bin/console app:generate-secrets secrets/mysql-password-test.twig
+
 deploy-mainline:prepare-secrets:
     extends:
       - .app-script
@@ -318,6 +332,8 @@ deploy-mainline:prepare-secrets:
       - job: qa:phpunit
         artifacts: false
       - job: qa:behat
+        artifacts: false
+      - job: qa:tools
         artifacts: false
     script:
       - mkdir --parent build/secrets
