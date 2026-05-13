@@ -67,19 +67,6 @@ stages:
     - composer install --prefer-dist --no-scripts --no-interaction
     - mkdir --parent build
 
-.deploy-script:
-  image: $CI_GIT_IMAGE_WITH_TAG
-  variables:
-    GIT_STRATEGY: none
-
-.deploy-script-ssh:
-  extends:
-    - .deploy-script
-  before_script:
-    - eval $(ssh-agent -s)
-    - chmod 600 "$SSH_PRIVATE_KEY"
-    - ssh-add "$SSH_PRIVATE_KEY"
-
 prepare-mainline:env:
   extends:
     - .job-policy-mainline
@@ -140,36 +127,6 @@ prepare-mainline:env:
     paths:
       - .env.prod.local
 
-build-mainline:docker-git-image:
-  extends:
-    - .job-policy-mainline
-  stage: build
-  script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker pull $CI_GIT_IMAGE_CACHE || true
-    - docker build
-          --cache-from $CI_GIT_IMAGE_CACHE
-          --tag $CI_GIT_IMAGE_WITH_TAG
-          ./docker/git
-    - docker push $CI_GIT_IMAGE_WITH_TAG
-    - docker logout $CI_REGISTRY
-
-build-mainline:docker-compose:
-  extends:
-    - .job-policy-mainline
-  stage: build
-  needs:
-    - job: prepare-mainline:env
-      artifacts: true
-  script:
-    - export DOCKER_COMPOSE_NAME="${SERVER_NAME//./_}"
-    - mkdir --parent build
-    - docker compose -f docker-compose.deploy.yml config > build/docker-compose.yml
-    - sed -i 's/\/builds\/'"$CI_PROJECT_NAMESPACE"'\/'"$CI_PROJECT_NAME"'/\./g' build/docker-compose.yml
-  artifacts:
-    paths:
-      - build/
-
 build:docker-source-image:
   extends:
     - .job-policy-branches
@@ -181,9 +138,6 @@ build-mainline:docker-source-image:
   extends:
     - .job-policy-mainline
     - .build-docker-source-image
-  needs:
-    - job: prepare-mainline:env
-      artifacts: true
 
 build-mainline:docker-app-image:
   extends:
@@ -314,6 +268,19 @@ qa:tools:
     - bin/console app:generate-secrets secrets/mysql-password.twig > /dev/null
     - bin/console app:generate-secrets secrets/redis.conf.twig > /dev/null
 
+deploy-mainline:prepare-docker-compose:
+    extends:
+        - .job-policy-mainline
+    stage: deploy
+    script:
+        - export DOCKER_COMPOSE_NAME="${SERVER_NAME//./_}"
+        - mkdir --parent build
+        - docker compose -f docker-compose.deploy.yml config > build/docker-compose.yml
+        - sed -i 's/\/builds\/'"$CI_PROJECT_NAMESPACE"'\/'"$CI_PROJECT_NAME"'/\./g' build/docker-compose.yml
+    artifacts:
+        paths:
+            - build/
+
 deploy-mainline:prepare-secrets:
   extends:
     - .app-script
@@ -350,16 +317,38 @@ deploy-mainline:prepare-secrets:
     paths:
       - build/
 
-deploy-mainline:secure-copy:
+deploy-mainline:deploy-image:
   extends:
-    - .deploy-script-ssh
+    - .job-policy-mainline
+  stage: deploy
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_GIT_IMAGE_CACHE || true
+    - docker build
+          --cache-from $CI_GIT_IMAGE_CACHE
+          --tag $CI_GIT_IMAGE_WITH_TAG
+          ./docker/git
+    - docker push $CI_GIT_IMAGE_WITH_TAG
+    - docker logout $CI_REGISTRY
+
+deploy-mainline:secure-copy:
+  image: $CI_GIT_IMAGE_WITH_TAG
+  extends:
     - .job-policy-mainline
   stage: deploy
   needs:
-    - job: build-mainline:docker-compose
+    - job: deploy-mainline:prepare-docker-compose
       artifacts: true
     - job: deploy-mainline:prepare-secrets
       artifacts: true
+    - job: deploy-mainline:deploy-image
+      artifacts: false
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    - eval $(ssh-agent -s)
+    - chmod 600 "$SSH_PRIVATE_KEY"
+    - ssh-add "$SSH_PRIVATE_KEY"
   script:
     - ssh -p 22 $DEPLOY_USER@$DEPLOY_HOST 'set -e ;
       rm -rf '"$DEPLOY_DIRECTORY"'_tmp ;

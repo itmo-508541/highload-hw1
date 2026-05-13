@@ -35,7 +35,7 @@
 
 - **GitLab CI — артефакты и `needs`**: у шаблона **`.app-script`** убран пустой **`dependencies: []`**, чтобы артефакты из **`needs`** (в т.ч. **`.env.prod.local`** для **`deploy-mainline:prepare-secrets`**, см. **Added**) корректно скачивались в deploy-job.
 
-- **GitLab CI — деплой по SSH**: шаблон **`.deploy-script-ssh`** — **`ssh-add`** получает путь из File-переменной **`SSH_PRIVATE_KEY`**, перед этим **`chmod 600 "$SSH_PRIVATE_KEY"`** (требования OpenSSH к правам на приватный ключ).
+- **GitLab CI — деплой по SSH**: удалены скрытые шаблоны **`.deploy-script`** / **`.deploy-script-ssh`**; job **`deploy-mainline:secure-copy`** задаёт **`image: $CI_GIT_IMAGE_WITH_TAG`**, **`variables: GIT_STRATEGY: none`**, **`before_script`** с **`ssh-agent`**, **`chmod 600 "$SSH_PRIVATE_KEY"`** и **`ssh-add`** (File-переменная **`SSH_PRIVATE_KEY`**). Сборка образа для этого job перенесена на стадию **`deploy`** и переименована в **`deploy-mainline:deploy-image`** (ранее **`build-mainline:docker-git-image`**); у **`deploy-mainline:secure-copy`** в **`needs`** указан **`deploy-mainline:deploy-image`** с **`artifacts: false`**, чтобы push в registry завершился до старта копирования на сервер.
 
 - **GitLab CI — `qa:behat`**: у сервиса Redis в **`services`** параметр **`--requirepass`** приведён к **`root`**, удалены **`variables: REDISCLI_AUTH`** у этого сервиса.
 
