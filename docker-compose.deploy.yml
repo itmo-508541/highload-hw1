@@ -53,23 +53,26 @@ services:
     redis:
         image: redis:8-trixie
         user: "999:999"
-        command: ["redis-server", "--requirepass", "${ENV_redis_password}"]
+        command: ["redis-server", "/run/secrets/redis.conf"]
         networks:
             - redis
-        environment:
-            REDISCLI_AUTH: "${ENV_redis_password}"
         volumes:
             - redis-data:/data
         <<: *default-security
         tmpfs:
             - /tmp:rw,noexec,nosuid,size=16M
         restart: always
+        configs:
+            - source: redis_healthcheck
+              target: /redis-healthcheck.sh
         healthcheck:
-            test: ["CMD-SHELL", "redis-cli --no-auth-warning PING | grep -q PONG"]
+            test: ["CMD-SHELL", "sh /redis-healthcheck.sh"]
             interval: 10s
             timeout: 3s
             retries: 5
             start_period: 3s
+        secrets:
+          - redis.conf
 
     mysql:
         image: mysql:8.0-debian
@@ -79,10 +82,12 @@ services:
         expose:
             - 3306
         environment:
-            MYSQL_ROOT_PASSWORD: "${ENV_database_root_password}"
+            MYSQL_ROOT_PASSWORD: "/run/secrets/mysql_root_password"
         volumes:
           - database:/var/lib/mysql
         restart: always
+        secrets:
+          - mysql_root_password
 
 volumes:
     database:
@@ -96,6 +101,8 @@ networks:
 configs:
     env.php:
         file: env.php
+    redis_healthcheck:
+        file: redis-healthcheck.sh
 
 secrets:
     .env.local.php:
@@ -104,3 +111,7 @@ secrets:
         file: secrets/jwt_public.pem
     jwt_private.pem:
         file: secrets/jwt_private.pem
+    mysql_root_password:
+        file: secrets/mysql_root_password
+    redis.conf:
+        file: secrets/redis.conf

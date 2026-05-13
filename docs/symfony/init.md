@@ -123,7 +123,9 @@ docker compose exec redis redis-cli -a "$ENV_redis_password" --no-auth-warning K
 docker compose exec redis redis-cli -a "$ENV_redis_password" --no-auth-warning TTL 'sf_s:<id>'
 ```
 
-В `docker-compose.yml` сервису `redis` пробрасывается `REDISCLI_AUTH=${ENV_redis_password}`, поэтому `redis-cli` внутри контейнера авторизуется автоматически — `docker compose exec redis redis-cli PING` отвечает `PONG` даже без явного `-a`. Это означает, что сам по себе `PING` **не подтверждает**, что AUTH включён. Чтобы проверить факт включения пароля, надо явно передать заведомо неправильный пароль и убедиться, что сервер вернёт `WRONGPASS`:
+В **`docker-compose.yml`** (локально) у сервиса **`redis`** задано **`REDISCLI_AUTH: "root"`** (как в **`.env`**), поэтому **`docker compose exec redis redis-cli PING`** внутри контейнера отвечает **`PONG`** без `-a`. На **проде** в **`docker-compose.deploy.yml`** у **`redis`** переменных **`ENV_*` в `environment:` нет** — пароль только в **`/run/secrets/redis.conf`**, healthcheck читает его из файла (см. **`secrets/redis-healthcheck.sh`**).
+
+Сам по себе **`PING` без проверки пароля** не доказывает, что AUTH включён. Чтобы убедиться, что сервер отклоняет неверный пароль:
 
 ```bash
 docker compose exec redis redis-cli -a wrong_password --no-auth-warning PING

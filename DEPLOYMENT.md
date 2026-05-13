@@ -29,7 +29,7 @@
 - `ENV_database_password`
 - `ENV_database_root_password` — root-пароль MySQL; используется при создании БД и пользователя через `phing database-deploy` и при интерполяции `${...}` в `docker-compose.deploy.yml`.
 - `ENV_jwt_passphrase`
-- `ENV_redis_password` — пароль Redis; попадает в `--requirepass` сервиса `redis`, в `REDISCLI_AUTH` и в резолв `REDIS_URL` для приложения.
+- `ENV_redis_password` — пароль Redis; на CI участвует в генерации **`secrets/redis.conf`** (Twig **`secrets/redis.conf.twig`**, **`app:generate-secrets`**) и попадает в дамп **`REDIS_URL`** для приложения. В контейнере **`redis`** на проде **нет** `environment:` с `ENV_*` — пароль только в secret **`/run/secrets/redis.conf`**, проверка готовности — **`/redis-healthcheck.sh`** (config из **`secrets/redis-healthcheck.sh`**).
 
 **Файловые переменные (тип File), проверяются `REQUIRED_FILES`:**
 
