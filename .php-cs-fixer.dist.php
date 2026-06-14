@@ -3,17 +3,17 @@
 declare(strict_types=1);
 
 $rules = [
-    '@PHP8x0Migration' => true,
-    '@PHP8x0Migration:risky' => true,
+    '@PHP8x4Migration' => true,
+    '@PHP8x4Migration:risky' => true,
     '@PHPUnit8x4Migration:risky' => true,
     '@PSR12' => true,
     '@PSR12:risky' => true,
     '@Symfony' => true,
     '@Symfony:risky' => true,
-    'array_syntax' => ['syntax' => 'short'],
     'combine_consecutive_issets' => true,
     'combine_consecutive_unsets' => true,
     'compact_nullable_type_declaration' => true,
+    'declare_strict_types' => ['strategy' => 'enforce'],
     'global_namespace_import' => ['import_classes' => false, 'import_constants' => false, 'import_functions' => false],
     'list_syntax' => ['syntax' => 'short'],
     'logical_operators' => true,
