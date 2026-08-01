@@ -253,6 +253,25 @@ qa:behat:
     reports:
       junit: build/behat-junit/*.xml
 
+# OpenSpec CLI (Node) — проверка процессного tooling; не контейнер php
+qa:openspec:
+  extends:
+    - .job-policy-branches
+  stage: test
+  image: node:22-bookworm
+  needs: []
+  variables:
+    OPENSPEC_TELEMETRY: "0"
+  cache:
+    key: "npm-cache"
+    paths:
+      - .npm/
+  before_script:
+    - npm ci --cache .npm --prefer-offline
+  script:
+    - npx openspec --version
+    - npx openspec validate --all --no-interactive
+
 # холостой прогон утилит для подготовки секретов и окружения
 qa:tools:
   extends:
@@ -302,6 +321,8 @@ deploy-mainline:prepare-secrets:
     - job: qa:phpunit
       artifacts: false
     - job: qa:behat
+      artifacts: false
+    - job: qa:openspec
       artifacts: false
     - job: qa:tools
       artifacts: false

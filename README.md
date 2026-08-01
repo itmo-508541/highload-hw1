@@ -12,6 +12,7 @@
 - Composer
 - Phing (инициализация, миграции, deploy-команды)
 - QA-инструменты: PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat
+- OpenSpec (процесс изменений: explore → propose → apply → archive); CLI через `npx`, Node.js ≥ 20.19
 
 ## Быстрый старт
 
@@ -33,7 +34,31 @@ make deps
 make qa
 ```
 
-Подробности смотри в [документации](docs/symfony/init.md).
+OpenSpec (процесс изменений; локальный CLI из `package.json`, без глобальной установки):
+
+```bash
+npm ci
+npx openspec --version
+npx openspec validate --all --no-interactive
+```
+
+В Cursor: `/opsx-explore`, `/opsx-propose`, `/opsx-apply`, `/opsx-archive` и связанные skills.
+Единый процесс ролей и артефактов: [openspec/process.md](openspec/process.md).
+
+## Документация
+
+| Вход | Зачем |
+|------|--------|
+| [ABOUT.md](ABOUT.md) | Продукт и рамки шаблона |
+| [openspec/process.md](openspec/process.md) | Процесс изменений, роли, слои тестов, ADR, куда класть docs |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | CI-гейт, переменные, обзор деплоя → детали в `.gitlab-ci.yml` |
+| [docs/redis.md](docs/redis.md) | Runbook: Redis / сессии |
+| [docs/dotenv.md](docs/dotenv.md) | Runbook: Dotenv / env / prod-шим |
+| [docs/phing.md](docs/phing.md) | Runbook: Phing / init / test-env |
+| [docs/volume.md](docs/volume.md) | Runbook: именованный Docker volume |
+
+Отдельный `CHANGELOG.md` **не** ведётся: принятое поведение — в
+`openspec/specs/`, история коммитов — в git.
 
 ## Начало работы
 
@@ -52,19 +77,3 @@ make qa
 - Соблюдайте единый стиль кода (`.editorconfig`, `.php-cs-fixer.dist.php`) и не обходите проверки качества.
 - Перед merge обязательно прогоняйте QA-набор (`php-cs-fixer`, `phpstan`, `rector`, `phpunit`, `behat`).
 - Не храните production-секреты в репозитории и в коммитах. Для production используются CI-переменные и серверные env-файлы.
-
-## Добавление новых volume
-
-В **`docker-compose.yml`** для **`php`** и **`nginx`** включён **`read_only: true`** (в **`docker-compose.deploy.yml`** — также **`spare`**). Корень файловой системы контейнера запечатан на уровне слоёв образа: запись возможна только в **`tmpfs`** (то, что не нужно переживать пересоздание контейнера, например **`/tmp`**) или в смонтированный **volume** / bind mount (постоянное состояние — загрузки, выгрузки, отчёты).
-
-Когда приложению нужно постоянное файловое хранилище, его добавляют как именованный bind-volume — одним и тем же набором правок для локального окружения и production-деплоя.
-
-Пошаговый рецепт: [docs/symfony/volume.md](docs/symfony/volume.md). Покрывает **`.env`**, **`docker-compose.yml`**, **`docker-compose.deploy.yml`**, **`docker-compose.override.yml.dist`**, CI/CD-переменные и подготовку каталогов на хостах.
-
-Промпт для агента Cursor (замените имя тома на нужное):
-
-```
-Создай новый volume по инструкции в @docs/symfony/volume.md. Пусть волюм называется results
-```
-
-После применения — обязательно прогнать smoke-тест из раздела «Проверка» инструкции.

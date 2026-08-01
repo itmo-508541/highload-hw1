@@ -81,8 +81,13 @@ COPY \
     --exclude=.env \
     --exclude=.env.* \
     --exclude=config/jwt \
+    --exclude=adr \
     --exclude=docs \
     --exclude=features \
+    --exclude=node_modules \
+    --exclude=openspec \
+    --exclude=package.json \
+    --exclude=package-lock.json \
     --exclude=secrets \
     --exclude=tests \
     --from=source_image \

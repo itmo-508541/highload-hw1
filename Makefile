@@ -11,10 +11,6 @@ up:
 deps:
 	docker compose exec php composer install
 
-# На хосте из корня репозитория: выровнять владельца всех путей под текущего пользователя (после работы в контейнере от root).
-owner:
-	sudo find . -xdev ! -user "$$(id -un)" -exec chown "$$(id -un):$$(id -gn)" {} +
-
 # Optional: ARGS="path/to/Test.php" (avoids GNU make treating extra CLI words as extra targets)
 test:
 	docker compose exec -T php vendor/bin/phpunit $(if $(strip $(ARGS)),$(ARGS),$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)))
