@@ -28,13 +28,16 @@
     },
     "require-dev": {
         "behat/behat": "^3.30",
+        "friends-of-behat/mink-extension": "^2.7",
         "friends-of-behat/symfony-extension": "^2.6",
         "friendsofphp/php-cs-fixer": "^3.94",
         "phpstan/phpdoc-parser": "^2.1",
         "phpstan/phpstan-symfony": "^2.0",
         "phpunit/phpunit": "^13",
         "rector/rector": "^2.3",
+        "robertfausk/behat-panther-extension": "^2.0",
         "symfony/maker-bundle": "^1.33",
+        "symfony/panther": "^2.4",
         "symfony/phpunit-bridge": "^7.4",
         "symfony/stopwatch": "^7.4",
         "symfony/web-profiler-bundle": "^7.4"

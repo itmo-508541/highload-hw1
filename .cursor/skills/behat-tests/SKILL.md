@@ -14,12 +14,12 @@ description: Описывает написание и обновление сц�
   (избегайте дублирования ради дублирования).
 - Конфигурация по умолчанию: `behat.yml.dist`, bootstrap: `tests/bootstrap.php`, расширение Symfony: `FriendsOfBehat\SymfonyExtension` (ядро в окружении `test`).
 - Локальные правки: копия `behat.yml.dist` → `behat.yml` (не коммитится).
-- Сценарии: каталог `features/` (`*.feature`), контексты шагов: `tests/Behat/`, пространства имён вида `App\Tests\Behat\...`, регистрация контекстов в `behat.yml.dist` (или в `behat.yml`).
+- Сценарии: «быстрая» приёмка — `features/` (suite `default`, filter `~@e2e`); E2E — `features/e2e/` (suite `e2e`, Mink+Panther). Контексты: `tests/Behat/`, регистрация в `behat.yml.dist`.
 - Запуск **только в Docker**: контейнер `php` должен быть поднят (`make up`).
 - Прямой `docker compose exec`: для неинтерактивного режима (скрипты, агенты, CI) используйте **`exec -T`** — без псевдо-TTY, как в цели `make behat` в `Makefile`.
 - **Запрещено** сливать `openspec/specs/**` и `features/`: это разные слои
   (соглашение vs исполняемый BDD). Не переносить `.feature` в `openspec/` и
-  не класть OpenSpec `spec.md` в `features/`.
+  не класть OpenSpec `spec.md` в `features/`. E2E не смешивать с suite `default`.
 
 ## Рабочий цикл
 
@@ -31,7 +31,8 @@ description: Описывает написание и обновление сц�
 5. В `tasks.md` change указывать пути к `.feature` / контексту и связь со
    Scenario specs, где уместно (формальная матрица ID — вне scope; достаточно ссылок).
 6. Запустить прогон:
-   - весь набор: `make behat`
+   - default: `make behat`
+   - E2E: `make behat-e2e` (нужен Redis; см. `docs/e2e.md`)
    - один feature: `make behat features/phing_dotenv_property_task.feature` или `make behat ARGS="features/phing_dotenv_property_task.feature"`
 7. Исправить падения до зелёного прогона, если это в рамках задачи.
 
@@ -39,6 +40,7 @@ description: Описывает написание и обновление сц�
 
 ```bash
 make behat
+make behat-e2e
 make behat features/phing_dotenv_property_task.feature
 make behat ARGS="features/phing_dotenv_property_task.feature"
 ```

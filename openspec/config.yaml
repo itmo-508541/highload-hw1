@@ -5,10 +5,12 @@ schema: spec-driven
 context: |
   Проект: Symfony-шаблон backend (PHP 8.4, Symfony 7.4; MySQL 8, Redis 8,
   Docker Compose, Composer, Phing). Бандлы: FOSRest, LexikJWT, NelmioApiDoc, SonataAdmin.
-  PHP и QA только в Docker-сервисе `php`; фасад — Makefile (`make test` / `make behat` / `make qa`).
+  PHP и QA только в Docker-сервисе `php`; фасад — Makefile (`make test` /
+  `make behat` / `make test-e2e` / `make behat-e2e` / `make qa`).
   Язык артефактов (proposal/design/tasks/specs) — русский; пути, ID, CLI — как в инструментах.
-  Слои не смешивать: поведение = openspec/specs/**; unit = tests/; приёмка = features/;
-  E2E — отдельный будущий слой. Main specs сейчас: platform, qa.
+  Слои не смешивать: поведение = openspec/specs/**; unit = tests/ + PHPUnit;
+  приёмка = features/ + Behat; E2E = tests/E2E + features/e2e (Panther).
+  Main specs сейчас: platform, qa.
   Процесс (core), ADR, CLI/CI — openspec/process.md. Операционные runbook'и — docs/ (см. docs/AGENTS.md).
   В specs — только поведение и invariants, не runbook'и.
 
@@ -41,11 +43,11 @@ operations:
   apply:
     guidance:
       - "Реализуй строго по tasks.md активного change; отмечай выполненное в чеклисте."
-      - "После реализации (код и/или тесты) запускай в Docker релевантные проверки по scope: make test и/или make behat; при широком изменении — make qa."
+      - "После реализации (код и/или тесты) запускай в Docker релевантные проверки по scope: make test и/или make behat; при E2E-scope — make test-e2e / make behat-e2e; при широком изменении — make qa."
       - "Сверяй покрытие с Scenario из specs change: новый или изменённый Scenario без теста — пробел, закрой до archive."
       - "Не добавляй записи в CHANGELOG как часть apply."
   archive:
     guidance:
-      - "Перед archive убедись, что релевантные проверки зелёные (make test / make behat по scope) и delta specs готовы к merge."
+      - "Перед archive убедись, что релевантные проверки зелёные (make test / make behat / E2E-таргеты по scope) и delta specs готовы к merge."
       - "Дай краткое summary исхода (что вошло в main specs, что осталось follow-up)."
       - "Не веди и не требуй CHANGELOG при закрытии change."

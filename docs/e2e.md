@@ -1,0 +1,40 @@
+# E2E-приёмка (внешний клиент)
+
+Отдельный контур для сценариев через **headless-браузер** (Symfony Panther / Chromium). Не смешивается с обычным PHPUnit Unit и «быстрым» Behat (`APP_ENV=test`, упрощённые сессии без Redis).
+
+## Два контура
+
+| Контур | Команда | Окружение приложения | Сессии |
+| ------ | ------- | -------------------- | ------ |
+| Обычный test | `make test`, `make behat` | `APP_ENV=test` | `session.storage.factory.mock_file` (`when@test`) — Redis не обязателен |
+| E2E | `make test-e2e`, `make behat-e2e` | Panther поднимает приложение с `APP_ENV=e2e` (`PANTHER_APP_ENV` / options). В `config/packages/framework.yaml` для `when@e2e` включён `framework.test` (test-container), **без** подмены сессий на `mock_file` | Тот же `RedisSessionHandler`, что в **dev** и **prod** |
+
+Harness шаблона: PHPUnit suite **E2E** — открытие `/` (`tests/E2E/HomepageTest.php`) и probe записи cookie-сессии в Redis (`tests/E2E/E2eSessionStorageTest.php`, ключ `sf_s:`). Behat suite **e2e** — Mink+Panther открывает главную (`features/e2e/`). HTTP-статус через Mink/Panther **не** проверяем (`getStatusCode` в драйвере недоступен); статус — в PHPUnit.
+
+Два именованных Mink-сеанса `panther` **не** дают два независимых cookie jar: `createPantherClient()` возвращает один и тот же Client. Для двух клиентов используйте `createAdditionalPantherClient()` в PHPUnit E2E (продуктовые мультиклиентские дымы — отдельные задачи).
+
+## Локальный запуск
+
+Нужны поднятые контейнеры (`make up`), в том числе **Redis** (для E2E-сессий).
+
+```bash
+make test-e2e          # PHPUnit suite E2E
+make behat-e2e         # Behat suite e2e (Mink + Panther; перед запуском — Phing -Dapp.env=test)
+```
+
+Повторный прогон той же командой должен завершаться успешно без ручных шагов.
+
+Полный локальный QA (включая E2E): `make qa`.
+
+## CI
+
+В GitLab CI:
+
+- `qa:phpunit` — только `--testsuite=Unit`
+- `qa:phpunit-e2e` — `--testsuite=E2E` + сервис Redis
+- `qa:behat` — suite `default` (без Redis)
+- `qa:behat-e2e` — suite `e2e` + сервис Redis + Chromium из образа `dev`/`source`
+
+Автотесты **не** гоняются против staging/prod.
+
+Архитектурное решение: [`adr/0002-e2e-acceptance-infrastructure.md`](../adr/0002-e2e-acceptance-infrastructure.md).

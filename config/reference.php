@@ -1836,6 +1836,27 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         nelmio_api_doc?: NelmioApiDocConfig,
  *         stimulus?: StimulusConfig,
  *     },
+ *     "when@e2e"?: array{
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         framework?: FrameworkConfig,
+ *         doctrine?: DoctrineConfig,
+ *         doctrine_migrations?: DoctrineMigrationsConfig,
+ *         knp_menu?: KnpMenuConfig,
+ *         twig?: TwigConfig,
+ *         sonata_twig?: SonataTwigConfig,
+ *         sonata_form?: SonataFormConfig,
+ *         sonata_block?: SonataBlockConfig,
+ *         sonata_exporter?: SonataExporterConfig,
+ *         security?: SecurityConfig,
+ *         sonata_admin?: SonataAdminConfig,
+ *         sonata_doctrine_orm_admin?: SonataDoctrineOrmAdminConfig,
+ *         fos_rest?: FosRestConfig,
+ *         lexik_jwt_authentication?: LexikJwtAuthenticationConfig,
+ *         nelmio_api_doc?: NelmioApiDocConfig,
+ *         stimulus?: StimulusConfig,
+ *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1962,6 +1983,7 @@ namespace Symfony\Component\Routing\Loader\Configurator;
  * }
  * @psalm-type RoutesConfig = array{
  *     "when@dev"?: array<string, RouteConfig|ImportConfig|AliasConfig>,
+ *     "when@e2e"?: array<string, RouteConfig|ImportConfig|AliasConfig>,
  *     "when@prod"?: array<string, RouteConfig|ImportConfig|AliasConfig>,
  *     "when@test"?: array<string, RouteConfig|ImportConfig|AliasConfig>,
  *     ...<string, RouteConfig|ImportConfig|AliasConfig>

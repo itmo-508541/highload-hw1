@@ -98,7 +98,7 @@ OpenSpec — прежде всего **процесс и артефакты в g
 | Деплой: гейт, переменные, обзор пайплайна | [`DEPLOYMENT.md`](../DEPLOYMENT.md) → детали в `.gitlab-ci.yml` |
 | Процесс изменений, роли, ADR, слои тестов | этот файл (`process.md`) |
 | Поведение (Requirement / Scenario) | `openspec/specs/` (через change → archive) |
-| Операционные runbook'и («как сделать») | `docs/` (`redis`, `dotenv`, `phing`, `volume`) и/или `.cursor/skills/` |
+| Операционные runbook'и («как сделать») | `docs/` (`redis`, `e2e`, `dotenv`, `phing`, `volume`) и/или `.cursor/skills/` |
 | Архитектурные решения | корневой [`adr/`](../adr/) (`/adr`) |
 | История коммитов | **git**; принятое поведение — specs + `changes/archive/` |
 
@@ -117,7 +117,7 @@ OpenSpec — прежде всего **процесс и артефакты в g
 | Соглашение о поведении | `openspec/specs/**`, delta в change | Requirement + Scenario |
 | Unit / integration | `tests/` + PHPUnit (`make test`) | Код и контракты |
 | Приёмка (BDD) | `features/` + Behat (`make behat`) | Исполняемые сценарии |
-| E2E (будущее) | отдельный каталог/runner (TBD) | Зарезервировано; третий исполняемый слой |
+| E2E (браузер) | `tests/E2E/` + PHPUnit suite E2E; `features/e2e/` + Behat suite e2e | Panther / Chromium; `make test-e2e` / `make behat-e2e`; runbook `docs/e2e.md` |
 
 **Запрещено** сливать `openspec/specs/**` и `features/`: не переносить
 `.feature` в OpenSpec и не класть `spec.md` в `features/`. Skills:
@@ -134,8 +134,8 @@ PHP и QA-инструменты — **только** в Docker-сервисе `
 |----------------------|------|
 | Ожидаемое поведение (Requirement / Scenario) | delta specs в change → после archive в `openspec/specs/` |
 | Проверка кода / контракта без UI-потока | `tests/` + PHPUnit; часто **достаточно одного** этого слоя |
-| Исполняемую приёмку (Gherkin) | `features/*.feature` + контексты в `tests/Behat/` |
-| Сквозной UI/browser E2E | **будущий** отдельный слой (каталог, runner, CI — TBD; интеграция готового набора из другого проекта — follow-up). Не класть в `openspec/specs/` и не сливать с `features/` |
+| Исполняемую приёмку (Gherkin) | `features/*.feature` + контексты в `tests/Behat/` (suite `default`; не `features/e2e/`) |
+| Сквозной UI/browser E2E | `tests/E2E/` (PHPUnit suite E2E) и/или `features/e2e/` (Behat suite e2e); детали — `docs/e2e.md`. Не класть в `openspec/specs/` и не смешивать с «быстрой» приёмкой `features/` + `APP_ENV=test` |
 
 Каждый Scenario из **затрагиваемого** spec должен иметь или получить
 подтверждение тестом: PHPUnit и/или Behat по смыслу Scenario (не обязательно
@@ -173,9 +173,11 @@ proposal → specs → design → [ADR при нужде] → tasks → apply �
 ## Проверки
 
 - Локально по затронутому scope: `make test`, `make behat` (в Docker); при
-  широком изменении — `make qa`.
+  E2E-scope — `make test-e2e` / `make behat-e2e`; при широком изменении —
+  `make qa`.
 - OpenSpec: `npx openspec validate --all --no-interactive`.
-- CI: PHP QA jobs + `qa:openspec` до mainline-гейта.
+- CI: PHP QA jobs (в т.ч. `qa:phpunit-e2e` / `qa:behat-e2e`) + `qa:openspec`
+  до mainline-гейта.
 
 При закрытии change (`/opsx-archive`) достаточно краткого summary исхода.
 **Не** создавать и **не** дополнять `CHANGELOG.md`.
@@ -205,6 +207,6 @@ proposal → specs → design → [ADR при нужде] → tasks → apply �
 - Specs: [`specs/`](./specs/) (начальные: `platform`, `qa`)
 - Changes: [`changes/`](./changes/)
 - ADR (durable): [`../adr/`](../adr/)
-- Операционные runbook'и: [`../docs/`](../docs/) (`redis`, `dotenv`, `phing`, `volume`)
+- Операционные runbook'и: [`../docs/`](../docs/) (`redis`, `e2e`, `dotenv`, `phing`, `volume`)
 - Маркер каталога: [`AGENTS.md`](./AGENTS.md)
 - Вход в репозиторий: [`../README.md`](../README.md)

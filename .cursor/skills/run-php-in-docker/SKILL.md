@@ -26,8 +26,8 @@ description: Запускает команды PHP и связанных инс�
 | Поднять контейнеры | `make up` |
 | Инициализация (Phing: БД, миграции) | `make init` |
 | Зависимости Composer | `make deps` |
-| PHPUnit | `make test` — узкий прогон: `make test path/to/Test.php` или `make test ARGS="..."` |
-| Behat | `make behat` — узкий прогон: `make behat features/foo.feature` или `make behat ARGS="..."` |
+| PHPUnit | `make test` (Unit); `make test-e2e` (E2E) — узкий прогон: `make test ARGS="..."` |
+| Behat | `make behat` (default); `make behat-e2e` (E2E / Mink+Panther) |
 | PHP CS Fixer | `make cs` |
 | PHPStan | `make phpstan` |
 | Rector | `make rector` |
@@ -51,5 +51,6 @@ docker compose exec php vendor/bin/rector <args>
 
 ## Заметки
 
-- **Behat:** цель `make behat` перед `behat` вызывает Phing с тестовым окружением — для полного соответствия CI предпочитай её, а не голый `vendor/bin/behat`.
+- **Behat:** цели `make behat` / `make behat-e2e` перед `behat` вызывают Phing с `-Dapp.env=test` (как в CI); приложение под Panther в E2E — `APP_ENV=e2e` из `behat.yml.dist`. Предпочитай Makefile, а не голый `vendor/bin/behat`.
+- **E2E:** нужен Redis в compose; детали — `docs/e2e.md`.
 - **Права на хосте:** команды в контейнере часто от `root`; новые файлы в смонтированных каталогах могут стать `root` на хосте — см. `make owner`.

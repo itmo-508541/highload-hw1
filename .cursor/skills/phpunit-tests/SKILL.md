@@ -11,12 +11,11 @@ description: Описывает написание и обновление PHPUn
   (`openspec/changes/<name>/specs/**`) и/или main specs (`openspec/specs/**`).
   Requirement/Scenario задают *что* должно быть верно; PHPUnit проверяет это
   на уровне кода. Не дублировать длинные specs wholesale в docblock'и тестов.
-- Конфигурация: `phpunit.dist.xml`, bootstrap: `tests/bootstrap.php`, окружение тестов: `APP_ENV=test` (задано в конфиге PHPUnit).
-- Тесты: каталог `tests/`, пространства имён вида `App\Tests\...` для классов из `App\...`.
+- Конфигурация: `phpunit.dist.xml`, bootstrap: `tests/bootstrap.php`, окружение Unit: `APP_ENV=test` (в конфиге PHPUnit). Suite: `Unit` (exclude `tests/E2E`) и `E2E`.
+- Тесты: каталог `tests/` (Unit/integration); E2E — `tests/E2E/` (Panther / Redis-сессии). Пространства имён вида `App\Tests\...`.
 - Запуск **только в Docker**: контейнер `php` должен быть поднят (`make up`). На хосте без контейнера не полагаться на совпадение PHP/расширений с CI.
 - Прямой `docker compose exec`: для неинтерактивного режима (скрипты, агенты, CI) используйте **`exec -T`** — без псевдо-TTY, как в цели `make test` в `Makefile`.
-- **Не смешивать каталоги:** OpenSpec specs остаются в `openspec/`; исполняемые
-  Behat `.feature` — в `features/`; PHPUnit — только в `tests/`.
+- **Не смешивать каталоги:** OpenSpec specs — в `openspec/`; Behat — в `features/` / `features/e2e/`; PHPUnit Unit — в `tests/` вне `tests/E2E/`.
 
 ## Рабочий цикл
 
@@ -28,7 +27,8 @@ description: Описывает написание и обновление PHPUn
 5. В `tasks.md` change (если ведёте OpenSpec) указывать пути к затронутым
    `*Test.php` и связь со Scenario, где уместно.
 6. Запустить прогон:
-   - весь набор: `make test`
+   - Unit: `make test`
+   - E2E: `make test-e2e` (нужен Redis; см. `docs/e2e.md`)
    - один файл: `make test tests/Path/To/SomeTest.php` или `make test ARGS="tests/Path/To/SomeTest.php"`
 7. Исправить падения до зелёного прогона, если это в рамках задачи.
 

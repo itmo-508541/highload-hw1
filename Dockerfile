@@ -49,8 +49,14 @@ COPY docker/php-dev /etc/php/8.4/
 COPY --from=composer/composer:latest-bin /composer /usr/local/bin/composer
 
 RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends php8.4-xdebug
+    && apt-get install -y --no-install-recommends \
+        php8.4-xdebug \
+        chromium \
+        chromium-driver
 USER www-data
+
+ENV PANTHER_NO_SANDBOX=1
+ENV PANTHER_CHROME_ARGUMENTS='--disable-dev-shm-usage'
 
 # Используется для подготовки кода и ассетов для prod образа
 FROM dev AS source

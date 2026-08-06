@@ -26,6 +26,11 @@ when@test:
         session:
             storage_factory_id: session.storage.factory.mock_file
 
+# E2E: test-container для KernelTestCase, сессии как в dev/prod (Redis), не mock_file
+when@e2e:
+    framework:
+        test: true
+
 services:
     Symfony\Component\HttpFoundation\Session\Storage\Handler\RedisSessionHandler:
         arguments:

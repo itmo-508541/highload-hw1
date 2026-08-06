@@ -14,10 +14,10 @@
 
 В тестовом окружении (`when@test:` в `config/packages/framework.yaml`)
 `storage_factory_id` подменяется на `session.storage.factory.mock_file`, поэтому
-`make test` (PHPUnit) и `make behat` локально **не требуют** работающего Redis.
-В CI (`qa:behat`, см. [`.gitlab-ci.yml`](../.gitlab-ci.yml)) Redis всё равно
-поднимается как сервис — ради согласованности с dev-стендом и совместимости с
-возможными будущими сценариями, которым понадобится реальное подключение.
+`make test` (PHPUnit Unit) и `make behat` (suite `default`) **не требуют**
+работающего Redis ради сессий. Контур E2E (`APP_ENV=e2e`, `make test-e2e` /
+`make behat-e2e`, CI `qa:phpunit-e2e` / `qa:behat-e2e`) пишет сессии в Redis
+как dev/prod — см. [`e2e.md`](e2e.md).
 
 Persistence между перезапусками — именованный том `redis-data` (в
 `docker-compose.yml` и `docker-compose.deploy.yml`).

@@ -1,8 +1,17 @@
 default:
     suites:
         default:
+            paths:
+                - '%paths.base%/features'
+            filters:
+                tags: '~@e2e'
             contexts:
                 - App\Tests\Behat\PhingDotEnvContext
+        e2e:
+            paths:
+                - '%paths.base%/features/e2e'
+            contexts:
+                - App\Tests\Behat\HomepageContext
 
     extensions:
         FriendsOfBehat\SymfonyExtension:
@@ -11,3 +20,17 @@ default:
                 environment: test
                 debug: true
             bootstrap: tests/bootstrap.php
+
+        Robertfausk\Behat\PantherExtension: ~
+
+        Behat\MinkExtension:
+            base_url: http://127.0.0.1:9080
+            javascript_session: panther
+            sessions:
+                panther:
+                    panther:
+                        options:
+                            browser: 'chrome'
+                            webServerDir: '%paths.base%/public'
+                            env:
+                                APP_ENV: e2e

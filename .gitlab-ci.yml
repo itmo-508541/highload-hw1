@@ -223,13 +223,36 @@ qa:phpunit:
   needs:
     - job: prepare:composer-cache
   script:
-    - vendor/bin/phpunit --colors=never --coverage-text --coverage-cobertura=build/phpunit-coverage.xml --log-junit build/phpunit-junit.xml  --do-not-cache-result
+    - vendor/bin/phpunit --testsuite=Unit --colors=never --coverage-text --coverage-cobertura=build/phpunit-coverage.xml --log-junit build/phpunit-junit.xml  --do-not-cache-result
   artifacts:
     reports:
       junit: build/phpunit-junit.xml
       coverage_report:
         coverage_format: cobertura
         path: build/phpunit-coverage.xml
+  coverage: /^\s*Lines:\s*(\d+\.\d+)\%/
+
+qa:phpunit-e2e:
+  extends:
+    - .app-script
+  needs:
+    - job: prepare:composer-cache
+  services:
+    - name: mysql:8.0-debian
+      alias: mysql
+      variables:
+        MYSQL_ROOT_PASSWORD: "root"
+    - name: redis:8-trixie
+      command: ["redis-server", "--requirepass", "root"]
+      alias: redis
+  script:
+    - vendor/bin/phpunit --testsuite=E2E --colors=never --coverage-text --coverage-cobertura=build/phpunit-coverage-e2e.xml --log-junit build/phpunit-junit-e2e.xml  --do-not-cache-result
+  artifacts:
+    reports:
+      junit: build/phpunit-junit-e2e.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: build/phpunit-coverage-e2e.xml
   coverage: /^\s*Lines:\s*(\d+\.\d+)\%/
 
 qa:behat:
@@ -247,11 +270,32 @@ qa:behat:
       alias: redis
   script:
     - phing -Dapp.env=test
-    - vendor/bin/behat --format=junit --out=build/behat-junit --format=pretty --out=build/progress.txt --no-colors
+    - vendor/bin/behat --suite=default --format=junit --out=build/behat-junit --format=pretty --out=build/progress.txt --no-colors
     - cat build/progress.txt
   artifacts:
     reports:
       junit: build/behat-junit/*.xml
+
+qa:behat-e2e:
+  extends:
+    - .app-script
+  needs:
+    - job: prepare:composer-cache
+  services:
+    - name: mysql:8.0-debian
+      alias: mysql
+      variables:
+        MYSQL_ROOT_PASSWORD: "root"
+    - name: redis:8-trixie
+      command: ["redis-server", "--requirepass", "root"]
+      alias: redis
+  script:
+    - phing -Dapp.env=test
+    - vendor/bin/behat --suite=e2e --format=junit --out=build/behat-junit-e2e --format=pretty --out=build/progress-e2e.txt --no-colors
+    - cat build/progress-e2e.txt
+  artifacts:
+    reports:
+      junit: build/behat-junit-e2e/*.xml
 
 # OpenSpec CLI (Node) — проверка процессного tooling; не контейнер php
 qa:openspec:
@@ -320,7 +364,11 @@ deploy-mainline:prepare-secrets:
       artifacts: false
     - job: qa:phpunit
       artifacts: false
+    - job: qa:phpunit-e2e
+      artifacts: false
     - job: qa:behat
+      artifacts: false
+    - job: qa:behat-e2e
       artifacts: false
     - job: qa:openspec
       artifacts: false

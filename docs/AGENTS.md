@@ -9,6 +9,7 @@
 | Путь | Назначение |
 |------|------------|
 | `redis.md` | Redis: сессии, smoke `redis-cli`, local vs prod AUTH |
+| `e2e.md` | E2E: Panther/Chromium, контуры Unit vs E2E, CI job’ы |
 | `dotenv.md` | Dotenv: цепочка env, prod-шим, группы `ENV_*` |
 | `phing.md` | Phing: `make init`, bootstrap/`symfonyenv`, test-env для Behat |
 | `volume.md` | Именованный bind-volume: когда нужен, smoke, ловушки (+ skill) |
