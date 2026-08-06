@@ -1,50 +1,45 @@
 schema: spec-driven
 
 # Project context — injected into ALL artifact prompts.
-# Операционные детали стека — в docs/; процесс/ADR — в openspec/process.md.
 context: |
-  Проект: Symfony-шаблон backend (PHP 8.4, Symfony 7.4; MySQL 8, Redis 8,
-  Docker Compose, Composer, Phing). Бандлы: FOSRest, LexikJWT, NelmioApiDoc, SonataAdmin.
-  PHP и QA только в Docker-сервисе `php`; фасад — Makefile (`make test` /
-  `make behat` / `make test-e2e` / `make behat-e2e` / `make qa`).
-  Язык артефактов (proposal/design/tasks/specs) — русский; пути, ID, CLI — как в инструментах.
-  Слои не смешивать: поведение = openspec/specs/**; unit = tests/ + PHPUnit;
-  приёмка = features/ + Behat; E2E = tests/E2E + features/e2e (Panther).
-  Main specs сейчас: platform, qa.
-  Процесс (core), ADR, CLI/CI — openspec/process.md. Операционные runbook'и — docs/ (см. docs/AGENTS.md).
-  В specs — только поведение и invariants, не runbook'и.
+  Проект: Symfony-backend.
+  Стек: PHP 8.4, Symfony 7.4, MySQL 8, Redis 8, Docker Compose, Composer, Make, Phing
+  Бандлы: FOSRest, LexikJWT, NelmioApiDoc, SonataAdmin.
+
+  Тестирование:
+  - PHPUnit 13 — unit/integration тесты (tests/).
+  - Behat 3 — functional/acceptance тесты (features/) и E2E-тесты (Panther, Mink).
+
+  Инструменты качества: PHP CS Fixer, PHPStan, Rector.
+
+  Скиллы:
+  - phpunit-tests — unit/integration тесты (.cursor/skills/phpunit-tests/SKILL.yaml).
+  - behat-tests — functional/acceptance/e2e тесты (.cursor/skills/behat-tests/SKILL.yaml).
+  - brownfield-map — описание существующего поведения legacy-кода (.cursor/skills/brownfield-map/SKILL.yaml).
+
+  Язык: русский.
 
 # Per-artifact rules — injected only for the matching artifact.
 rules:
   proposal:
-    - "Пиши на русском; имя change — kebab-case латиницей."
-    - "Явно укажи Why, What Changes, Non-goals и Impact (код, API, ops, тесты)."
-  specs:
-    - "Пиши требования и сценарии на русском."
-    - "Сценарии в формате Given/When/Then (или эквивалентные блоки с теми же ролями)."
-    - "Описывай наблюдаемое поведение, не детали реализации."
-    - "Каждый Scenario затрагиваемого capability должен подразумевать покрытие тестом: PHPUnit (tests/) и/или Behat (features/) — по смыслу Scenario; не обязательно оба слоя."
-    - "При затрагивании тестов укажи ожидаемый слой: PHPUnit (tests/) и/или Behat (features/). Запрещено предлагать сливать или переносить каталоги openspec/specs и features."
-  design:
-    - "Пиши на русском; опирайся на существующие паттерны репозитория (Docker-only PHP, Makefile)."
-    - "Зафиксируй риски, границы модулей и необходимость ADR, если решение архитектурное; иначе явно отметь, что durable ADR не требуется."
-    - "Укажи, какие проверки (make test / make behat / make qa) подтверждают design."
-  tasks:
-    - "Пиши на русском; задачи — конкретные, проверяемые чеклист-пункты."
-    - "Для каждого затронутого Scenario из specs добавь или укажи тест (путь к *Test.php и/или .feature); ссылай Scenario → тест без формальной матрицы ID."
-    - "Включай шаги на тесты по затронутому scope; change без UI/приёмки может ограничиться PHPUnit."
-    - "PHP/QA-команды формулируй через Makefile / Docker-сервис php, не запуск PHPUnit/Behat на хосте."
-    - "При архитектурном решении добавь задачу на ADR (/adr → adr/NNNN-<slug>.md); если durable ADR не нужен — не изобретай."
-    - "Не предлагай переносить .feature в openspec/ или spec.md в features/."
+    - "Укажи тип: изменение brownfield-поведения, новая capability или чистый refactor/tooling."
 
-# Per-operation guidance — advisory for apply/archive workflows.
+#  specs:
+#    - "Каталоги openspec/specs/ и features/ не сливать и не переносить друг в друга."
+#
+  design:
+    - "Для каждого изменения зафиксируй затрагиваемые границы модулей и существенные технические риски."
+    - "Если изменение требует архитектурного решения, укажи необходимость создания или обновления ADR."
+    - "Для описания изменений в brownfield-поведении воспользуйся скиллом `brownfield-map` и создай в design раздел «Brownfield-поведение» по его Required Output."
+
+  tasks:
+    - "Перед задачами по изменению кода добавь обязательные задачи на characterization/regression тесты, фиксирующие наблюдаемое brownfield-поведение затрагиваемых путей."
+    - "Для каждого затронутого Scenario из specs добавь задачу на создание или изменение автоматизированного теста."
+    - "При подготовке задач по созданию тестов выбирай между PHPUnit и Behat по уровню поведения: PHPUnit — unit/integration, Behat — functional/acceptance/e2e."
+
+# Per-operation guidance (optional)
 operations:
   apply:
     guidance:
-      - "Реализуй строго по tasks.md активного change; отмечай выполненное в чеклисте."
-      - "После реализации (код и/или тесты) запускай в Docker релевантные проверки по scope: make test и/или make behat; при E2E-scope — make test-e2e / make behat-e2e; при широком изменении — make qa."
-      - "Сверяй покрытие с Scenario из specs change: новый или изменённый Scenario без теста — пробел, закрой до archive."
-  archive:
-    guidance:
-      - "Перед archive убедись, что релевантные проверки зелёные (make test / make behat / E2E-таргеты по scope) и delta specs готовы к merge."
-      - "Дай краткое summary исхода (что вошло в main specs, что осталось follow-up)."
+      - "Для создания тестов используй скиллы `phpunit-tests` и `behat-tests`."
+      - "PHP/QA-команды — запуск через Makefile (make test, make behat и т.д.), не на хосте, со всеми permissions."
