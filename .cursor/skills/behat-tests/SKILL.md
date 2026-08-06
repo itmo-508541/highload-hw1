@@ -1,6 +1,11 @@
 ---
 name: behat-tests
-description: Описывает написание и обновление сценариев Behat (Gherkin) и контекстов в Symfony-проекте, запуск через Makefile в Docker. Использовать когда план или задача требует BDD/приёмочных сценариев, меняется поведение API/UI по сценариям, пользователь просит прогнать или добавить Behat, упоминаются `make behat`, `behat.yml.dist`, каталог `features/` или `App\Tests\Behat`.
+description: >
+  Пишет и обновляет Behat-сценарии (Gherkin в features/, контексты в
+  tests/Behat/); прогон — make behat / make behat-e2e. Использовать при
+  BDD/приёмочных сценариях, изменении API/UI-потоков, просьбе добавить или
+  прогнать Behat, упоминании features/, features/e2e/, behat.yml.dist,
+  make behat, make behat-e2e, App\Tests\Behat.
 ---
 
 # Behat

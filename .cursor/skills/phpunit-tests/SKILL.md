@@ -1,6 +1,10 @@
 ---
 name: phpunit-tests
-description: Описывает написание и обновление PHPUnit-тестов в Symfony-проекте и их запуск через Makefile в Docker. Использовать когда план или задача требует unit/integration-тестов, меняется код в `src/`, пользователь просит прогнать или добавить тесты, упоминаются `make test`, `phpunit.dist.xml` или каталог `tests/`.
+description: >
+  Пишет и обновляет PHPUnit-тесты (*Test.php в tests/, E2E в tests/E2E/);
+  прогон — make test / make test-e2e. Использовать при unit/integration/E2E-
+  тестах, изменении кода в src/, просьбе добавить или прогнать PHPUnit,
+  упоминании phpunit.dist.xml, make test, make test-e2e, tests/E2E/, App\Tests.
 ---
 
 # PHPUnit

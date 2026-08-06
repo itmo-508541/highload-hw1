@@ -1,6 +1,11 @@
 ---
 name: run-php-in-docker
-description: Запускает команды PHP и связанных инструментов только в Docker-сервисе `php` из корня репозитория: приоритет целей `make`, иначе `docker compose exec php`. Использовать при Symfony Console, Composer, PHPUnit, Behat, Phing, PHP CS Fixer, PHPStan, Rector, при упоминании контейнера `php`, `make up`, или когда агент собирается выполнить PHP/Composer на хосте.
+description: >
+  Запускает composer, php, bin/console и vendor/bin/* только в Docker-сервисе
+  `php`, не на хосте: сначала цель Makefile, иначе `docker compose exec php`.
+  Команды выполнять вне sandbox с required_permissions: ["all"].
+  Использовать перед PHP/Composer/QA (Symfony Console, PHPUnit, Behat, Phing,
+  PHP CS Fixer, PHPStan, Rector) или когда агент собирается запустить их локально.
 ---
 
 # Запуск PHP-команд в Docker
@@ -9,6 +14,8 @@ description: Запускает команды PHP и связанных инс�
 
 Все команды, затрагивающие **PHP-код** и **PHP-окружение** (и бинарники из `vendor/bin/`), выполняй **только** внутри сервиса **`php`**. Не запускай `php`, `composer` и скрипты из `vendor/bin/` **на хосте** из корня репозитория — версии PHP, расширений и пути не совпадут с CI/продом.
 
+Shell: всегда **вне sandbox** — `required_permissions: ["all"]` (нужен доступ к Docker; без этого `docker compose`/`make` в контейнер падают).
+
 Рабочая директория: **корень репозитория** на хосте; в контейнере проект смонтирован в `/srv/` (пути к файлам те же).
 
 ## Порядок выбора команды
@@ -16,6 +23,8 @@ description: Запускает команды PHP и связанных инс�
 1. Контейнеры подняты: `make up` (если не запущены).
 2. **Сначала** ищи цель в **`Makefile`**.
 3. Если готовой цели нет — **`docker compose exec php <команда>`** (из корня репозитория).
+
+Любой из этих вызовов — через Shell с `required_permissions: ["all"]`.
 
 Для неинтерактивного ввода в скриптах/CI к `exec` иногда добавляют `-T` (см. цель `test` в `Makefile`).
 
