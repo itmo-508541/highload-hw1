@@ -32,27 +32,16 @@ services:
       tags:
         - { name: sonata.admin, model_class: App\Entity\User, manager_type: orm, group: Main, label: UserAdmin }
       calls:
-        - ['setSecurityRoleHierarchy', [ '%security.role_hierarchy.roles%']]
         - ['setTranslationDomain', ['UserAdmin']]
 
     App\Admin\ClientAdmin:
         tags:
             - { name: sonata.admin, model_class: App\Entity\Client, manager_type: orm, group: Main, label: ClientAdmin }
         calls:
-            - ['setSecurityRoleHierarchy', [ '%security.role_hierarchy.roles%']]
             - ['setTranslationDomain', ['ClientAdmin']]
-
-    #App\Admin\DataTypeAdmin:
-    #  tags:
-    #    - { name: sonata.admin, model_class: App\Entity\DataType, manager_type: orm, group: Main, label: DataType }
-    #  calls:
-    #    - ['setTranslationDomain', ['DataTypeAdmin']]
 
     App\Admin\ConfigAdmin:
       tags:
         - { name: sonata.admin, model_class: App\Entity\Config, manager_type: orm, group: Internal, label: ConfigAdmin }
       calls:
         - ['setTranslationDomain', ['ConfigAdmin']]
-
-    App\Security\UserAuthentificatorAuthenticator:
-        autowire: true

@@ -19,7 +19,6 @@ rules:
   proposal:
     - "Пиши на русском; имя change — kebab-case латиницей."
     - "Явно укажи Why, What Changes, Non-goals и Impact (код, API, ops, тесты)."
-    - "Не требуй и не ссылайся на CHANGELOG как на артефакт процесса."
   specs:
     - "Пиши требования и сценарии на русском."
     - "Сценарии в формате Given/When/Then (или эквивалентные блоки с теми же ролями)."
@@ -45,9 +44,7 @@ operations:
       - "Реализуй строго по tasks.md активного change; отмечай выполненное в чеклисте."
       - "После реализации (код и/или тесты) запускай в Docker релевантные проверки по scope: make test и/или make behat; при E2E-scope — make test-e2e / make behat-e2e; при широком изменении — make qa."
       - "Сверяй покрытие с Scenario из specs change: новый или изменённый Scenario без теста — пробел, закрой до archive."
-      - "Не добавляй записи в CHANGELOG как часть apply."
   archive:
     guidance:
       - "Перед archive убедись, что релевантные проверки зелёные (make test / make behat / E2E-таргеты по scope) и delta specs готовы к merge."
       - "Дай краткое summary исхода (что вошло в main specs, что осталось follow-up)."
-      - "Не веди и не требуй CHANGELOG при закрытии change."

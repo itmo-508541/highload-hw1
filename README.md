@@ -57,9 +57,6 @@ npx openspec validate --all --no-interactive
 | [docs/phing.md](docs/phing.md) | Runbook: Phing / init / test-env |
 | [docs/volume.md](docs/volume.md) | Runbook: именованный Docker volume |
 
-Отдельный `CHANGELOG.md` **не** ведётся: принятое поведение — в
-`openspec/specs/`, история коммитов — в git.
-
 ## Начало работы
 
 После шага из раздела «Быстрый старт» у вас уже есть локальный **`docker-compose.override.yml`** (его нет в репозитории: файл в **`.gitignore`**, создаётся копированием **`docker-compose.override.yml.dist`**).

@@ -8,6 +8,8 @@ use App\Entity\User;
 use App\Traits\UserPasswordHasherTrait;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Route\RouteCollectionInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class UserProviderAdmin extends AbstractAdmin
 {
@@ -15,8 +17,11 @@ abstract class UserProviderAdmin extends AbstractAdmin
 
     protected array $securityRoleHierarchy = [];
 
-    public function setSecurityRoleHierarchy(array $securityRoleHierarchy): void
-    {
+    #[Required]
+    public function setSecurityRoleHierarchy(
+        #[Autowire(param: 'security.role_hierarchy.roles')]
+        array $securityRoleHierarchy,
+    ): void {
         $this->securityRoleHierarchy = $securityRoleHierarchy;
     }
 

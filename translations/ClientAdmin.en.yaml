@@ -16,7 +16,6 @@ show:
   group_client_admin: Client
   label_id: Id
   label_username: API Username
-  label_api_key: X-Api-Key
   label_temporary_access_token: Temporary Access Token
   label_permanent_access_token: Permanent Access Token
   label_roles_as_string: Roles
@@ -24,10 +23,5 @@ show:
 form:
   group_client_admin: Client
   label_username: API Username
-  label_api_key: X-Api-Key
   label_plain_password: Plain password
   label_roles: Roles
-
-help:
-  form:
-    api_key: type random symbols

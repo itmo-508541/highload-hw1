@@ -38,13 +38,12 @@ class ClientAdmin extends UserProviderAdmin
 
     protected function configureFormFields(FormMapper $form): void
     {
+        $subject = $form->getAdmin()->getSubject();
+        /** @var Client $subject */
         $form
             ->add('username')
-            ->add('apiKey', null, [
-                'help' => 'help.form.api_key',
-            ])
             ->add('plainPassword', TextType::class, [
-                'required' => false,
+                'required' => null === $subject->getId(),
             ])
             ->add('roles', ChoiceType::class, [
                 'choices' => $this->getRoleHierarchyChoices(),
@@ -58,7 +57,6 @@ class ClientAdmin extends UserProviderAdmin
         $object = $show->getAdmin()->getSubject();
         $show
             ->add('username')
-            ->add('apiKey')
             ->add('rolesAsString')
             ->add('temporaryAccessToken', null, [
                 'template' => 'CRUD/client_show_token.html.twig',

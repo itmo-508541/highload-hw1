@@ -7,18 +7,10 @@ namespace App\Entity;
 use App\Repository\ClientRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
-#[ORM\Table(
-    uniqueConstraints: [
-        new ORM\UniqueConstraint(name: 'apiKey', columns: ['apiKey']),
-    ],
-)]
-#[UniqueEntity(fields: ['apiKey'], message: 'This apiKey is already in use.')]
 class Client extends UserProvider
 {
     #[ORM\Id]
@@ -31,24 +23,9 @@ class Client extends UserProvider
     #[Groups(['api'])]
     protected array $roles = [self::ROLE_USER, self::ROLE_API];
 
-    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-    #[Assert\Length(max: 255)]
-    #[Ignore]
-    protected ?string $apiKey = null;
-
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getApiKey(): ?string
-    {
-        return $this->apiKey;
-    }
-
-    public function setApiKey(?string $apiKey): void
-    {
-        $this->apiKey = $apiKey;
     }
 
     /** @internal used only inside sonata admin, should not be used outside, always null */
