@@ -1,0 +1,38 @@
+topic: platform
+spec: openspec/specs/platform/spec.md
+summary: PHP/QA только в Docker-сервисе php, Makefile как фасад повседневных команд
+
+files:
+  - path: Makefile
+    role: Фасад всех команд (test, behat, cs, phpstan, rector, qa, init, up)
+  - path: docker-compose.yml
+    role: Определение сервиса php и остальной инфраструктуры
+  - path: Dockerfile
+    role: Образ сервиса php (PHP 8.4, расширения, Chromium для E2E)
+  - path: build.xml
+    role: Phing-сборка (bootstrap, dotenv, подготовка test-env)
+
+entry_points:
+  - type: command
+    path: make init
+    handler: "docker compose exec php phing"
+  - type: command
+    path: make up
+    handler: "docker compose up -d"
+  - type: command
+    path: make test
+    handler: "docker compose exec php vendor/bin/phpunit --testsuite=Unit"
+  - type: command
+    path: make test-e2e
+    handler: "docker compose exec php vendor/bin/phpunit --testsuite=E2E"
+  - type: command
+    path: make behat
+    handler: "docker compose exec php vendor/bin/behat --suite=default"
+  - type: command
+    path: make behat-e2e
+    handler: "docker compose exec php vendor/bin/behat --suite=e2e"
+  - type: command
+    path: make qa
+    handler: "cs phpstan rector test behat test-e2e behat-e2e"
+
+tests: []

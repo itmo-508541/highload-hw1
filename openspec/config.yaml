@@ -16,6 +16,7 @@ context: |
   - phpunit-tests — unit/integration тесты (.cursor/skills/phpunit-tests/SKILL.yaml).
   - behat-tests — functional/acceptance/e2e тесты (.cursor/skills/behat-tests/SKILL.yaml).
   - brownfield-map — описание существующего поведения legacy-кода (.cursor/skills/brownfield-map/SKILL.yaml).
+  - capability-index — индекс specs→файлы реализации (.cursor/skills/capability-index/SKILL.md).
 
   Язык: русский.
 
