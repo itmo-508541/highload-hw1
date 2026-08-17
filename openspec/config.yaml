@@ -44,6 +44,7 @@ operations:
     guidance:
       - "Для создания тестов используй скиллы `phpunit-tests` и `behat-tests`."
       - "PHP/QA-команды — запуск через Makefile (make test, make behat и т.д.), не на хосте, со всеми permissions."
+      - "Перед выполнением задач прочитай terra.md, если он существует в каталоге change."
   archive:
     guidance:
       - "После успешного archive напомни Архиватору запустить `/opsx-index` с именем папки архива. Не вставляй этот текст в шаблон Archive Complete — сообщи отдельно."
