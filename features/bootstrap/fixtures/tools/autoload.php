@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-require_once __DIR__.'/../../vendor/autoload.php';
-require_once __DIR__.'/../../tools/dotEnvPropertyTask.php';
+require_once __DIR__.'/../../../../vendor/autoload.php';
+require_once __DIR__.'/../../../../tools/dotEnvPropertyTask.php';
 
 use Symfony\Component\Dotenv\Dotenv;
 

@@ -15,6 +15,7 @@ return RectorConfig::configure()
     ->withPaths([
         __DIR__.'/src',
         __DIR__.'/tests',
+        __DIR__.'/features/bootstrap',
     ])
     ->withImportNames(true, true, false)
     ->withSets([
@@ -37,6 +38,7 @@ return RectorConfig::configure()
     ->withRules([
         PreferPHPUnitSelfCallRector::class,
     ])
+    ->withSkipPath(__DIR__.'/features/bootstrap/fixtures')
     ->withSkip([
         PreferPHPUnitThisCallRector::class,
     ]);

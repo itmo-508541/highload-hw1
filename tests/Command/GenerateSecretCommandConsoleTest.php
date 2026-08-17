@@ -18,7 +18,7 @@ final class GenerateSecretCommandConsoleTest extends KernelTestCase
     public function testMarkerFromEnvTestChain(): void
     {
         self::bootKernel(['environment' => 'test']);
-        $out = $this->runConsoleCommand($this->projectRoot().'/tests/tools/generate-secret/console/marker.twig');
+        $out = $this->runConsoleCommand(__DIR__.'/fixtures/tools/console/marker.twig');
         self::assertSame('behat-console-marker', $out);
     }
 
@@ -32,7 +32,7 @@ final class GenerateSecretCommandConsoleTest extends KernelTestCase
     public function testRedisRequirepassTwig(): void
     {
         self::bootKernel(['environment' => 'test']);
-        $out = $this->runConsoleCommand($this->projectRoot().'/tests/tools/generate-secret/console/redis-requirepass.twig');
+        $out = $this->runConsoleCommand(__DIR__.'/fixtures/tools/console/redis-requirepass.twig');
         self::assertSame("requirepass root\n", $out);
     }
 
@@ -49,7 +49,7 @@ final class GenerateSecretCommandConsoleTest extends KernelTestCase
         self::bootKernel(['environment' => 'test']);
         $this->expectException(SyntaxError::class);
         $this->expectExceptionMessage('Unclosed');
-        $this->runConsoleCommand($this->projectRoot().'/tests/tools/generate-secret/cases/invalid-twig/invalid.twig');
+        $this->runConsoleCommand(__DIR__.'/fixtures/tools/cases/invalid-twig/invalid.twig');
     }
 
     private function projectRoot(): string

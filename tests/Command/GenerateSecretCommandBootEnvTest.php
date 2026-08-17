@@ -34,22 +34,22 @@ final class GenerateSecretCommandBootEnvTest extends TestCase
 
     public function testPasswordOverrideFromEnvTest(): void
     {
-        $this->bootProjectFixture('tests/tools/generate-secret/cases/password-override/.env');
-        $out = $this->runCommand('tests/tools/generate-secret/cases/password-override/mysql-password.twig');
+        $this->bootProjectFixture('cases/password-override/.env');
+        $out = $this->runCommand('cases/password-override/mysql-password.twig');
         self::assertSame('asdf', $out);
     }
 
     public function testPasswordFromBaseEnv(): void
     {
-        $this->bootProjectFixture('tests/tools/generate-secret/cases/password-override/.env');
-        $out = $this->runCommand('tests/tools/generate-secret/cases/password-override/redis.conf.twig');
+        $this->bootProjectFixture('cases/password-override/.env');
+        $out = $this->runCommand('cases/password-override/redis.conf.twig');
         self::assertSame("requirepass zxcv\n", $out);
     }
 
     public function testLayeredEnvTestOverridesAndAdds(): void
     {
-        $this->bootProjectFixture('tests/tools/generate-secret/cases/layered/.env');
-        $out = $this->runCommand('tests/tools/generate-secret/cases/layered/layered.twig');
+        $this->bootProjectFixture('cases/layered/.env');
+        $out = $this->runCommand('cases/layered/layered.twig');
         self::assertSame("1 new 3\n", $out);
     }
 
@@ -64,27 +64,27 @@ final class GenerateSecretCommandBootEnvTest extends TestCase
     public function testBadSyntaxEnvThrowsBeforeCommand(): void
     {
         $this->expectException(FormatException::class);
-        $this->bootProjectFixture('tests/tools/generate-secret/cases/bad-syntax/.env');
+        $this->bootProjectFixture('cases/bad-syntax/.env');
     }
 
     public function testInvalidTwigSyntaxError(): void
     {
-        $this->bootProjectFixture('tests/tools/generate-secret/cases/invalid-twig/.env');
+        $this->bootProjectFixture('cases/invalid-twig/.env');
         $this->expectException(SyntaxError::class);
         $this->expectExceptionMessage('Unclosed');
-        $this->runCommand('tests/tools/generate-secret/cases/invalid-twig/invalid.twig');
+        $this->runCommand('cases/invalid-twig/invalid.twig');
     }
 
-    private function bootProjectFixture(string $dotenvRelativeToProjectRoot): void
+    private function bootProjectFixture(string $dotenvRelativeToFixturesTools): void
     {
-        $path = \dirname(__DIR__, 2).'/'.$dotenvRelativeToProjectRoot;
+        $path = __DIR__.'/fixtures/tools/'.$dotenvRelativeToFixturesTools;
         self::assertFileIsReadable($path);
         new Dotenv()->bootEnv($path, overrideExistingVars: true);
     }
 
-    private function runCommand(string $templateRelativeToProjectRoot): string
+    private function runCommand(string $templateRelativeToFixturesTools): string
     {
-        $path = \dirname(__DIR__, 2).'/'.$templateRelativeToProjectRoot;
+        $path = __DIR__.'/fixtures/tools/'.$templateRelativeToFixturesTools;
         $command = new GenerateSecretCommand();
         $tester = new CommandTester($command);
         $exit = $tester->execute(['template' => $path]);

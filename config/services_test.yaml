@@ -3,5 +3,6 @@ services:
         autowire: true
         autoconfigure: true
 
-    App\Tests\Behat\:
-        resource: '../tests/Behat/'
+    App\Behat\:
+        resource: '../features/bootstrap/'
+        exclude: '../features/bootstrap/fixtures/'

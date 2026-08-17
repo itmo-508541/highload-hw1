@@ -1,7 +1,13 @@
 # features/
 
-Исполняемые приёмочные сценарии **Behat** (Gherkin). Конфиг: `behat.yml.dist`
-(локально можно скопировать в `behat.yml`, не коммитить).
+Исполняемые приёмочные сценарии **Behat** (Gherkin) и контексты. Конфиг:
+`behat.yml.dist` (локально можно скопировать в `behat.yml`, не коммитить).
+Контексты: `features/bootstrap/`, namespace `App\Behat\`. Фикстуры контекста —
+`./fixtures/` относительно `*Context.php`. Шаг, указывающий каталог фикстуры,
+задаёт путь относительно `features/bootstrap/` (например `fixtures/<dir>`).
+
+**test env autoload** — `tests/bootstrap.php` (FoB `bootstrap:`), не каталог
+контекстов.
 
 **Источник ожидаемого поведения** — OpenSpec specs (`openspec/specs/**` и
 delta в `openspec/changes/…/specs/`). `.feature` реализует/уточняет Scenario

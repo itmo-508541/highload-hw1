@@ -15,11 +15,17 @@ description: >
   (`openspec/changes/<name>/specs/**`) и/или main specs (`openspec/specs/**`).
   Requirement/Scenario задают *что* должно быть верно; PHPUnit проверяет это
   на уровне кода. Не дублировать длинные specs wholesale в docblock'и тестов.
-- Конфигурация: `phpunit.dist.xml`, bootstrap: `tests/bootstrap.php`, окружение Unit: `APP_ENV=test` (в конфиге PHPUnit). Suite: `Unit` (exclude `tests/E2E`) и `E2E`.
-- Тесты: каталог `tests/` (Unit/integration); E2E — `tests/E2E/` (Panther / Redis-сессии). Пространства имён вида `App\Tests\...`.
+- Конфигурация: `phpunit.dist.xml`, **test env autoload:** `tests/bootstrap.php`,
+  окружение Unit: `APP_ENV=test` (в конфиге PHPUnit). Suite: `Unit` (exclude
+  `tests/E2E`) и `E2E`.
+- Тесты: каталог `tests/` (Unit/integration); E2E — `tests/E2E/` (Panther /
+  Redis-сессии). Пространства имён вида `App\Tests\...`. Фикстуры — `./fixtures/`
+  относительно `*Test.php`.
 - Запуск **только в Docker**: контейнер `php` должен быть поднят (`make up`). На хосте без контейнера не полагаться на совпадение PHP/расширений с CI.
 - Прямой `docker compose exec`: для неинтерактивного режима (скрипты, агенты, CI) используйте **`exec -T`** — без псевдо-TTY, как в цели `make test` в `Makefile`.
-- **Не смешивать каталоги:** OpenSpec specs — в `openspec/`; Behat — в `features/` / `features/e2e/`; PHPUnit Unit — в `tests/` вне `tests/E2E/`.
+- **Не смешивать каталоги:** OpenSpec specs — в `openspec/`; Behat (Gherkin и
+  контексты) — в `features/` / `features/bootstrap/` / `features/e2e/`; PHPUnit
+  Unit — в `tests/` вне `tests/E2E/`. Контексты Behat в `tests/` не класть.
 
 ## Рабочий цикл
 
@@ -61,5 +67,6 @@ docker compose exec -T php vendor/bin/phpunit tests/EventListener/CorsRequestLis
 
 - [ ] Прочитаны затронутые OpenSpec specs/change (источник поведения)
 - [ ] Тесты лежат в `tests/`, имена классов и файлов согласованы с принятыми в проекте примерами
+- [ ] Фикстуры (если нужны) — в `./fixtures/` относительно `*Test.php`
 - [ ] Выполнен `make test` (или узкий прогон изменённого файла) в запущенном контейнере `php`
 - [ ] Пользователю при сдаче указаны пути к тестам и результат прогона

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Behat;
+namespace App\Behat;
 
 use Behat\MinkExtension\Context\RawMinkContext;
 use Behat\Step\Then;

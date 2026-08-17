@@ -134,8 +134,12 @@ PHP и QA-инструменты — **только** в Docker-сервисе `
 |----------------------|------|
 | Ожидаемое поведение (Requirement / Scenario) | delta specs в change → после archive в `openspec/specs/` |
 | Проверка кода / контракта без UI-потока | `tests/` + PHPUnit; часто **достаточно одного** этого слоя |
-| Исполняемую приёмку (Gherkin) | `features/*.feature` + контексты в `tests/Behat/` (suite `default`; не `features/e2e/`) |
+| Исполняемую приёмку (Gherkin) | `features/*.feature` + контексты в `features/bootstrap/` (`App\Behat\`, suite `default`; не `features/e2e/`); фикстуры Behat — `features/bootstrap/fixtures/` |
 | Сквозной UI/browser E2E | `tests/E2E/` (PHPUnit suite E2E) и/или `features/e2e/` (Behat suite e2e); детали — `docs/e2e.md`. Не класть в `openspec/specs/` и не смешивать с «быстрой» приёмкой `features/` + `APP_ENV=test` |
+
+`tests/` — только PHPUnit (`*Test.php`, фикстуры рядом с тестом в `./fixtures/`)
+и общий файл **test env autoload** `tests/bootstrap.php` (его же читает FoB).
+Контексты Behat в `tests/` не класть. `features/` — только Behat.
 
 Каждый Scenario из **затрагиваемого** spec должен иметь или получить
 подтверждение тестом: PHPUnit и/или Behat по смыслу Scenario (не обязательно

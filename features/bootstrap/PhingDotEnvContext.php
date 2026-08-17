@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Behat;
+namespace App\Behat;
 
 use Behat\Behat\Context\Context;
 use Behat\Step\Then;
@@ -10,7 +10,8 @@ use Behat\Step\When;
 use Symfony\Component\Process\Process;
 
 /**
- * Запускает Phing по фикстурам в tests/tools/<scenario>/ и проверяет stdout/stderr.
+ * Запускает Phing по фикстурам в fixtures/tools/<scenario>/ (относительно этого контекста)
+ * и проверяет stdout/stderr.
  *
  * Каждая фикстура — отдельный подкаталог с build.xml; Phing вызывается без -f, то есть
  * читает build.xml из текущей рабочей директории.
@@ -72,8 +73,7 @@ final class PhingDotEnvContext implements Context
      */
     private function runPhing(string $relativeProjectDir, array $phingArgs): void
     {
-        $projectRoot = \dirname(__DIR__, 2);
-        $cwd = $projectRoot.'/'.trim($relativeProjectDir, '/');
+        $cwd = __DIR__.'/'.trim($relativeProjectDir, '/');
 
         $process = new Process(array_merge(['phing'], $phingArgs), $cwd);
         $process->run();
