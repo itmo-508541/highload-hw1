@@ -16,7 +16,6 @@ delta в `openspec/changes/…/specs/`). `.feature` реализует/уточ�
 Запуск: `make behat` (suite `default`, `APP_ENV=test`); E2E — `make behat-e2e`
 (suite `e2e`, сценарии в `features/e2e/`). Docker-сервис `php`.
 Skill: `.cursor/skills/behat-tests`. E2E runbook: `docs/e2e.md`.
-Процесс слоёв: `openspec/process.md`.
 
 ## Куда не класть
 
@@ -25,4 +24,4 @@ Skill: `.cursor/skills/behat-tests`. E2E runbook: `docs/e2e.md`.
 - Unit/integration PHPUnit → `tests/` (не `tests/E2E/` для «быстрой» приёмки).
 - E2E Behat — только в `features/e2e/` (не смешивать с suite `default` в корне
   `features/`); PHPUnit E2E → `tests/E2E/`. Не в `openspec/`.
-- Cursor skills / process docs → `.cursor/skills/`, `openspec/process.md`.
+- Cursor skills → `.cursor/skills/`.

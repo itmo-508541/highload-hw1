@@ -2,7 +2,7 @@
 name: update-rules
 description: >
   Синхронизирует процессные и входные документы со scope изменений:
-  OpenSpec specs/process, AGENTS.md, README/ABOUT/DEPLOYMENT, операционные
+  OpenSpec specs, AGENTS.md, README/ABOUT/DEPLOYMENT, операционные
   runbook'и в docs/. Использовать после заметных изменений в коде/инфре/CI/процессах,
   перед сдачей работы, или когда пользователь просит обновить правила/документацию,
   «подведи итоги», упоминает docs/, AGENTS.md, openspec/specs.
@@ -17,7 +17,7 @@ description: >
 ## Инструкции
 1) **Документация и OpenSpec (по затронутому scope)**
    - Поведение продукта/шаблона — актуальность `openspec/specs/` (через change →
-     archive) и при необходимости `openspec/process.md`.
+     archive).
    - Входы для людей: `README.md`, `ABOUT.md`, `DEPLOYMENT.md` — кратко и со
      ссылками; длинные процедуры — в runbook или skills (см. п. 2).
    - Маркеры каталогов: релевантные `AGENTS.md`, если изменилась роль пути.
@@ -31,8 +31,7 @@ description: >
      `docs/<name>.md` или **добавить** новый плоский файл `docs/<name>.md`
      (kebab-case латиницей, один контур на файл).
    - После добавления файла: строка в таблице `docs/AGENTS.md`; при необходимости
-     краткая ссылка в `README.md` (таблица «Документация») и/или
-     `openspec/process.md`.
+     краткая ссылка в `README.md` (таблица «Документация»).
    - **Не** класть в `docs/`: поведение (→ specs), «почему» (→ `adr/`), быстрый
      старт (→ README), обзор деплоя (→ DEPLOYMENT), обзоры стека/бандлов.
    - Длинный агентский чеклист с правками compose/CI/кода (как volume) —
@@ -46,7 +45,7 @@ description: >
    - Не добавлять лишней воды: только то, что реально нужно соблюдать.
 
 ## Мини-чеклист качества
-- Затронутые specs/process/AGENTS/README/ABOUT/DEPLOYMENT согласованы со scope
+- Затронутые specs/AGENTS/README/ABOUT/DEPLOYMENT согласованы со scope
 - Новые/изменённые операционные контуры отражены в `docs/*.md` (+ таблица в
   `docs/AGENTS.md`); в `docs/` нет обзоров, ADR и specs
 - `CHANGELOG.md` не создавался и не обновлялся

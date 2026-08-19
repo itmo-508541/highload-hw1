@@ -11,7 +11,6 @@ UI/приёмки часто покрывается только этим сло
 Запуск: `make test` (suite Unit); E2E — `make test-e2e` (suite E2E,
 `tests/E2E/`). Только Docker-сервис `php`.
 Skill: `.cursor/skills/phpunit-tests`. E2E runbook: `docs/e2e.md`.
-Процесс слоёв: `openspec/process.md`.
 
 Фикстуры теста — `./fixtures/` относительно `*Test.php`. Каталог `tests/`
 только для PHPUnit: контексты Behat сюда не класть.

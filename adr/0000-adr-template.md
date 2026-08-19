@@ -39,4 +39,3 @@
 
 - [Documenting Architecture Decisions](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions) — оригинальная статья Майкла Найгарда
 - [`.cursor/commands/adr.md`](../.cursor/commands/adr.md) — команда Cursor для создания новых ADR
-- [`openspec/process.md`](../openspec/process.md) — когда ADR появляется в жизненном цикле OpenSpec change

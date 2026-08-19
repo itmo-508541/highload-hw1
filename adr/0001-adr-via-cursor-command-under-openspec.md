@@ -59,6 +59,5 @@ experimental schema API без выигрыша для шаблонного ре
 ## Связанные артефакты
 
 - [ADR-0000](0000-adr-template.md) — решение вести ADR в репозитории
-- [`openspec/process.md`](../openspec/process.md) — точка ADR в lifecycle
 - [`.cursor/commands/adr.md`](../.cursor/commands/adr.md) — создание ADR
 - [`.cursor/rules/adr-immutability.mdc`](../.cursor/rules/adr-immutability.mdc) — иммутабельность

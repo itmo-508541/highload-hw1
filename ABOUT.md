@@ -11,8 +11,7 @@
 **После форка:** задайте свой заголовок `#` в начале файла и удалите всё от
 первого `## Шаблон:` до конца HTML-комментария ниже (включительно).
 
-Запуск и команды — [`README.md`](README.md). Процесс изменений —
-[`openspec/process.md`](openspec/process.md).
+Запуск и команды — [`README.md`](README.md).
 
 ---
 
@@ -27,9 +26,10 @@ explore → propose → apply → archive), без расхождения «на
 **Цель шаблона** — дать готовую точку входа: стек PHP 8.4 / Symfony 7.4, MySQL 8,
 Redis 8, Composer, Phing, QA (PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat),
 работу только в контейнере `php`, плюс артефакты OpenSpec в git и job
-`qa:openspec` в CI. Подробно для людей — `README.md` и `openspec/process.md`.
+`qa:openspec` в CI. Подробно для людей — `README.md`.
 Доменная логика в шаблон **намеренно не вписана** — разделы без префикса
-«Шаблон:» ниже и specs по мере реальных changes.
+«Шаблон:» ниже и specs по мере реальных changes. Пустой `openspec/changes/` —
+нормальное стартовое состояние; не ждать «готового» каталога specs.
 
 ---
 
@@ -96,7 +96,7 @@ Redis 8, Composer, Phing, QA (PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat),
 | Сборка и задачи | Composer, Phing (`make init` и связанные цели) |
 | Качество | PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat (`make qa` и отдельные цели) |
 | Деплой | GitLab CI/CD (как настроено в репозитории) |
-| AI / процесс | OpenSpec ([`openspec/process.md`](openspec/process.md)): explore → propose → apply → archive; Cursor `/opsx-*`; ADR через `/adr` → `adr/`; PHP/QA только в Docker |
+| AI / процесс | OpenSpec (`openspec/`): explore → propose → apply → archive; Cursor `/opsx-*`; ADR через `/adr` → `adr/`; PHP/QA только в Docker |
 
 Детали команд — `README.md` / `Makefile`. Поведение — `openspec/specs/`.
 Деплой — [`DEPLOYMENT.md`](DEPLOYMENT.md).

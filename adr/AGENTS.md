@@ -13,5 +13,5 @@
 - Принятые ADR иммутабельны (кроме раздела «Статус») —
   `.cursor/rules/adr-immutability.mdc`.
 - Связь с OpenSpec change: после `design.md` / до или в `tasks.md`, только при
-  значимом архитектурном решении — см. `openspec/process.md`.
+  значимом архитектурном решении (см. `.cursor/commands/adr.md`).
 - Не класть сюда delta specs, runbook'и или исполняемые тесты.

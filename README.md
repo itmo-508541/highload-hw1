@@ -34,7 +34,9 @@ make deps
 make qa
 ```
 
-OpenSpec (процесс изменений; локальный CLI из `package.json`, без глобальной установки):
+OpenSpec (профиль `core`: explore → propose → apply → archive). Локальный CLI
+опционален: из `package.json` через `npx`, без глобальной установки и без
+Makefile-таргета. Expanded workflows и `/opsx-onboard` не используем.
 
 ```bash
 npm ci
@@ -43,14 +45,13 @@ npx openspec validate --all --no-interactive
 ```
 
 В Cursor: `/opsx-explore`, `/opsx-propose`, `/opsx-apply`, `/opsx-archive` и связанные skills.
-Единый процесс ролей и артефактов: [openspec/process.md](openspec/process.md).
 
 ## Документация
 
 | Вход | Зачем |
 |------|--------|
 | [ABOUT.md](ABOUT.md) | Продукт и рамки шаблона |
-| [openspec/process.md](openspec/process.md) | Процесс изменений, роли, слои тестов, ADR, куда класть docs |
+| [openspec/specs/](openspec/specs/) | Принятое поведение (Requirement / Scenario) |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | CI-гейт, переменные, обзор деплоя → детали в `.gitlab-ci.yml` |
 | [docs/redis.md](docs/redis.md) | Runbook: Redis / сессии |
 | [docs/dotenv.md](docs/dotenv.md) | Runbook: Dotenv / env / prod-шим |

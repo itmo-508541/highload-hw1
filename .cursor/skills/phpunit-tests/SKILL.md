@@ -46,7 +46,6 @@ description: >
 
 Change без UI/HTTP-приёмки: unit/integration в `tests/` обычно достаточно;
 Behat не обязателен, если Scenario не требуют исполняемого Gherkin-потока.
-См. `openspec/process.md` (слои тестов).
 
 ## Команды
 

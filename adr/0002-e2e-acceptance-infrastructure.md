@@ -35,7 +35,7 @@ Panther уже в экосистеме Symfony; Chromium в том же обра
 
 ## Последствия
 
-- В репозитории: suite E2E, Chromium в образе, CI job’ы, `when@e2e`, runbook `docs/e2e.md`, закрытый слот в `openspec/process.md`.
+- В репозитории: suite E2E, Chromium в образе, CI job’ы, `when@e2e`, runbook `docs/e2e.md`.
 - Unit и Behat default не требуют Redis ради сессий; E2E пишет сессии в Redis.
 - Осознанный долг: продуктовая UI-приёмка и мультиклиентские дымы — отдельные change; Behat E2E пока harness.
 
