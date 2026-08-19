@@ -34,17 +34,15 @@ make deps
 make qa
 ```
 
-OpenSpec (профиль `core`: explore → propose → apply → archive). Локальный CLI
-опционален: из `package.json` через `npx`, без глобальной установки и без
-Makefile-таргета. Expanded workflows и `/opsx-onboard` не используем.
+Установка и настройка OpenSpec:
 
 ```bash
-npm ci
-npx openspec --version
-npx openspec validate --all --no-interactive
+npm install -g @fission-ai/openspec@latest
+openspec init --tools cursor
+openspec --version
+openspec config profile # в Delivery and workflows выбрать Commands Only
+                        # далее пометить всё кроме Propose, Fast-forward и Onboard
 ```
-
-В Cursor: `/opsx-explore`, `/opsx-propose`, `/opsx-apply`, `/opsx-archive` и связанные skills.
 
 ## Документация
 
