@@ -1,8 +1,7 @@
 ---
-name: "/opsx-index"
-id: "opsx-index"
-category: "Workflow"
-description: "Индексировать архивированный OpenSpec change в Capability Index"
+name: opsx-index
+description: Индексировать архивированный OpenSpec change в Capability Index
+disable-model-invocation: true
 ---
 
 Обновить Capability Index (`.cursor/skills/capability-index/`) по **уже

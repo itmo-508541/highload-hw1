@@ -1,6 +1,10 @@
 ---
-description: Разрешение FQCN через Composer (classmap → PSR-4 из autoload_*.php); App\ из composer.json; без обхода vendor; HITL при провале; без веба вместо локального.
-alwaysApply: false
+name: vendor-class-lookup
+description: >
+  Разрешение FQCN через Composer (classmap → PSR-4 из autoload_*.php); App\ из
+  composer.json; без обхода vendor; HITL при провале; без веба вместо локального.
+  Использовать при поиске класса в vendor/, FQCN зависимости, autoload,
+  classmap, autoload_psr4, когда workspace-поиск не видит gitignored vendor/.
 ---
 
 ## Исходники подключаемых модулей (`vendor/`) и классов приложения

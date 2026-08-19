@@ -9,9 +9,9 @@
 
 ## Правила
 
-- Создавать новые ADR командой Cursor `/adr` (см. `.cursor/commands/adr.md`).
+- Создавать новые ADR скиллом Cursor `/adr` (см. `.cursor/skills/adr/SKILL.md`).
 - Принятые ADR иммутабельны (кроме раздела «Статус») —
   `.cursor/rules/adr-immutability.mdc`.
 - Связь с OpenSpec change: после `design.md` / до или в `tasks.md`, только при
-  значимом архитектурном решении (см. `.cursor/commands/adr.md`).
+  значимом архитектурном решении (см. `.cursor/skills/adr/SKILL.md`).
 - Не класть сюда delta specs, runbook'и или исполняемые тесты.

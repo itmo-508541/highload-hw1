@@ -6,6 +6,7 @@ description: >-
   права на сервере). Использовать когда нужен новый том/хранилище файлов,
   пользователь упоминает volume, uploads storage, bind-mount, ENV_*_storage,
   docker-compose.deploy.yml volumes, docs/volume.md или skill add-docker-volume.
+disable-model-invocation: true
 ---
 
 # Добавление Docker volume (локально + prod)

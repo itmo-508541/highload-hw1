@@ -3,14 +3,14 @@ spec: openspec/specs/terra/spec.md
 summary: Сериализованный кеш исследования кодовой базы для передачи между AI-агентами при парном программировании.
 
 files:
-  - path: .cursor/commands/opsx-terra-firma.md
-    role: Команда создания terra.md — алгоритм, guardrails, формат вывода
+  - path: .cursor/skills/opsx-terra-firma/SKILL.md
+    role: Скилл создания terra.md — алгоритм, guardrails, формат вывода
   - path: openspec/config.yaml
     role: apply guidance — указание читать terra.md при наличии
 
 entry_points:
   - type: command
     path: /opsx-terra-firma
-    handler: .cursor/commands/opsx-terra-firma.md
+    handler: .cursor/skills/opsx-terra-firma/SKILL.md
 
 tests: []

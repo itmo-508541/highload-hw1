@@ -1,8 +1,7 @@
 ---
-name: "/opsx-terra-firma"
-id: "opsx-terra-firma"
-category: "Workflow"
-description: "Сериализовать кеш исследования кодовой базы в terra.md для handoff Разработчику"
+name: opsx-terra-firma
+description: Сериализовать кеш исследования кодовой базы в terra.md для handoff Разработчику
+disable-model-invocation: true
 ---
 
 Создать `terra.md` в каталоге OpenSpec change — карту территории, исследованной

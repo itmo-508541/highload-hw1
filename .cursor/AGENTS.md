@@ -4,9 +4,9 @@
 
 | Путь | Назначение |
 |------|------------|
-| `skills/` | Skills (OpenSpec opsx, PHPUnit, Behat, Docker PHP, volume, …) |
-| `rules/` | Always-on / glob rules (например `run-php-in-docker`) |
-| `commands/` | Slash-команды (например `/adr` → файлы в корневом `adr/`) |
+| `skills/` | Skills: PHPUnit, Behat, Docker PHP, volume; свои slash-процедуры `/adr`, `/opsx-index`, `/opsx-terra-firma` (`disable-model-invocation`); generated `openspec-*` |
+| `rules/` | Always-on / glob rules (например `run-php-in-docker`, `adr-immutability`) |
+| `commands/` | Generated OpenSpec slash-команды (`opsx-apply`, `opsx-new`, … из `openspec init`) |
 
 ## Куда не класть
 
