@@ -12,6 +12,7 @@ default:
                 - '%paths.base%/features/e2e'
             contexts:
                 - App\Behat\HomepageContext
+                - App\Behat\AdminLoginContext
 
     extensions:
         FriendsOfBehat\SymfonyExtension:

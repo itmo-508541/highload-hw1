@@ -9,7 +9,9 @@
 | Обычный test | `make test`, `make behat` | `APP_ENV=test` | `session.storage.factory.mock_file` (`when@test`) — Redis не обязателен |
 | E2E | `make test-e2e`, `make behat-e2e` | Panther поднимает приложение с `APP_ENV=e2e` (`PANTHER_APP_ENV` / options). В `config/packages/framework.yaml` для `when@e2e` включён `framework.test` (test-container), **без** подмены сессий на `mock_file` | Тот же `RedisSessionHandler`, что в **dev** и **prod** |
 
-Harness шаблона: PHPUnit suite **E2E** — открытие `/` (`tests/E2E/HomepageTest.php`) и probe записи cookie-сессии в Redis (`tests/E2E/E2eSessionStorageTest.php`, ключ `sf_s:`). Behat suite **e2e** — Mink+Panther открывает главную (`features/e2e/`). HTTP-статус через Mink/Panther **не** проверяем (`getStatusCode` в драйвере недоступен); статус — в PHPUnit.
+Harness шаблона: PHPUnit suite **E2E** — открытие `/` (`tests/E2E/HomepageTest.php`) и probe записи cookie-сессии в Redis (`tests/E2E/E2eSessionStorageTest.php`, ключ `sf_s:`). Behat suite **e2e** — Mink+Panther (`features/e2e/`), включая вход в Sonata через `/admin/login`. HTTP-статус через Mink/Panther **не** проверяем (`getStatusCode` в драйвере недоступен); статус — в PHPUnit.
+
+Для фикстур из Behat (ядро FoB: `APP_ENV=test`) и приложения под Panther (`APP_ENV=e2e`) в `.env.e2e` задан тот же `ENV_database_name`, что в `.env.test` (`db_name_test`). Перед `make behat-e2e` Phing `-Dapp.env=test` готовит эту БД.
 
 Два именованных Mink-сеанса `panther` **не** дают два независимых cookie jar: `createPantherClient()` возвращает один и тот же Client. Для двух клиентов используйте `createAdditionalPantherClient()` в PHPUnit E2E (продуктовые мультиклиентские дымы — отдельные задачи).
 
