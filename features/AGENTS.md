@@ -1,27 +1,37 @@
 # features/
 
-Исполняемые приёмочные сценарии **Behat** (Gherkin) и контексты. Конфиг:
-`behat.yml.dist` (локально можно скопировать в `behat.yml`, не коммитить).
-Контексты: `features/bootstrap/`, namespace `App\Behat\`. Фикстуры контекста —
-`./fixtures/` относительно `*Context.php`. Шаг, указывающий каталог фикстуры,
-задаёт путь относительно `features/bootstrap/` (например `fixtures/<dir>`).
+Behat приёмочные сценарии (Gherkin) и контексты.
 
-**test env autoload** — `tests/bootstrap.php` (FoB `bootstrap:`), не каталог
-контекстов.
+## Конфигурация
 
-**Источник ожидаемого поведения** — OpenSpec specs (`openspec/specs/**` и
-delta в `openspec/changes/…/specs/`). `.feature` реализует/уточняет Scenario
-для приёмки; не копировать specs wholesale без нужды.
+- `behat.yml.dist` (локально: копия → `behat.yml`, не коммитить).
+- Bootstrap: `tests/bootstrap.php` (FoB `bootstrap:`).
+- Расширение: `FriendsOfBehat\SymfonyExtension`, ядро в `test`.
+- Suite `default` (`features/`, filter `~@e2e`), suite `e2e` (`features/e2e/`,
+  Mink + Panther).
 
-Запуск: `make behat` (suite `default`, `APP_ENV=test`); E2E — `make behat-e2e`
-(suite `e2e`, сценарии в `features/e2e/`). Docker-сервис `php`.
+## Конвенции
+
+- Контексты: `features/bootstrap/`, namespace `App\Behat\`.
+- Фикстуры: `./fixtures/` относительно `*Context.php`. Путь в шагах —
+  относительно `features/bootstrap/` (например `fixtures/<dir>`).
+- Стиль шагов — атрибуты `#[When]` / `#[Then]` (как в соседних контекстах).
+- Новый контекст → зарегистрировать в `behat.yml.dist`.
+- При наличии активного OpenSpec change — specs задают ожидаемое поведение;
+  `.feature` реализует/уточняет Scenario, не дублирует wholesale.
+
+## Команды
+
+```bash
+make behat                            # suite default
+make behat-e2e                        # suite e2e (нужен Redis)
+make behat features/foo.feature       # один файл
+```
+
 Skill: `.cursor/skills/behat-tests`. E2E runbook: `docs/e2e.md`.
 
 ## Куда не класть
 
-- Соглашения о поведении OpenSpec → `openspec/specs/` (**не сливать** с этим
-  каталогом; не переносить `.feature` в `openspec/`).
-- Unit/integration PHPUnit → `tests/` (не `tests/E2E/` для «быстрой» приёмки).
-- E2E Behat — только в `features/e2e/` (не смешивать с suite `default` в корне
-  `features/`); PHPUnit E2E → `tests/E2E/`. Не в `openspec/`.
-- Cursor skills → `.cursor/skills/`.
+- OpenSpec specs → `openspec/` (не сливать с `features/`)
+- Unit/integration PHPUnit → `tests/`
+- E2E Behat — только `features/e2e/`, не смешивать с suite `default`

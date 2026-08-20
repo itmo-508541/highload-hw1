@@ -9,63 +9,33 @@ description: >
 
 # PHPUnit
 
-## Контекст
-
-- **Источник ожидаемого поведения:** OpenSpec — active change
-  (`openspec/changes/<name>/specs/**`) и/или main specs (`openspec/specs/**`).
-  Requirement/Scenario задают *что* должно быть верно; PHPUnit проверяет это
-  на уровне кода. Не дублировать длинные specs wholesale в docblock'и тестов.
-- Конфигурация: `phpunit.dist.xml`, **test env autoload:** `tests/bootstrap.php`,
-  окружение Unit: `APP_ENV=test` (в конфиге PHPUnit). Suite: `Unit` (exclude
-  `tests/E2E`) и `E2E`.
-- Тесты: каталог `tests/` (Unit/integration); E2E — `tests/E2E/` (Panther /
-  Redis-сессии). Пространства имён вида `App\Tests\...`. Фикстуры — `./fixtures/`
-  относительно `*Test.php`.
-- Запуск **только в Docker**: контейнер `php` должен быть поднят (`make up`). На хосте без контейнера не полагаться на совпадение PHP/расширений с CI.
-- Прямой `docker compose exec`: для неинтерактивного режима (скрипты, агенты, CI) используйте **`exec -T`** — без псевдо-TTY, как в цели `make test` в `Makefile`.
-- **Не смешивать каталоги:** OpenSpec specs — в `openspec/`; Behat (Gherkin и
-  контексты) — в `features/` / `features/bootstrap/` / `features/e2e/`; PHPUnit
-  Unit — в `tests/` вне `tests/E2E/`. Контексты Behat в `tests/` не класть.
+Контекст и конвенции: `tests/AGENTS.md`.
 
 ## Рабочий цикл
 
-1. Перед написанием/правкой тестов прочитать затронутые OpenSpec specs (change
-   delta и/или main): какие Scenario должны быть покрыты unit/integration.
-2. Определить класс(ы) в `src/`, которые нужно покрыть или обновить.
-3. Найти существующий тест в `tests/` по зеркальной структуре (например `src/EventListener/Foo.php` → `tests/EventListener/FooTest.php`) или создать новый `*Test.php`.
-4. Использовать `PHPUnit\Framework\TestCase` или интеграционные базовые классы Symfony из проекта, если они уже приняты в соседних тестах — **сохранять стиль существующих тестов** в том же каталоге.
-5. В `tasks.md` change (если ведёте OpenSpec) указывать пути к затронутым
-   `*Test.php` и связь со Scenario, где уместно.
-6. Запустить прогон:
-   - Unit: `make test`
-   - E2E: `make test-e2e` (нужен Redis; см. `docs/e2e.md`)
-   - один файл: `make test tests/Path/To/SomeTest.php` или `make test ARGS="tests/Path/To/SomeTest.php"`
-7. Исправить падения до зелёного прогона, если это в рамках задачи.
+1. Прочитать затронутые OpenSpec specs (если есть активный change).
+2. Определить класс(ы) в `src/`, которые нужно покрыть.
+3. Найти существующий тест по зеркальной структуре или создать `*Test.php`.
+4. Сохранять стиль соседних тестов (базовые классы, assertions).
+5. Запустить: `make test` (Unit), `make test-e2e` (E2E), один файл —
+   `make test tests/Path/FooTest.php`.
+6. Исправить падения до зелёного прогона (макс. 3 попытки). Если после
+   третьей попытки тесты не зелёные — остановиться, сообщить пользователю
+   о проблеме и ждать указаний.
 
 ## Когда достаточно PHPUnit
 
 Change без UI/HTTP-приёмки: unit/integration в `tests/` обычно достаточно;
 Behat не обязателен, если Scenario не требуют исполняемого Gherkin-потока.
 
-## Команды
+## Справочник API
 
-```bash
-make test
-make test tests/EventListener/CorsRequestListenerTest.php
-make test ARGS="tests/EventListener/CorsRequestListenerTest.php"
-```
+PHPUnit 13 Model Knowledge Patch: `PHPUnit13-full.md` в директории скилла —
+прочитать при написании тестов.
 
-Прямой вызов (если Makefile неудобен):
+## Чеклист
 
-```bash
-docker compose exec -T php vendor/bin/phpunit
-docker compose exec -T php vendor/bin/phpunit tests/EventListener/CorsRequestListenerTest.php
-```
-
-## Мини-чеклист
-
-- [ ] Прочитаны затронутые OpenSpec specs/change (источник поведения)
-- [ ] Тесты лежат в `tests/`, имена классов и файлов согласованы с принятыми в проекте примерами
-- [ ] Фикстуры (если нужны) — в `./fixtures/` относительно `*Test.php`
-- [ ] Выполнен `make test` (или узкий прогон изменённого файла) в запущенном контейнере `php`
-- [ ] Пользователю при сдаче указаны пути к тестам и результат прогона
+- [ ] Тесты в `tests/`, имена согласованы с проектом
+- [ ] Фикстуры в `./fixtures/` относительно `*Test.php`
+- [ ] `make test` пройден в Docker
+- [ ] Пользователю указаны пути и результат прогона

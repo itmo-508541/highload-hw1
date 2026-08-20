@@ -1,8 +1,0 @@
----
-description: Команды PHP/Symfony/Composer/QA: только по skill run-php-in-docker (Docker), без произвольных вызовов с хоста.
-alwaysApply: true
----
-
-## Запуск инструментов PHP и QA в Docker
-
-Используй skill `run-php-in-docker` для запуска Symfony Console, Composer, PHPUnit, Behat, Phing, PHP CS Fixer, PHPStan, Rector.

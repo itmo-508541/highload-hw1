@@ -1,23 +1,32 @@
 # tests/
 
-PHPUnit unit/integration-тесты. Конфиг: `phpunit.dist.xml`. **test env autoload:**
-`tests/bootstrap.php` (Composer + Dotenv; тот же файл читает FoB в
-`behat.yml.dist`). Пространства имён зеркалят `App\…` → `App\Tests\…`.
+PHPUnit unit/integration-тесты.
 
-**Источник ожидаемого поведения** — OpenSpec specs (`openspec/specs/**` и
-delta в change). PHPUnit подтверждает Scenario на уровне кода; change без
-UI/приёмки часто покрывается только этим слоем.
+## Конфигурация
 
-Запуск: `make test` (suite Unit); E2E — `make test-e2e` (suite E2E,
-`tests/E2E/`). Только Docker-сервис `php`.
+- `phpunit.dist.xml`, bootstrap: `tests/bootstrap.php` (Composer + Dotenv).
+- `APP_ENV=test` (задано в конфиге PHPUnit).
+- Suite `Unit` (exclude `tests/E2E/`), suite `E2E` (`tests/E2E/`).
+
+## Конвенции
+
+- Namespace: `App\…` → `App\Tests\…` (зеркальная структура).
+- Фикстуры: `./fixtures/` относительно `*Test.php`.
+- Базовые классы и стиль assertions — от соседних тестов в том же каталоге.
+- При наличии активного OpenSpec change — specs задают ожидаемое поведение
+  для тестов.
+
+## Команды
+
+```bash
+make test                             # suite Unit
+make test-e2e                         # suite E2E (нужен Redis)
+make test tests/Path/FooTest.php      # один файл
+```
+
 Skill: `.cursor/skills/phpunit-tests`. E2E runbook: `docs/e2e.md`.
-
-Фикстуры теста — `./fixtures/` относительно `*Test.php`. Каталог `tests/`
-только для PHPUnit: контексты Behat сюда не класть.
 
 ## Куда не класть
 
-- Gherkin `.feature` и `*Context.php` → `features/` / `features/bootstrap/`
-  (E2E Gherkin — `features/e2e/`).
-- OpenSpec specs / delta → `openspec/specs/`, `openspec/changes/`.
-- Запуск PHPUnit на хосте без контейнера `php` — не делать.
+- Gherkin `.feature`, `*Context.php` → `features/`
+- OpenSpec specs → `openspec/`
