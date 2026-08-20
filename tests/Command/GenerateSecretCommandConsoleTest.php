@@ -40,7 +40,7 @@ final class GenerateSecretCommandConsoleTest extends KernelTestCase
     {
         self::bootKernel(['environment' => 'test']);
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Not enough arguments');
+        $this->expectExceptionMessageIsOrContains('Not enough arguments');
         $this->createConsoleTester()->execute(['command' => 'app:generate-secrets']);
     }
 
@@ -48,7 +48,7 @@ final class GenerateSecretCommandConsoleTest extends KernelTestCase
     {
         self::bootKernel(['environment' => 'test']);
         $this->expectException(SyntaxError::class);
-        $this->expectExceptionMessage('Unclosed');
+        $this->expectExceptionMessageIsOrContains('Unclosed');
         $this->runConsoleCommand(__DIR__.'/fixtures/tools/cases/invalid-twig/invalid.twig');
     }
 

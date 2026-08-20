@@ -56,7 +56,7 @@ final class GenerateSecretCommandBootEnvTest extends TestCase
     public function testMissingTemplateArgument(): void
     {
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Not enough arguments');
+        $this->expectExceptionMessageIsOrContains('Not enough arguments');
         $tester = new CommandTester(new GenerateSecretCommand());
         $tester->execute([]);
     }
@@ -71,7 +71,7 @@ final class GenerateSecretCommandBootEnvTest extends TestCase
     {
         $this->bootProjectFixture('cases/invalid-twig/.env');
         $this->expectException(SyntaxError::class);
-        $this->expectExceptionMessage('Unclosed');
+        $this->expectExceptionMessageIsOrContains('Unclosed');
         $this->runCommand('cases/invalid-twig/invalid.twig');
     }
 
