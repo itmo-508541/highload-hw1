@@ -6,12 +6,12 @@
 
 | Контур | Команда | Окружение приложения | Сессии |
 | ------ | ------- | -------------------- | ------ |
-| Обычный test | `make test`, `make behat` | `APP_ENV=test` | `session.storage.factory.mock_file` (`when@test`) — Redis не обязателен |
-| E2E | `make test-e2e`, `make behat-e2e` | Panther поднимает приложение с `APP_ENV=e2e` (`PANTHER_APP_ENV` / options). В `config/packages/framework.yaml` для `when@e2e` включён `framework.test` (test-container), **без** подмены сессий на `mock_file` | Тот же `RedisSessionHandler`, что в **dev** и **prod** |
+| Без окружения | `make test` (suite `Unit`) | `APP_ENV=test` | не поднимаются |
+| С окружением | `make test-env` (suite'ы `Integration`, `E2E`), `make behat` | `APP_ENV=test`; приложение под Panther — `APP_ENV=e2e` (`PANTHER_APP_ENV` / options). В `config/packages/framework.yaml` для `when@e2e` включён `framework.test` (test-container), **без** подмены сессий на `mock_file` | `mock_file` в `when@test`; под Panther — тот же `RedisSessionHandler`, что в **dev** и **prod** |
 
-Harness шаблона: PHPUnit suite **E2E** — открытие `/` (`tests/E2E/HomepageTest.php`) и probe записи cookie-сессии в Redis (`tests/E2E/E2eSessionStorageTest.php`, ключ `sf_s:`). Behat suite **e2e** — Mink+Panther (`features/e2e/`), включая вход в Sonata через `/admin/login`. HTTP-статус через Mink/Panther **не** проверяем (`getStatusCode` в драйвере недоступен); статус — в PHPUnit.
+Harness шаблона: PHPUnit suite **E2E** — открытие `/` (`tests/E2E/HomepageTest.php`); probe записи cookie-сессии в Redis — `tests/Integration/Session/E2eSessionStorageTest.php` (ключ `sf_s:`), ему нужны ядро и Redis, но не браузер. Behat — сценарии с тегом `@javascript` (`features/admin_access_*.feature`), включая вход в Sonata через `/admin/login`. HTTP-статус через Mink/Panther **не** проверяем (`getStatusCode` в драйвере недоступен); статус — в PHPUnit.
 
-Для фикстур из Behat (ядро FoB: `APP_ENV=test`) и приложения под Panther (`APP_ENV=e2e`) в `.env.e2e` задан тот же `ENV_database_name`, что в `.env.test` (`db_name_test`). Перед `make behat-e2e` Phing `-Dapp.env=test` готовит эту БД.
+Для фикстур из Behat (ядро FoB: `APP_ENV=test`) и приложения под Panther (`APP_ENV=e2e`) в `.env.e2e` задан тот же `ENV_database_name`, что в `.env.test` (`db_name_test`). Перед прогоном Phing `-Dapp.env=test` готовит эту БД — это делает цель `test-prepare`, от которой зависят `test-env` и `behat`.
 
 Два именованных Mink-сеанса `panther` **не** дают два независимых cookie jar: `createPantherClient()` возвращает один и тот же Client. Для двух клиентов используйте `createAdditionalPantherClient()` в PHPUnit E2E (продуктовые мультиклиентские дымы — отдельные задачи).
 
@@ -20,8 +20,8 @@ Harness шаблона: PHPUnit suite **E2E** — открытие `/` (`tests/E
 Нужны поднятые контейнеры (`make up`), в том числе **Redis** (для E2E-сессий).
 
 ```bash
-make test-e2e          # PHPUnit suite E2E
-make behat-e2e         # Behat suite e2e (Mink + Panther; перед запуском — Phing -Dapp.env=test)
+make test-env          # PHPUnit suite'ы Integration и E2E
+make behat             # Behat целиком (браузерный срез — тег @javascript)
 ```
 
 Повторный прогон той же командой должен завершаться успешно без ручных шагов.
@@ -32,11 +32,17 @@ make behat-e2e         # Behat suite e2e (Mink + Panther; перед запус�
 
 В GitLab CI:
 
-- `qa:phpunit` — только `--testsuite=Unit`
-- `qa:phpunit-e2e` — `--testsuite=E2E` + сервис Redis
-- `qa:behat` — suite `default` (без Redis)
-- `qa:behat-e2e` — suite `e2e` + сервис Redis + Chromium из образа `dev`/`source`
+- `qa:phpunit` — `--testsuite=Unit`, без сервисов
+- `qa:phpunit-env` — `--testsuite=Integration,E2E` + MySQL и Redis
+- `qa:behat-env` — все сценарии + MySQL, Redis и Chromium из образа `dev`/`source`
+
+Имя джобы — `qa:<инструмент>-<класс окружения>`; отсутствие суффикса значит,
+что окружение не нужно.
 
 Автотесты **не** гоняются против staging/prod.
 
-Архитектурное решение: [`adr/0002-e2e-acceptance-infrastructure.md`](../adr/0002-e2e-acceptance-infrastructure.md).
+Решение об этом контуре принималось в OpenSpec change
+`openspec/changes/archive/2026-08-06-add-e2e-acceptance-layer/`: там разобраны
+альтернативы (Redis под обычный `test`, Playwright/Cypress, статус через Mink)
+и риски Chromium в Docker. Прежняя система ADR этого проекта отменена;
+действующие правила выбора инструмента и места теста — `docs/adr/0001`.

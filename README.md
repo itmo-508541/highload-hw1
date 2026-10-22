@@ -38,7 +38,7 @@ make qa
 
 ```bash
 npm install -g @fission-ai/openspec@latest
-openspec init --tools cursor
+openspec init --tools claude
 openspec --version
 openspec config profile # в Delivery and workflows выбрать Commands Only
                         # далее пометить всё кроме Propose, Fast-forward и Onboard
@@ -49,6 +49,9 @@ openspec config profile # в Delivery and workflows выбрать Commands Only
 | Вход | Зачем |
 |------|--------|
 | [ABOUT.md](ABOUT.md) | Продукт и рамки шаблона |
+| [CLAUDE.md](CLAUDE.md) | Агентский контекст: constraints, каталоги, скиллы |
+| [docs/adr/](docs/adr/) | Architecture Decision Records |
+| [patterns/tests/](patterns/tests/) | Каталог механик тестов |
 | [openspec/specs/](openspec/specs/) | Принятое поведение (Requirement / Scenario) |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | CI-гейт, переменные, обзор деплоя → детали в `.gitlab-ci.yml` |
 | [docs/redis.md](docs/redis.md) | Runbook: Redis / сессии |

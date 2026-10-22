@@ -38,7 +38,7 @@ return RectorConfig::configure()
     ->withRules([
         PreferPHPUnitSelfCallRector::class,
     ])
-    ->withSkipPath(__DIR__.'/features/bootstrap/fixtures')
+    ->withSkipPath(__DIR__.'/tests/Unit/Tools/fixtures')
     ->withSkip([
         PreferPHPUnitThisCallRector::class,
     ]);

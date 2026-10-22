@@ -1,8 +1,9 @@
 # Docker volume (операционный runbook)
 
 Именованный bind-том для постоянного файлового хранилища (локально и prod).
-Пошаговый чеклист правок compose/CI для агента — skill
-[`add-docker-volume`](../.cursor/skills/add-docker-volume/SKILL.md).
+Пошаговый чеклист правок compose/CI для агента — скилл
+[`add-docker-volume`](../.claude/skills/add-docker-volume/SKILL.md),
+вызывается явно.
 Соглашения `ENV_*` — также [`dotenv.md`](dotenv.md).
 
 ## Когда нужен том

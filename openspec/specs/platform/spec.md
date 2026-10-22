@@ -19,7 +19,7 @@ Docker-сервиса `php`, а не на хосте из корня репоз�
 #### Scenario: Запуск E2E через фасад Makefile
 - **WHEN** разработчик или CI запускает E2E-прогоны из корня репозитория
 - **THEN** прогон выполняется в контейнере сервиса `php` (типично через
-  `make test-e2e` / `make behat-e2e`)
+  `make test-env` / `make behat`)
 - **AND** результат не зависит от браузера или PHP, установленных на хосте
 
 #### Scenario: Запрет запуска PHP-инструментов на хосте
@@ -34,5 +34,5 @@ QA включая E2E) MUST быть доступны через цели Makefi
 #### Scenario: Первый запуск и ежедневный QA
 - **WHEN** нужен первый подъём окружения или полный пакет проверок перед merge
 - **THEN** используются `make up` / `make init` и `make qa` (или поштучные
-  `make test` / `make behat` / `make test-e2e` / `make behat-e2e` /
+  `make test` / `make test-env` / `make behat` /
   `make cs` / `make phpstan` / `make rector`)

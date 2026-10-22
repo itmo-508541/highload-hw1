@@ -81,7 +81,7 @@
    `nginx`.
 
 Prod-образ (`Dockerfile`, target `prod`) не копирует в runtime `docs/`,
-`features/`, `tests/`, `openspec/`, `adr/`, `node_modules` и репозиторные
+`features/`, `tests/`, `openspec/`, `patterns/`, `.claude/`, `node_modules` и репозиторные
 dotenv — см. `COPY --exclude` в [`Dockerfile`](Dockerfile).
 
 ```mermaid

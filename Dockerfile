@@ -83,11 +83,11 @@ FROM php AS prod
 ENV APP_ENV="prod"
 
 COPY \
-    --exclude=.cursor \
+    --exclude=.claude \
     --exclude=.env \
     --exclude=.env.* \
     --exclude=config/jwt \
-    --exclude=adr \
+    --exclude=patterns \
     --exclude=docs \
     --exclude=features \
     --exclude=node_modules \

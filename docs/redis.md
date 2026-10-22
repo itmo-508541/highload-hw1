@@ -15,8 +15,8 @@
 В тестовом окружении (`when@test:` в `config/packages/framework.yaml`)
 `storage_factory_id` подменяется на `session.storage.factory.mock_file`, поэтому
 `make test` (PHPUnit Unit) и `make behat` (suite `default`) **не требуют**
-работающего Redis ради сессий. Контур E2E (`APP_ENV=e2e`, `make test-e2e` /
-`make behat-e2e`, CI `qa:phpunit-e2e` / `qa:behat-e2e`) пишет сессии в Redis
+работающего Redis ради сессий. Контур E2E (`APP_ENV=e2e`, `make test-env` /
+`make behat`, CI `qa:phpunit-env` / `qa:behat-env`) пишет сессии в Redis
 как dev/prod — см. [`e2e.md`](e2e.md).
 
 Persistence между перезапусками — именованный том `redis-data` (в

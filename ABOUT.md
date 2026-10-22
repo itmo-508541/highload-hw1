@@ -41,7 +41,7 @@ Redis 8, Composer, Phing, QA (PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat),
 
 <!--
 Сопровождение шаблона: при изменении базового стека обновляйте таблицу в разделе «Ключевые компоненты и технологии» (ниже, без префикса «Шаблон:»)
-и при необходимости README / `.cursor/rules/run-php-in-docker.mdc` (список skills для агента). Разделы «Шаблон: …» задают рамки репозитория-шаблона; при форке этот блок вместе с комментарием удаляют.
+и при необходимости README / корневой `CLAUDE.md` (constraints и список скиллов для агента). Разделы «Шаблон: …» задают рамки репозитория-шаблона; при форке этот блок вместе с комментарием удаляют.
 -->
 
 ---
@@ -88,15 +88,15 @@ Redis 8, Composer, Phing, QA (PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat),
 
 ## Ключевые компоненты и технологии
 
-| Область | Содержание |
-|--------|------------|
-| Runtime | PHP 8.4, Symfony 7.4.* |
-| Данные | MySQL 8.0 и Redis 8 |
-| Окружение | Docker / Docker Compose, сервис `php`; команды PHP/Composer/QA — в контейнере |
-| Сборка и задачи | Composer, Phing (`make init` и связанные цели) |
-| Качество | PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat (`make qa` и отдельные цели) |
-| Деплой | GitLab CI/CD (как настроено в репозитории) |
-| AI / процесс | OpenSpec (`openspec/`): explore → propose → apply → archive; Cursor `/opsx-*`; ADR через `/adr` → `adr/`; PHP/QA только в Docker |
+| Область | Содержание                                                                                                                                                                                     |
+|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Runtime | PHP 8.4, Symfony 7.4.*                                                                                                                                                                         |
+| Данные | MySQL 8.0 и Redis 8                                                                                                                                                                            |
+| Окружение | Docker / Docker Compose, сервис `php`; команды PHP/Composer/QA — в контейнере                                                                                                                  |
+| Сборка и задачи | Composer, Phing (`make init` и связанные цели)                                                                                                                                                 |
+| Качество | PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat (`make qa` и отдельные цели)                                                                                                                     |
+| Деплой | GitLab CI/CD (как настроено в репозитории)                                                                                                                                                     |
+| AI / процесс | OpenSpec (`openspec/`): explore → new → ... → apply → archive; агентский контекст — `CLAUDE.md` по каталогам и `.claude/skills/`; ADR — `docs/adr/`; PHP/QA только в Docker |
 
 Детали команд — `README.md` / `Makefile`. Поведение — `openspec/specs/`.
 Деплой — [`DEPLOYMENT.md`](DEPLOYMENT.md).

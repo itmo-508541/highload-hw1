@@ -18,11 +18,10 @@ autoload. Контексты Behat MUST жить в `features/bootstrap/` и MUS
 - **WHEN** команда фиксирует ожидаемое поведение, unit-тест, приёмочный сценарий
   или E2E-сценарий
 - **THEN** поведение описывается в `openspec/specs/**` (или delta в change)
-- **AND** PHPUnit Unit/integration остаются в `tests/` вне `tests/E2E/`
-- **AND** PHPUnit E2E остаются в `tests/E2E/`
-- **AND** исполняемые Behat-сценарии «быстрой» приёмки остаются в `features/`
-  (не в `features/e2e/`)
-- **AND** Behat E2E остаются в `features/e2e/`
+- **AND** PHPUnit-тесты лежат в каталоге suite, выбранного по точке
+  наблюдения эффекта (`tests/Unit/`, `tests/Integration/`, `tests/E2E/`)
+- **AND** исполняемые Behat-сценарии остаются в `features/`, один suite,
+  браузерный срез режется тегом `@javascript`
 - **AND** контексты Behat остаются в `features/bootstrap/` (не в `tests/`)
 - **AND** каталоги `openspec/specs` и `features` не объединяются
 
@@ -46,11 +45,10 @@ Docker-сервисе `php`.
 
 #### Scenario: Запуск слоёв через Makefile
 - **WHEN** нужно прогнать unit/integration или приёмочные сценарии
-- **THEN** используются `make test` (PHPUnit suite Unit, `phpunit.dist.xml`) и
-  `make behat` (Behat suite `default`, `behat.yml.dist`, с подготовкой test-env
-  через Phing)
-- **AND** E2E-контур запускается отдельными целями `make test-e2e` /
-  `make behat-e2e` (см. requirement про Makefile и CI для E2E)
+- **THEN** используются `make test` (PHPUnit suite `Unit`, окружение не
+  готовится) и `make test-env` (suite'ы, которым нужно окружение)
+- **AND** Behat запускается целью `make behat` целиком: suite один, отбор
+  срезов — тегами
 
 ### Requirement: Отдельный контур E2E с окружением e2e
 Шаблон MUST предоставлять отдельный исполняемый контур E2E (сквозной прогон
@@ -77,16 +75,17 @@ Behat; все PHP/E2E-прогоны выполняются в Docker-серви
 
 #### Scenario: Локальный запуск E2E через Makefile
 - **WHEN** нужно прогнать E2E локально
-- **THEN** используются `make test-e2e` (PHPUnit suite E2E) и
-  `make behat-e2e` (Behat suite e2e, с подготовкой test-env через Phing как у
-  `make behat`)
-- **AND** покрытие harness — PHPUnit `tests/E2E/` и Behat `features/e2e/`
+- **THEN** используется `make test-env` (PHPUnit suite `E2E`) и `make behat`
+  (сценарии с тегом `@javascript`), обе цели готовят test-env через Phing
+- **AND** покрытие harness — PHPUnit `tests/E2E/` и Behat-сценарии
+  с тегом `@javascript`
 
 #### Scenario: CI разделяет Unit/Behat и E2E
 - **WHEN** выполняется pipeline QA
-- **THEN** job PHPUnit Unit не гоняет каталог `tests/E2E`
-- **AND** существуют отдельные job’ы для PHPUnit E2E и Behat e2e с доступным
-  Redis
+- **THEN** job PHPUnit Unit не гоняет каталоги suite'ов, которым нужно
+  окружение
+- **AND** существуют отдельные job’ы для прогонов с окружением
+  (`qa:phpunit-env`, `qa:behat-env`) с доступными MySQL и Redis
 - **AND** эти job’ы входят в mainline-гейт вместе с остальным QA
 
 ### Requirement: Минимальный E2E-harness главной страницы
@@ -96,4 +95,5 @@ Behat; все PHP/E2E-прогоны выполняются в Docker-серви
 #### Scenario: Главная открывается в браузере
 - **WHEN** E2E-клиент открывает `/`
 - **THEN** текущий URL заканчивается на `/`
-- **AND** покрытие — PHPUnit (`tests/E2E/`) и Behat (`features/e2e/`)
+- **AND** покрытие — PHPUnit (`tests/E2E/`) и Behat (сценарий домена
+  `admin_access` с тегом `@javascript`)

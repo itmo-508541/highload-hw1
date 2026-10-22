@@ -1,8 +1,0 @@
----
-description: vendor/ не в индексе — классы зависимостей читать через скилл vendor-class-lookup, не через веб.
-alwaysApply: true
----
-
-## Исходники зависимостей (vendor/)
-
-`vendor/` не в индексе agent harness. Для чтения FQCN зависимости используй скилл `vendor-class-lookup` (Composer autoload). Не искать на GitHub/веб.
