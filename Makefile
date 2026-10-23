@@ -2,7 +2,7 @@
 
 .PHONY: init up deps owner test-prepare test test-env behat cs phpstan rector qa
 
-init: up
+init: up deps
 	docker compose exec php phing
 
 up:

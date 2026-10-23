@@ -24,13 +24,13 @@ services:
         tmpfs:
             - /tmp:rw,noexec,nosuid,size=128M
         volumes:
-            - ./public:/srv/public
+            - static:/srv/public/bundles
 
-    php:
+    php: &php
         build:
             context: "."
             dockerfile: Dockerfile
-            target: dev
+            target: prod
         networks:
             - nginx
             - mysql
@@ -45,11 +45,19 @@ services:
             - /tmp:rw,noexec,nosuid
         environment:
             HOME: /tmp
-            APP_ENV: dev
-            APP_DEBUG: 1
-            DOCTRINE_PROXY_AUTO_GENERATE: 1
+        secrets:
+            - jwt_public.pem
+            - jwt_private.pem
         volumes:
-            - .:/srv
+            - static:/srv/public/bundles
+            - ./.env:/srv/.env:ro
+            - ./.env.prod:/srv/.env.prod:ro
+
+    init:
+        <<: *php
+        command: ["phing"]
+        depends_on:
+            - php
 
     redis:
         image: redis:8-trixie
@@ -71,20 +79,6 @@ services:
             retries: 5
             start_period: 3s
 
-    phpmyadmin:
-        image: phpmyadmin:latest
-        ports:
-            - 8080:80
-        networks:
-            - mysql
-        depends_on:
-            - mysql
-        environment:
-            PMA_ARBITRARY: "1"
-            PMA_HOST: "mysql"
-            PMA_USER: "root"
-            PMA_PASSWORD: "root"
-
     mysql:
         image: mysql:8.0-debian
         command: mysqld --sql_mode=""
@@ -99,9 +93,16 @@ services:
 
 volumes:
     database:
+    static:
     redis-data:
 
 networks:
     nginx:
     mysql:
     redis:
+
+secrets:
+    jwt_public.pem:
+        file: config/jwt/public.pem
+    jwt_private.pem:
+        file: config/jwt/private.pem

@@ -6,22 +6,27 @@
     <property name="symfony.console" value="bin/console" />
     <symfonyenv prefix="dotenv" />
 
-    <target name="init" depends="database-deploy">
+    <target name="init" depends="database-deploy,app-assets-deploy">
         <echo message="${phing.project.name} Init - OK" />
     </target>
 
-    <target name="app-deploy">
+    <target name="app-deploy" depends="app-cache-warmup,app-assets-deploy">
+        <echo message="${phing.project.name} AppDeploy - OK" />
+    </target>
+
+    <target name="app-cache-warmup">
         <exec executable="${symfony.console}" passthru="true" checkreturn="true">
             <arg line="cache:clear --env=${dotenv.APP_ENV} --no-warmup" />
         </exec>
         <exec executable="${symfony.console}" passthru="true" checkreturn="true">
             <arg line="cache:warmup --env=${dotenv.APP_ENV}" />
         </exec>
+    </target>
+
+    <target name="app-assets-deploy">
         <exec executable="${symfony.console}" passthru="true" checkreturn="true">
             <arg line="assets:install --env=${dotenv.APP_ENV} public" />
         </exec>
-
-        <echo message="${phing.project.name} AppDeploy - OK" />
     </target>
 
     <target name="database-deploy" depends="database-ready">

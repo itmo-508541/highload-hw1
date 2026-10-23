@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.19
-ARG source_image=scratch
+ARG source_image=source
 FROM debian:trixie-slim AS php
 
 ENV TERM=linux
@@ -39,10 +39,6 @@ USER www-data
 CMD ["php-fpm8.4"]
 
 
-# Используется для копирования файлов для prod образа
-FROM ${source_image} AS source_image
-
-
 # Используется для локальной разработки
 FROM php AS dev
 
@@ -77,6 +73,10 @@ RUN composer check-platform-reqs \
 COPY --chown=www-data:www-data . .
 
 RUN phing app-deploy -Dapp.env=prod
+
+
+# Используется для копирования файлов для prod образа
+FROM ${source_image} AS source_image
 
 
 # Используется для конечного приложения
