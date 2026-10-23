@@ -47,7 +47,11 @@ PHP 8.4 · Symfony 7.4 · MySQL 8.0 · Redis 8 · Docker Compose
 ## Environments
 
 - **dev** — `docker compose`: `docker-compose.yml` + `docker-compose.override.yml`
-  (gitignored, копия `.dist`). Порты: `80` (nginx), `8080`, `3306`.
+  (gitignored, копия `.dist`): `target: dev`, проект смонтирован в `/srv`.
+  Всё, что нужно только разработке, — в `.dist`. Порты: `80` (nginx),
+  `8080` (phpmyadmin), `3306`.
+- **demo** (prod-режим) — `docker-compose.yml` без override: образ `target: prod`,
+  `APP_ENV=prod`, одноразовый сервис `init` выполняет `phing`. Только для показа.
 - **test** — `APP_ENV=test`, задан в `phpunit.dist.xml` и в ядре Behat.
 - **e2e** — приложение под браузером Panther: `PANTHER_APP_ENV=e2e`, `.env.e2e`.
 - **production** — `docker-compose.deploy.yml`, конфиг собирается в CI.
