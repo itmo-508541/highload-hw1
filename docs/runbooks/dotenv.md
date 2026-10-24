@@ -2,7 +2,7 @@
 
 Как загружается окружение локально, в CI и на prod; ключевые группы переменных.
 Совпадение env с Phing — в [`phing.md`](phing.md). Обзор деплоя —
-[`DEPLOYMENT.md`](../DEPLOYMENT.md).
+[`DEPLOYMENT.md`](../../DEPLOYMENT.md).
 
 ## Локально и в CI на не-mainline ветках
 
@@ -26,22 +26,22 @@ GitLab CI: job **`prepare-mainline:env`** формирует артефакт
 secret **`/run/secrets/.env.local.php`**.
 
 Symfony ожидает файл **`.env.local.php`** в корне приложения. В образе для prod
-в [`docker-compose.deploy.yml`](../docker-compose.deploy.yml) используется
-**config**: файл [`secrets/env.php`](../secrets/env.php) попадает в контейнер как
+в [`docker-compose.deploy.yml`](../../docker-compose.deploy.yml) используется
+**config**: файл [`secrets/env.php`](../../secrets/env.php) попадает в контейнер как
 **`/srv/.env.local.php`** и делает
 `return include '/run/secrets/.env.local.php';` — Runtime загружает обычный путь,
 а массив окружения читается из секрета. Ключи JWT — отдельные secret-файлы
 (`jwt_private.pem`, `jwt_public.pem`), пути к ним задаются в дампе (конфигурация
 Lexik JWT).
 
-Шаги CI и копирование на сервер — [`DEPLOYMENT.md`](../DEPLOYMENT.md).
+Шаги CI и копирование на сервер — [`DEPLOYMENT.md`](../../DEPLOYMENT.md).
 
 ## Ключевые группы переменных
 
 - БД: `ENV_database_host`, `ENV_database_port`, `ENV_database_name`,
   `ENV_database_user`, `ENV_database_password`, `ENV_database_root_password`.
 - Redis: `ENV_redis_host`, `ENV_redis_port`, `ENV_redis_password`. Подключение в
-  сервисах — через **`REDIS_URL`** (см. [`config/services.yaml`](../config/services.yaml):
+  сервисах — через **`REDIS_URL`** (см. [`config/services.yaml`](../../config/services.yaml):
   `RedisAdapter::createConnection` с
   **`%env(resolve:REDIS_URL)%`**). URL и дефолты — в **`.env`** (как в рецептах
   Symfony Flex); дублирующей «сборки» URL в YAML нет. В **`qa:behat`** Dotenv
@@ -58,7 +58,7 @@ Lexik JWT).
 
 - Секреты production **не** хранятся в репозитории; значения — в **GitLab CI/CD
   Variables** (и File variables для ключей) → **`.env.prod.local`** → дамп
-  **`/run/secrets/.env.local.php`** (см. [`DEPLOYMENT.md`](../DEPLOYMENT.md)).
+  **`/run/secrets/.env.local.php`** (см. [`DEPLOYMENT.md`](../../DEPLOYMENT.md)).
 - Локально шаблонные значения из **`.env`** при необходимости переопределяют в
   **`.env.local`** (не коммитится).
 - `ENV_redis_password`, `ENV_database_root_password` и остальные поля из

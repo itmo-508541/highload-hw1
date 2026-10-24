@@ -21,9 +21,6 @@ context: |
   - skill-retro — оценка скилла по произведённому им артефакту;
   - vendor-class-lookup — чтение определения класса по FQCN.
 
-  После создания или изменения `proposal.md` информируй автора задачи
-  об изменениях в понимании задачи: `docs/adr/0003-informing-the-task-author.md`.
-
   Язык: русский.
 
 # Per-artifact rules — injected only for the matching artifact.

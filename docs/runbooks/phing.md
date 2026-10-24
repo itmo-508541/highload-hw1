@@ -2,7 +2,7 @@
 
 Инициализация через Phing, загрузка env в `build.xml`, подготовка test-env для
 Behat. Цепочка Dotenv приложения — в [`dotenv.md`](dotenv.md). Быстрый старт —
-[`README.md`](../README.md). PHP и Phing — только в Docker-сервисе `php`.
+[`README.md`](../../README.md). PHP и Phing — только в Docker-сервисе `php`.
 
 ## Первый запуск и database-deploy
 

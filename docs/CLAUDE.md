@@ -3,22 +3,22 @@
 Два жителя, не смешивать.
 
 - `docs/adr/` — Architecture Decision Records: **почему** так решено.
-- `docs/*.md` — операционные runbook'и: как проверить, настроить или прогнать
+- `docs/runbooks/` — операционные runbook'и: как проверить, настроить или прогнать
   конкретный контур руками (команды, smoke, ловушки).
 
 | Путь | Назначение |
 |------|------------|
-| `redis.md` | Redis: сессии, smoke `redis-cli`, local vs prod AUTH |
-| `e2e.md` | E2E: Panther/Chromium, контуры Unit vs E2E, CI job’ы |
-| `dotenv.md` | Dotenv: цепочка env, prod-шим, группы `ENV_*` |
-| `phing.md` | Phing: `make init`, bootstrap/`symfonyenv`, test-env для Behat |
-| `volume.md` | Именованный bind-volume: когда нужен, smoke, ловушки |
+| `runbooks/redis.md` | Redis: сессии, smoke `redis-cli`, local vs prod AUTH |
+| `runbooks/e2e.md` | E2E: Panther/Chromium, контуры Unit vs E2E, CI job’ы |
+| `runbooks/dotenv.md` | Dotenv: цепочка env, prod-шим, группы `ENV_*` |
+| `runbooks/phing.md` | Phing: `make init`, bootstrap/`symfonyenv`, test-env для Behat |
+| `runbooks/volume.md` | Именованный bind-volume: когда нужен, smoke, ловушки |
 
 ## Новый или изменённый контур
 
 Изменение вводит или меняет операционный контур — обновить существующий
-`docs/<name>.md` или добавить плоский файл `docs/<name>.md` (kebab-case
-латиницей, один контур на файл). После добавления — строка в таблице выше.
+`docs/runbooks/<name>.md` или добавить плоский файл `docs/runbooks/<name>.md`
+(kebab-case латиницей, один контур на файл). После добавления — строка в таблице выше.
 
 ## ADR
 

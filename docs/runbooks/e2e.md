@@ -41,8 +41,5 @@ make behat             # Behat целиком (браузерный срез —
 
 Автотесты **не** гоняются против staging/prod.
 
-Решение об этом контуре принималось в OpenSpec change
-`openspec/changes/archive/2026-08-06-add-e2e-acceptance-layer/`: там разобраны
-альтернативы (Redis под обычный `test`, Playwright/Cypress, статус через Mink)
-и риски Chromium в Docker. Прежняя система ADR этого проекта отменена;
-действующие правила выбора инструмента и места теста — `docs/adr/0001`.
+Правила выбора инструмента и места теста —
+[`docs/adr/0001-test-tool-and-suite-routing.md`](../adr/0001-test-tool-and-suite-routing.md).

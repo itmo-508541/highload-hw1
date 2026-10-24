@@ -34,9 +34,9 @@ PHP 8.4 · Symfony 7.4 · MySQL 8.0 · Redis 8 · Docker Compose
 | `features/` | Behat: сценарии Gherkin, контексты в `features/bootstrap/` |
 | `patterns/tests/` | Каталог механик тестов |
 | `migrations/` | Doctrine-миграции (только данные, не DDL) |
-| `docs/` | Операционные runbook'и |
+| `docs/runbooks/` | Операционные runbook'и |
 | `docs/adr/` | Architecture Decision Records |
-| `openspec/` | Спецификации поведения и changes (не смешивать с `features/`) |
+| `openspec/` | Спецификации поведения и changes |
 | `config/` | Конфигурация Symfony |
 | `docker/` | Конфиги образов: `php`, `php-dev`, `nginx`, `nginx-dev`, `git` |
 | `tools/` | Обвязка phing: bootstrap и задача `dotEnvProperty` |
@@ -56,7 +56,7 @@ PHP 8.4 · Symfony 7.4 · MySQL 8.0 · Redis 8 · Docker Compose
 - **e2e** — приложение под браузером Panther: `PANTHER_APP_ENV=e2e`, `.env.e2e`.
 - **production** — `docker-compose.deploy.yml`, конфиг собирается в CI.
 
-Цепочка `.env` и prod-шим — `docs/dotenv.md`.
+Цепочка `.env` и prod-шим — `docs/runbooks/dotenv.md`.
 
 ## QA-гейт
 

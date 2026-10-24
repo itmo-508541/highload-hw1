@@ -2,7 +2,7 @@
 
 Сессии Symfony и smoke-проверки Redis в Docker. Переменные `REDIS_URL` /
 `ENV_redis_*` — в [`dotenv.md`](dotenv.md). Быстрый старт проекта — в
-[`README.md`](../README.md).
+[`README.md`](../../README.md).
 
 ## Сессии приложения
 

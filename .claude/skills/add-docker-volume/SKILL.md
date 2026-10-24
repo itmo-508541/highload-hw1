@@ -5,7 +5,7 @@ description: >-
   разработки и production-деплоя (compose, .env, GitLab CI REQUIRED_VARS,
   права на сервере). Использовать когда нужен новый том/хранилище файлов,
   пользователь упоминает volume, uploads storage, bind-mount, ENV_*_storage,
-  docker-compose.deploy.yml volumes, docs/volume.md или skill add-docker-volume.
+  docker-compose.deploy.yml volumes, docs/runbooks/volume.md или skill add-docker-volume.
 disable-model-invocation: true
 ---
 
@@ -19,7 +19,7 @@ disable-model-invocation: true
 Перед применением замените имя и пути.
 
 Этот skill — канонический **чеклист правок**. Операционный runbook (когда нужен
-том, smoke, ловушки) — [`docs/volume.md`](../../../docs/volume.md).
+том, smoke, ловушки) — [`docs/runbooks/volume.md`](../../../docs/runbooks/volume.md).
 
 ## Соглашения по именам
 

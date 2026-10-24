@@ -2,7 +2,7 @@
 
 Именованный bind-том для постоянного файлового хранилища (локально и prod).
 Пошаговый чеклист правок compose/CI для агента — скилл
-[`add-docker-volume`](../.claude/skills/add-docker-volume/SKILL.md),
+[`add-docker-volume`](../../.claude/skills/add-docker-volume/SKILL.md),
 вызывается явно.
 Соглашения `ENV_*` — также [`dotenv.md`](dotenv.md).
 
@@ -39,7 +39,7 @@ runbook про bind на каталог хоста.
 
 1. Выполнить шаги skill `add-docker-volume` (или поручить агенту — промпт ниже).
 2. Пройти smoke (ниже) локально; после первого деплоя — на сервере.
-3. При новой CI-переменной хоста — пометка в [`DEPLOYMENT.md`](../DEPLOYMENT.md)
+3. При новой CI-переменной хоста — пометка в [`DEPLOYMENT.md`](../../DEPLOYMENT.md)
    (предусловия mainline), если перечень в тексте устарел.
 
 Промпт для агента Cursor (подставьте имя тома):
@@ -92,4 +92,4 @@ sudo chmod 0700 /var/local/uploads-storage
 
 - Агентский чеклист правок — skill `add-docker-volume`
 - Env / `ENV_*` — [`dotenv.md`](dotenv.md)
-- Деплой / `REQUIRED_VARS` — [`DEPLOYMENT.md`](../DEPLOYMENT.md)
+- Деплой / `REQUIRED_VARS` — [`DEPLOYMENT.md`](../../DEPLOYMENT.md)

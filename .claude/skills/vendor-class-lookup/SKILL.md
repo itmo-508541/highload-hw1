@@ -74,8 +74,8 @@ rg -n --no-ignore "class AbstractAdmin" vendor/
 2. **Классмап — `vendor/composer/autoload_classmap.php`,** если PSR-4 не дал
    ответа. Ключи в одинарных кавычках, `\` записан как `\\`. Путь — в значении
    после `$vendorDir . '` для зависимости или `$baseDir . '` для кода проекта.
-   Классмап в проекте неполон (`optimize-autoloader` не включён), поэтому пусто
-   в нём ничего не доказывает.
+   Классмап полон только при `optimize-autoloader`; если в `composer.json`
+   (`config`) этой опции нет, пусто в нём ничего не доказывает.
 3. **Сузить область — `composer.lock`.** `packages[].name` → ожидаемый каталог
    `vendor/<vendor>/<package>/`. Только чтобы уточнить поиск по autoload-файлам;
    перебирать файлы пакета руками не нужно.

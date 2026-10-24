@@ -45,16 +45,6 @@ make deps
 make qa
 ```
 
-Установка и настройка OpenSpec:
-
-```bash
-npm install -g @fission-ai/openspec@latest
-openspec init --tools claude
-openspec --version
-openspec config profile # в Delivery and workflows выбрать Commands Only
-                        # далее пометить всё кроме Propose, Fast-forward и Onboard
-```
-
 ## Документация
 
 | Вход | Зачем |
@@ -65,10 +55,11 @@ openspec config profile # в Delivery and workflows выбрать Commands Only
 | [patterns/tests/](patterns/tests/) | Каталог механик тестов |
 | [openspec/specs/](openspec/specs/) | Принятое поведение (Requirement / Scenario) |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | CI-гейт, переменные, обзор деплоя → детали в `.gitlab-ci.yml` |
-| [docs/redis.md](docs/redis.md) | Runbook: Redis / сессии |
-| [docs/dotenv.md](docs/dotenv.md) | Runbook: Dotenv / env / prod-шим |
-| [docs/phing.md](docs/phing.md) | Runbook: Phing / init / test-env |
-| [docs/volume.md](docs/volume.md) | Runbook: именованный Docker volume |
+| [docs/runbooks/redis.md](docs/runbooks/redis.md) | Runbook: Redis / сессии |
+| [docs/runbooks/dotenv.md](docs/runbooks/dotenv.md) | Runbook: Dotenv / env / prod-шим |
+| [docs/runbooks/phing.md](docs/runbooks/phing.md) | Runbook: Phing / init / test-env |
+| [docs/runbooks/volume.md](docs/runbooks/volume.md) | Runbook: именованный Docker volume |
+| [docs/runbooks/e2e.md](docs/runbooks/e2e.md) | Runbook: E2E / Panther / CI-джобы |
 
 ## Начало работы
 
