@@ -1,6 +1,6 @@
-# Symfony backend
+# Инструменты автоматизации в Grafana
 
-Проект backend на Symfony 7.4 / PHP 8.4 с локальной разработкой в Docker и деплоем через GitLab CI/CD.
+Домашняя работа HW1 ([`HW1.md`](HW1.md)): микросервис на Symfony 7.4 / PHP 8.4 с REST-ручками над записями и ручкой готовности, на котором строятся метрики золотых сигналов, генератор дашборда Grafana и нагрузочный скрипт. Локальная разработка — в Docker, деплой — через GitLab CI/CD.
 
 ## Технологический стек
 
@@ -45,11 +45,28 @@ make deps
 make qa
 ```
 
+## Ручки
+
+| Ручка | Ответ |
+|---|---|
+| `POST /items` | `201 {"id": N}` |
+| `GET /items/{id}` | `200 {"value": X}`; нет записи — `404` |
+| `PUT /items/{id}` | `200 {"id": N}`; нет записи — `404` |
+| `GET /health` | `200`, когда Redis доступен; иначе `503` |
+
+Тело `POST` и `PUT` — `{"value": <строка | число | true | false>}`, ровно один ключ; иначе `400`. Записи хранятся в Redis ([ADR 0004](docs/adr/0004-items-stored-in-redis.md)).
+
+Заголовок `Content-Type: application/json` обязателен: без него тело не разбирается, и запрос получает `400`.
+
+```bash
+curl -i -X POST http://localhost/items -H 'Content-Type: application/json' -d '{"value":"foo"}'
+```
+
 ## Документация
 
 | Вход | Зачем |
 |------|--------|
-| [ABOUT.md](ABOUT.md) | Продукт и рамки шаблона |
+| [ABOUT.md](ABOUT.md) | Продукт: цель HW1, ручки, архитектура, ограничения |
 | [CLAUDE.md](CLAUDE.md) | Агентский контекст: constraints, каталоги, скиллы |
 | [docs/adr/](docs/adr/) | Architecture Decision Records |
 | [patterns/tests/](patterns/tests/) | Каталог механик тестов |

@@ -9,7 +9,7 @@
 | Без окружения | `make test` (suite `Unit`) | `APP_ENV=test` | не поднимаются |
 | С окружением | `make test-env` (suite'ы `Integration`, `E2E`), `make behat` | `APP_ENV=test`; приложение под Panther — `APP_ENV=e2e` (`PANTHER_APP_ENV` / options). В `config/packages/framework.yaml` для `when@e2e` включён `framework.test` (test-container), **без** подмены сессий на `mock_file` | `mock_file` в `when@test`; под Panther — тот же `RedisSessionHandler`, что в **dev** и **prod** |
 
-Harness шаблона: PHPUnit suite **E2E** — открытие `/` (`tests/E2E/HomepageTest.php`); probe записи cookie-сессии в Redis — `tests/Integration/Session/E2eSessionStorageTest.php` (ключ `sf_s:`), ему нужны ядро и Redis, но не браузер. Behat — сценарии с тегом `@javascript` (`features/admin_access_*.feature`), включая вход в Sonata через `/admin/login`. HTTP-статус через Mink/Panther **не** проверяем (`getStatusCode` в драйвере недоступен); статус — в PHPUnit.
+Harness проекта: PHPUnit suite **E2E** — открытие `/` (`tests/E2E/HomepageTest.php`); probe записи cookie-сессии в Redis — `tests/Integration/Session/E2eSessionStorageTest.php` (ключ `sf_s:`), ему нужны ядро и Redis, но не браузер. Behat — сценарии с тегом `@javascript` (`features/admin_access_*.feature`), включая вход в Sonata через `/admin/login`. HTTP-статус через Mink/Panther **не** проверяем (`getStatusCode` в драйвере недоступен); статус — в PHPUnit.
 
 Для фикстур из Behat (ядро FoB: `APP_ENV=test`) и приложения под Panther (`APP_ENV=e2e`) в `.env.e2e` задан тот же `ENV_database_name`, что в `.env.test` (`db_name_test`). Перед прогоном Phing `-Dapp.env=test` готовит эту БД — это делает цель `test-prepare`, от которой зависят `test-env` и `behat`.
 

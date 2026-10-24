@@ -28,7 +28,7 @@
 
 ## Куда не класть
 
-- Поведение продукта/шаблона (Requirement / Scenario) → `openspec/specs/`.
+- Поведение продукта (Requirement / Scenario) → `openspec/specs/`.
 - Быстрый старт и принципы разработки → `README.md`.
 - Деплой / CI-гейт → `DEPLOYMENT.md` + `.gitlab-ci.yml`.
 - Пошаговые чеклисты для агента → `.claude/skills/`.

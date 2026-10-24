@@ -9,7 +9,10 @@ default:
             # Ключ обязателен даже пустым: без него Behat подставит дефолтный
             # FeatureContext и упадёт на class_exists.
             contexts:
+                - App\Behat\HttpApiContext
                 - App\Behat\AdminAccessContext
+                - App\Behat\ItemStorageContext
+                - App\Behat\ServiceHealthContext
 
     extensions:
         FriendsOfBehat\SymfonyExtension:
@@ -23,13 +26,15 @@ default:
 
         Behat\MinkExtension:
             base_url: http://127.0.0.1:9080
+            default_session: symfony
             javascript_session: panther
             sessions:
+                # Сценарии без `@javascript`: запрос исполняет ядро в процессе
+                # Behat (окружение test), без браузера и веб-сервера.
+                symfony:
+                    symfony: ~
                 # Сценарии с `@javascript`: Panther поднимает свой веб-сервер
                 # и браузер, приложение под ним работает в окружении e2e.
-                # Сессия `symfony` (ядро в том же процессе, без браузера)
-                # появится вместе с первым сценарием без `@javascript`:
-                # ей нужен пакет behat/mink-browserkit-driver.
                 panther:
                     panther:
                         options:
