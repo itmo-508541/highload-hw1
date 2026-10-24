@@ -27,17 +27,23 @@ final readonly class HealthController
     #[Route(path: '/health', name: 'health', methods: ['GET'])]
     public function __invoke(): Success
     {
+        $failure = null;
+
         try {
-            ($this->redis)()->ping();
+            // Ответ-ошибку Redis (например, `-LOADING`, пока Redis загружает данные
+            // с диска) phpredis может вернуть как `false`, не бросая исключения.
+            if (true === ($this->redis)()->ping()) {
+                return new Success('ok');
+            }
         } catch (InvalidArgumentException|\RedisException $e) {
             // InvalidArgumentException бросает `RedisAdapter::createConnection`, когда
             // подключение не устанавливается, — вопреки своему docblock'у, где она обещана
             // только для невалидного DSN. Изменение этого поведения при обновлении
             // symfony/cache поймает набор `connect-fails` в features/service_health_readiness.feature.
             // \RedisException — отказ уже открытого соединения.
-            throw new ServiceUnavailableHttpException(null, 'Storage is unavailable.', $e);
+            $failure = $e;
         }
 
-        return new Success('ok');
+        throw new ServiceUnavailableHttpException(null, 'Storage is unavailable.', $failure);
     }
 }

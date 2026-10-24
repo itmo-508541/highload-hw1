@@ -168,8 +168,10 @@
 (`#[AutowireServiceClosure(\Redis::class)]`) и вызывает его внутри `try`.
 Причина: `createConnection` подключается при создании сервиса. Если внедрить
 `\Redis` в конструктор, падение подключения случится при сборке контроллера,
-вне его `try`, и ответ будет 500, а не 503. Исключение подключения или `PING`
-→ `ServiceUnavailableHttpException` → JSON 503.
+вне его `try`, и ответ будет 500, а не 503. Исключение подключения или `PING`,
+а также результат `PING`, отличный от `true`, → `ServiceUnavailableHttpException`
+→ JSON 503. Ответ-ошибку Redis (например, `-LOADING`, пока Redis загружает
+данные с диска) phpredis может вернуть как `false`, не бросая исключения.
 
 Отказ подключения `RedisAdapter::createConnection` сообщает исключением Cache
 `InvalidArgumentException`, хотя его docblock обещает его только для
@@ -257,7 +259,7 @@ DSN, задаётся в `.env.test`); сценарии Behat очищают е�
 | items: Тело не в формате JSON | `item_storage` | `@domain:item_storage` | `features/item_storage_invalid_body.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | outline «невалидное тело отклоняется», наборы `form-body`, `x-json-body` (`Content-Type: application/x-json`, D5) и `no-content-type` (без заголовка, «Решения»); шаг отправки с произвольным `Content-Type` — в `ItemStorageContext` |
 | items: Число вне диапазона | `item_storage` | `@domain:item_storage` | `features/item_storage_invalid_body.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | outline «невалидное тело отклоняется», набор `overflow-float` |
 | health: Хранилище доступно | `service_health` | `@domain:service_health` | `features/service_health_readiness.feature` | `ServiceHealthContext`, `HttpApiContext` | новое поведение | новая | сценарий «сервис готов»: код 200, `Content-Type: application/json`, тело — JSON-объект |
-| health: Хранилище недоступно | `service_health` | `@domain:service_health` | `features/service_health_readiness.feature` | `ServiceHealthContext`, `HttpApiContext` | новое поведение | новая | outline «хранилище недоступно», наборы `ping-fails` и `connect-fails`: код 503, `Content-Type: application/json`, тело — JSON-объект; швы — в «Решениях» |
+| health: Хранилище недоступно | `service_health` | `@domain:service_health` | `features/service_health_readiness.feature` | `ServiceHealthContext`, `HttpApiContext` | новое поведение | новая | outline «хранилище недоступно», наборы `ping-fails`, `ping-error` и `connect-fails`: код 503, `Content-Type: application/json`, тело — JSON-объект; швы — в «Решениях» |
 
 ### PHPUnit
 
@@ -352,6 +354,7 @@ DSN, задаётся в `.env.test`); сценарии Behat очищают е�
   только на первый запрос сценария: перед вторым ядро перезагрузится. Поэтому
   сценарий «хранилище недоступно» делает ровно один запрос. Наблюдательный
   прогон до появления контроллера невозможен. Это шов набора `ping-fails`.
+  Тот же двойник, возвращающий `false` на `ping()`, — шов набора `ping-error`.
 - Шов набора `connect-fails`: ветка D6, где падает сам `createConnection`
   (исключение Cache, а не `\RedisException` от `PING`). `ServiceHealthContext`
   до первого запроса подменяет `REDIS_URL` на недоступный адрес: `%env()%`

@@ -43,6 +43,23 @@ final class ServiceHealthContext extends RawMinkContext
     }
 
     /**
+     * Ответ-ошибку Redis (например, `-LOADING`, пока Redis загружает данные
+     * с диска) phpredis может вернуть из `ping()` как `false`, не бросая
+     * исключения. Подмена — как у `storageStoppedResponding()`.
+     */
+    #[Given('хранилище записей отвечает ошибкой')]
+    public function storageRespondsWithError(): void
+    {
+        $this->driverContainer->set(\Redis::class, new class extends \Redis {
+            #[\Override]
+            public function ping(?string $message = null): bool
+            {
+                return false;
+            }
+        });
+    }
+
+    /**
      * `%env(REDIS_URL)%` разрешается при создании сервиса `Redis`, то есть уже
      * в запросе: недоступный адрес роняет `RedisAdapter::createConnection`.
      *

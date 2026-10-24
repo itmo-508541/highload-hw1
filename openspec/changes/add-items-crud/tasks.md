@@ -77,7 +77,11 @@
 - [x] 7.4 Шаг `HttpApiContext` без тела — только `GET` (Предусловие 3): без тела оба домена шлют только `GET`; docblock контекста не перечисляет домены. Проверка: `make behat` зелёный
 - [x] 7.5 Таймауты Redis (D6): второй аргумент `createConnection` в `config/services.yaml` — `{ timeout: 2, read_timeout: 2 }`, имена опций — по `RedisTrait::$defaultConnectionOptions` (скилл `vendor-class-lookup`). Проверка ручная, автоматической нет (Risks): на dev-стенде `docker compose exec php bin/console debug:container Redis --show-arguments` показывает опции (в prod команде нужна запись в кеш), `make behat` зелёный; стенд в prod-режиме (`docker-compose.yml` без override): `GET /health` — 200; после `docker compose pause redis` — 503 с JSON-телом и `Content-Type: application/json` не дольше 3 с (подключение принимается, ответа на `AUTH` нет — срабатывает `read_timeout`); после `docker compose unpause redis` — снова 200. Таймаут подключения — prod-ядро из CLI (`docker compose exec -e ENV_redis_host=10.255.255.1 php php`, переменная окружения перекрывает `.env`), обрабатывающее `Request::create('/health')`: 503 не дольше 3 с, первопричина — `Redis connection failed: Connection timed out`. На dev-стенде проверка 503 невозможна (Risks)
 
-## 8. Гейт (выполняет пользователь)
+## 8. Замечания четвёртого code-review
 
-- [x] 8.1 Пользователь запускает `make qa`. Проверка: все цели (`cs`, `phpstan`, `rector`, `test`, `test-env`, `behat`) зелёные
-- [ ] 8.2 Пользователь повторяет `code-review` изменений change. Проверка: замечания ревью закрыты или вынесены отдельными задачами
+- [x] 8.1 `HealthController` проверяет результат `ping()` (D6): ответ, отличный от `true`, — неготовность, `ServiceUnavailableHttpException`, как при исключении. Набор `ping-error` в outline «хранилище недоступно»: двойник `Redis` возвращает `false` на `ping()`, шаг `хранилище записей отвечает ошибкой` — в `ServiceHealthContext`. Проверка: `make behat features/service_health_readiness.feature` зелёный, в выводе набор `ping-error`; без проверки результата в контроллере набор краснеет (200), код вернуть
+
+## 9. Гейт (выполняет пользователь)
+
+- [x] 9.1 Пользователь запускает `make qa`. Проверка: все цели (`cs`, `phpstan`, `rector`, `test`, `test-env`, `behat`) зелёные
+- [x] 9.2 Пользователь повторяет `code-review` изменений change. Проверка: замечания ревью закрыты или вынесены отдельными задачами
