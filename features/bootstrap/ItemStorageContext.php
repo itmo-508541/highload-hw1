@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Behat;
 
 use Behat\Gherkin\Node\PyStringNode;
+use Behat\Hook\BeforeScenario;
 use Behat\MinkExtension\Context\RawMinkContext;
 use Behat\Step\Given;
 use Behat\Step\Then;
@@ -14,6 +15,10 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 /**
  * Домен `item_storage`: записи «ключ — значение» по HTTP — создание, чтение
  * и замена значения через `/items`.
+ *
+ * Перед каждым сценарием очищает тестовую БД Redis (`REDIS_URL` из `.env.test`):
+ * в неё пишет только этот домен. Исключение из правила уборки в `@AfterScenario`
+ * (ADR 0002) — прогон не зависит от остатков упавшего.
  */
 final class ItemStorageContext extends RawMinkContext
 {
@@ -27,6 +32,17 @@ final class ItemStorageContext extends RawMinkContext
     public function __construct(
         private readonly \Redis $redis,
     ) {
+    }
+
+    #[BeforeScenario]
+    public function flushTestRedisDatabase(): void
+    {
+        // БД 0 — данные dev-окружения: чистить можно только отдельную тестовую.
+        if (0 === $this->redis->getDbNum()) {
+            throw new \LogicException('Refusing to FLUSHDB Redis database 0: REDIS_URL of the test env must select a separate database.');
+        }
+
+        $this->redis->flushDB();
     }
 
     #[Given('/^существует запись со значением (.+)$/')]
@@ -43,16 +59,22 @@ final class ItemStorageContext extends RawMinkContext
         $this->itemId = $id;
     }
 
-    #[When('/^клиент отправляет (GET|POST|PUT) (\S+) с телом:$/')]
+    #[When('/^клиент отправляет (POST|PUT) (\S+) с телом:$/')]
     public function clientSendsWithBody(string $method, string $path, PyStringNode $body): void
     {
         $this->sendRequest($method, $path, $body->getRaw());
     }
 
-    #[When('/^клиент отправляет (POST|PUT) (\S+) с Content-Type (\S+) и телом:$/')]
-    public function clientSendsWithContentTypeAndBody(string $method, string $path, string $contentType, PyStringNode $body): void
+    #[When('/^клиент отправляет POST (\S+) с Content-Type (\S+) и телом:$/')]
+    public function clientPostsWithContentTypeAndBody(string $path, string $contentType, PyStringNode $body): void
     {
-        $this->sendRequest($method, $path, $body->getRaw(), $contentType);
+        $this->sendRequest('POST', $path, $body->getRaw(), $contentType);
+    }
+
+    #[When('/^клиент отправляет GET (\S+) с Accept (\S+)$/')]
+    public function clientSendsGetWithAccept(string $path, string $accept): void
+    {
+        $this->sendRequest('GET', $path, accept: $accept);
     }
 
     #[When('клиент читает эту запись')]
@@ -65,6 +87,9 @@ final class ItemStorageContext extends RawMinkContext
      * Другой экземпляр — новое ядро с новым контейнером и новым соединением
      * с тем же Redis. Ядро гасится явно, а не ставкой на перезагрузку
      * `KernelBrowser` перед повторным запросом.
+     *
+     * Новое ядро живёт в том же процессе PHP: хранилище в памяти процесса прошло бы
+     * чтение. Поэтому запись сначала ищется вне процесса — в тестовой БД Redis.
      */
     #[When('клиент читает эту запись через другой экземпляр сервиса')]
     public function clientReadsTheItemThroughAnotherInstance(): void
@@ -72,6 +97,10 @@ final class ItemStorageContext extends RawMinkContext
         $client = $this->browserKitClient();
         if (!$client instanceof KernelBrowser) {
             throw new \LogicException(\sprintf('Another service instance needs a KernelBrowser, got "%s".', get_debug_type($client)));
+        }
+
+        if (0 === $this->redis->dbSize()) {
+            throw new \RuntimeException('Expected the created item outside the Behat process, but the test Redis database is empty.');
         }
 
         $client->getKernel()->shutdown();
@@ -108,8 +137,8 @@ final class ItemStorageContext extends RawMinkContext
     #[Then('id в ответах различаются')]
     public function idsInResponsesDiffer(): void
     {
-        $ids = array_map(static fn (array $response): mixed => \is_array($response['body']) ? ($response['body']['id'] ?? null) : null, $this->responses);
-        if (2 !== \count($ids) || !\is_int($ids[0]) || !\is_int($ids[1]) || $ids[0] === $ids[1]) {
+        $ids = array_map(static fn (array $response): ?int => self::itemIdIn($response['body']), $this->responses);
+        if (2 !== \count($ids) || null === $ids[0] || null === $ids[1] || $ids[0] === $ids[1]) {
             throw new \RuntimeException(\sprintf('Expected two different integer ids, got %s.', json_encode($ids)));
         }
     }
@@ -155,12 +184,16 @@ final class ItemStorageContext extends RawMinkContext
         }
     }
 
-    /**
-     * id из ответа создания: тело — ровно `{"id": N}` с положительным целым `N`.
-     */
     private function createdItemId(): ?int
     {
-        $body = $this->responseJson();
+        return self::itemIdIn($this->responseJson());
+    }
+
+    /**
+     * id из тела ответа создания: тело — ровно `{"id": N}` с положительным целым `N`.
+     */
+    private static function itemIdIn(mixed $body): ?int
+    {
         if (!\is_array($body) || ['id'] !== array_keys($body) || !\is_int($body['id']) || $body['id'] <= 0) {
             return null;
         }

@@ -7,7 +7,6 @@ namespace App\Controller\Item;
 use App\Model\Rest\ItemId;
 use App\Model\Rest\ItemValue;
 use App\Repository\ItemRepository;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 final readonly class UpdateItemController
@@ -17,11 +16,11 @@ final readonly class UpdateItemController
     ) {
     }
 
-    #[Route(path: '/items/{id}', name: 'items_update', requirements: ['id' => ItemId::ROUTE_REQUIREMENT], methods: ['PUT'])]
+    #[Route(path: '/items/{id}', name: 'items_update', requirements: ['id' => ItemRoute::ID_REQUIREMENT], methods: ['PUT'])]
     public function __invoke(int $id, ItemValue $item): ItemId
     {
-        if (!$this->items->replace($id, $item)) {
-            throw new NotFoundHttpException(\sprintf('Item %d not found.', $id));
+        if (!$this->items->replace($id, $item->getValue())) {
+            throw new ItemNotFoundHttpException($id);
         }
 
         return new ItemId($id);

@@ -25,13 +25,14 @@ Feature: Чтение записи
             | empty-string | ""       |
 
     Scenario Outline: запись не найдена
-        When клиент отправляет GET <путь>
+        When клиент отправляет GET <путь> с Accept <accept>
         Then код ответа 404
         And ответ имеет Content-Type application/json
         And тело ответа — JSON-объект
 
         Examples:
-            | набор          | путь                        |
-            | missing-id     | /items/999999999            |
-            | non-numeric-id | /items/abc                  |
-            | huge-id        | /items/99999999999999999999 |
+            | набор          | путь                        | accept    |
+            | missing-id     | /items/999999999            | */*       |
+            | non-numeric-id | /items/abc                  | */*       |
+            | huge-id        | /items/99999999999999999999 | */*       |
+            | accept-html    | /items/999999999            | text/html |

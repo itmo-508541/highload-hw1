@@ -22,6 +22,6 @@ final readonly class CreateItemController
     #[Rest\View(statusCode: Response::HTTP_CREATED)]
     public function __invoke(ItemValue $item): ItemId
     {
-        return new ItemId($this->items->create($item));
+        return new ItemId($this->items->create($item->getValue()));
     }
 }

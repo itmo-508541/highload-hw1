@@ -22,7 +22,8 @@
 ## Записи `/items`
 
 Записи хранятся в том же Redis (ADR [0004](../adr/0004-items-stored-in-redis.md)),
-репозиторий — `App\Repository\ItemRepository`:
+репозиторий — `App\Repository\ItemRepository`. Он — источник правды схемы
+ключей; таблица ниже — её копия для работы с `redis-cli`:
 
 | Ключ | Что хранит |
 |---|---|
@@ -30,7 +31,7 @@
 | `item:<id>` | JSON-строка `{"value": X}`: JSON сохраняет тип значения |
 
 Тестовое окружение пишет в отдельную БД Redis: индекс `/1` в `REDIS_URL`
-из `.env.test`. Перед каждым сценарием Behat `HttpApiContext` очищает её
+из `.env.test`. Перед каждым сценарием Behat `ItemStorageContext` очищает её
 (`FLUSHDB`) и отказывается чистить БД `0` — данные dev-окружения. Поэтому
 `make behat` и сценарии без `@javascript` требуют работающего Redis.
 

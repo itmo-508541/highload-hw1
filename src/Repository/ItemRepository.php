@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Model\Rest\ItemValue;
-
 /**
  * Записи `/items` в Redis (ADR 0004): счётчик id `items:seq`,
  * значение — JSON-строка `{"value": X}` под ключом `item:{id}`, чтобы сохранялся JSON-тип.
+ *
+ * Интерфейс — скаляры: модели ответа собирают резолвер и контроллеры.
  */
 class ItemRepository
 {
@@ -19,21 +19,24 @@ class ItemRepository
     ) {
     }
 
-    public function create(ItemValue $item): int
+    public function create(string|int|float|bool $value): int
     {
         $id = $this->redis->incr(self::SEQUENCE_KEY);
         if (!\is_int($id)) {
             throw new \RuntimeException(\sprintf('Redis INCR %s failed.', self::SEQUENCE_KEY));
         }
 
-        if (true !== $this->redis->set($this->key($id), $this->encode($item))) {
+        if (true !== $this->redis->set($this->key($id), $this->encode($value))) {
             throw new \RuntimeException(\sprintf('Redis SET %s failed.', $this->key($id)));
         }
 
         return $id;
     }
 
-    public function find(int $id): ?ItemValue
+    /**
+     * @return string|int|float|bool|null null, если записи с таким id нет
+     */
+    public function find(int $id): string|int|float|bool|null
     {
         $raw = $this->redis->get($this->key($id));
         if (!\is_string($raw)) {
@@ -43,7 +46,7 @@ class ItemRepository
         /** @var array{value: string|int|float|bool} $data */
         $data = json_decode($raw, true, 512, \JSON_THROW_ON_ERROR);
 
-        return new ItemValue($data['value']);
+        return $data['value'];
     }
 
     /**
@@ -51,9 +54,9 @@ class ItemRepository
      *
      * @return bool false, если записи с таким id нет
      */
-    public function replace(int $id, ItemValue $item): bool
+    public function replace(int $id, string|int|float|bool $value): bool
     {
-        return true === $this->redis->set($this->key($id), $this->encode($item), ['XX']);
+        return true === $this->redis->set($this->key($id), $this->encode($value), ['XX']);
     }
 
     private function key(int $id): string
@@ -61,8 +64,8 @@ class ItemRepository
         return 'item:'.$id;
     }
 
-    private function encode(ItemValue $item): string
+    private function encode(string|int|float|bool $value): string
     {
-        return json_encode(['value' => $item->getValue()], \JSON_THROW_ON_ERROR);
+        return json_encode(['value' => $value], \JSON_THROW_ON_ERROR);
     }
 }

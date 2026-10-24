@@ -30,8 +30,8 @@ final class ServiceHealthContext extends RawMinkContext
      * Действует только на первый запрос сценария: перед вторым ядро
      * перезагрузится, — поэтому после этого шага запрос ровно один.
      */
-    #[Given('хранилище записей не отвечает на PING')]
-    public function storageDoesNotAnswerPing(): void
+    #[Given('хранилище записей перестало отвечать')]
+    public function storageStoppedResponding(): void
     {
         $this->driverContainer->set(\Redis::class, new class extends \Redis {
             #[\Override]
@@ -45,7 +45,10 @@ final class ServiceHealthContext extends RawMinkContext
     /**
      * `%env(REDIS_URL)%` разрешается при создании сервиса `Redis`, то есть уже
      * в запросе: недоступный адрес роняет `RedisAdapter::createConnection`.
-     * Прежнее значение возвращает `restoreRedisUrl()`.
+     *
+     * Подмена меняет `$_ENV` и `$_SERVER` — глобальное состояние процесса Behat,
+     * а не приватное состояние контекста. Прежнее значение возвращает
+     * `restoreRedisUrl()` этого же контекста.
      */
     #[Given('хранилище записей не принимает подключений')]
     public function storageRefusesConnections(): void

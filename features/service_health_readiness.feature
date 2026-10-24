@@ -19,5 +19,5 @@ Feature: Готовность сервиса
 
         Examples:
             | набор         | отказ                    |
-            | ping-fails    | не отвечает на PING      |
+            | ping-fails    | перестало отвечать       |
             | connect-fails | не принимает подключений |

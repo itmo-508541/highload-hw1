@@ -23,4 +23,5 @@ Feature: Невалидное тело записи
             | object-value   | application/json                  | {"value": {"a": 1}}      |
             | invalid-json   | application/json                  | {"value":                |
             | form-body      | application/x-www-form-urlencoded | value=foo                |
+            | x-json-body    | application/x-json                | {"value": 1}             |
             | overflow-float | application/json                  | {"value": 1e400}         |

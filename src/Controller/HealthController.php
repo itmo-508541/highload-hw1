@@ -31,7 +31,10 @@ final readonly class HealthController
             ($this->redis)()->ping();
         } catch (InvalidArgumentException|\RedisException $e) {
             // InvalidArgumentException бросает `RedisAdapter::createConnection`, когда
-            // подключение не устанавливается; \RedisException — отказ уже открытого соединения.
+            // подключение не устанавливается, — вопреки своему docblock'у, где она обещана
+            // только для невалидного DSN. Изменение этого поведения при обновлении
+            // symfony/cache поймает набор `connect-fails` в features/service_health_readiness.feature.
+            // \RedisException — отказ уже открытого соединения.
             throw new ServiceUnavailableHttpException(null, 'Storage is unavailable.', $e);
         }
 

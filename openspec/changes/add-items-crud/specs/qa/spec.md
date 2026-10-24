@@ -28,7 +28,7 @@ Docker-сервисе `php`.
 - **WHEN** выполняется проверка записи сессии в контуре E2E
 - **THEN** сохранённая cookie-сессия присутствует в Redis с префиксом ключей
   сессий проекта (`sf_s:`)
-- **AND** покрытие — PHPUnit в `tests/E2E/`
+- **AND** покрытие — PHPUnit в `tests/Integration/Session/`
 
 #### Scenario: Обычный test-контур остаётся без обязательного Redis для сессий
 - **WHEN** выполняется suite Unit или Behat suite `default`

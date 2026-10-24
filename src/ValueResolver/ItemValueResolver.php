@@ -28,7 +28,9 @@ final class ItemValueResolver implements ValueResolverInterface
             return [];
         }
 
-        if ('json' !== $request->getContentTypeFormat()) {
+        // Не `getContentTypeFormat()`: формат `json` включает и `application/x-json`.
+        $mediaType = strtolower(trim(explode(';', (string) $request->headers->get('Content-Type'))[0]));
+        if ('application/json' !== $mediaType) {
             throw new BadRequestHttpException('Body must be sent with "Content-Type: application/json".');
         }
 

@@ -44,9 +44,12 @@ Lexik JWT).
   сервисах — через **`REDIS_URL`** (см. [`config/services.yaml`](../../config/services.yaml):
   `RedisAdapter::createConnection` с
   **`%env(resolve:REDIS_URL)%`**). URL и дефолты — в **`.env`** (как в рецептах
-  Symfony Flex); дублирующей «сборки» URL в YAML нет. В **`qa:behat`** Dotenv
-  грузит в основном **`.env`** — значения должны быть согласованы с сервисом
-  Redis в CI.
+  Symfony Flex); дублирующей «сборки» URL в YAML нет. Исключение —
+  **`.env.test`**: он переопределяет `REDIS_URL` целиком, той же сборкой
+  из `ENV_redis_*`, но с индексом БД `/1` — записи `/items` из сценариев Behat
+  не попадают в данные dev-окружения (см. [`redis.md`](redis.md)). В
+  **`qa:behat`** Dotenv грузит в основном **`.env`** — значения должны быть
+  согласованы с сервисом Redis в CI.
 - Приложение: `ENV_app_secret`.
 
 Именованные bind-тома: путь **внутри** контейнера — `ENV_<name>_storage` в

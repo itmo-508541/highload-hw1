@@ -15,9 +15,9 @@ use Symfony\Component\BrowserKit\AbstractBrowser;
  */
 trait SendsJsonRequests
 {
-    private function sendRequest(string $method, string $path, ?string $body = null, string $contentType = 'application/json'): void
+    private function sendRequest(string $method, string $path, ?string $body = null, string $contentType = 'application/json', string $accept = '*/*'): void
     {
-        $server = ['HTTP_ACCEPT' => '*/*'];
+        $server = ['HTTP_ACCEPT' => $accept];
         if (null !== $body) {
             $server['CONTENT_TYPE'] = $contentType;
         }
