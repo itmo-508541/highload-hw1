@@ -64,8 +64,11 @@ class ItemRepository
         return 'item:'.$id;
     }
 
+    /**
+     * Без `JSON_PRESERVE_ZERO_FRACTION` `1.0` записалось бы как `1` и читалось целым.
+     */
     private function encode(string|int|float|bool $value): string
     {
-        return json_encode(['value' => $value], \JSON_THROW_ON_ERROR);
+        return json_encode(['value' => $value], \JSON_THROW_ON_ERROR | \JSON_PRESERVE_ZERO_FRACTION);
     }
 }

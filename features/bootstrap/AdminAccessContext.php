@@ -26,7 +26,7 @@ final class AdminAccessContext extends RawMinkContext
     ) {
     }
 
-    #[BeforeScenario]
+    #[BeforeScenario('@domain:admin_access')]
     public function resetBrowserSession(): void
     {
         $session = $this->getSession();

@@ -5,7 +5,7 @@ Feature: Невалидное тело записи
     Я хочу получать 400 на тело другого вида, и хранилище при этом не меняется
 
     Scenario Outline: невалидное тело отклоняется
-        When клиент отправляет POST /items с Content-Type <тип> и телом:
+        When клиент отправляет POST /items <заголовок> и телом:
             """
             <тело>
             """
@@ -15,13 +15,14 @@ Feature: Невалидное тело записи
         And хранилище записей не изменилось
 
         Examples:
-            | набор          | тип                               | тело                     |
-            | missing-value  | application/json                  | {}                       |
-            | extra-key      | application/json                  | {"value": 1, "extra": 2} |
-            | null-value     | application/json                  | {"value": null}          |
-            | array-value    | application/json                  | {"value": [1]}           |
-            | object-value   | application/json                  | {"value": {"a": 1}}      |
-            | invalid-json   | application/json                  | {"value":                |
-            | form-body      | application/x-www-form-urlencoded | value=foo                |
-            | x-json-body    | application/x-json                | {"value": 1}             |
-            | overflow-float | application/json                  | {"value": 1e400}         |
+            | набор           | заголовок                                        | тело                     |
+            | missing-value   | с Content-Type application/json                  | {}                       |
+            | extra-key       | с Content-Type application/json                  | {"value": 1, "extra": 2} |
+            | null-value      | с Content-Type application/json                  | {"value": null}          |
+            | array-value     | с Content-Type application/json                  | {"value": [1]}           |
+            | object-value    | с Content-Type application/json                  | {"value": {"a": 1}}      |
+            | invalid-json    | с Content-Type application/json                  | {"value":                |
+            | form-body       | с Content-Type application/x-www-form-urlencoded | value=foo                |
+            | x-json-body     | с Content-Type application/x-json                | {"value": 1}             |
+            | overflow-float  | с Content-Type application/json                  | {"value": 1e400}         |
+            | no-content-type | без Content-Type                                 | {"value": 1}             |

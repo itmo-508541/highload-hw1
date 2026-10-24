@@ -9,17 +9,16 @@ use Behat\Step\Then;
 use Behat\Step\When;
 
 /**
- * Общий контекст, не домен: HTTP-шаги, которые используют оба домена —
- * `item_storage` и `service_health`.
+ * Общий контекст, не домен: HTTP-шаги, которые используют несколько доменов.
  */
 final class HttpApiContext extends RawMinkContext
 {
     use SendsJsonRequests;
 
-    #[When('/^клиент отправляет (GET|POST|PUT) (\S+)$/')]
-    public function clientSends(string $method, string $path): void
+    #[When('/^клиент отправляет GET (\S+)$/')]
+    public function clientSendsGet(string $path): void
     {
-        $this->sendRequest($method, $path);
+        $this->sendRequest('GET', $path);
     }
 
     #[Then('код ответа :code')]

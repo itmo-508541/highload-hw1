@@ -15,14 +15,15 @@ Feature: Чтение записи
             """
 
         Examples:
-            | набор        | значение |
-            | string-foo   | "foo"    |
-            | string-digit | "1"      |
-            | int          | 1        |
-            | float        | 1.5      |
-            | true         | true     |
-            | false        | false    |
-            | empty-string | ""       |
+            | набор         | значение |
+            | string-foo    | "foo"    |
+            | string-digit  | "1"      |
+            | int           | 1        |
+            | float         | 1.5      |
+            | zero-fraction | 1.0      |
+            | true          | true     |
+            | false         | false    |
+            | empty-string  | ""       |
 
     Scenario Outline: запись не найдена
         When клиент отправляет GET <путь> с Accept <accept>

@@ -15,11 +15,16 @@ use Symfony\Component\BrowserKit\AbstractBrowser;
  */
 trait SendsJsonRequests
 {
-    private function sendRequest(string $method, string $path, ?string $body = null, string $contentType = 'application/json', string $accept = '*/*'): void
+    /**
+     * `$contentType = null` — тело без заголовка `Content-Type`: передаётся пустой
+     * `CONTENT_TYPE`, как его отдают nginx и PHP-FPM. Иначе `Request::create`
+     * подставил бы `application/x-www-form-urlencoded`.
+     */
+    private function sendRequest(string $method, string $path, ?string $body = null, ?string $contentType = 'application/json', string $accept = '*/*'): void
     {
         $server = ['HTTP_ACCEPT' => $accept];
         if (null !== $body) {
-            $server['CONTENT_TYPE'] = $contentType;
+            $server['CONTENT_TYPE'] = $contentType ?? '';
         }
 
         // PHP-FPM раскладывает тело формы в `$_POST` сам, а BrowserKit кладёт

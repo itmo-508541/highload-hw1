@@ -14,6 +14,9 @@ services:
         factory: ['Symfony\Component\Cache\Adapter\RedisAdapter', 'createConnection']
         arguments:
             - '%env(resolve:REDIS_URL)%'
+            # По умолчанию подключение ждёт 30 с, а чтение не ограничено:
+            # /health отдал бы 503 позже, чем истечёт проба готовности.
+            - { timeout: 2, read_timeout: 2 }
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

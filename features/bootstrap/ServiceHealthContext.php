@@ -46,9 +46,10 @@ final class ServiceHealthContext extends RawMinkContext
      * `%env(REDIS_URL)%` разрешается при создании сервиса `Redis`, то есть уже
      * в запросе: недоступный адрес роняет `RedisAdapter::createConnection`.
      *
-     * Подмена меняет `$_ENV` и `$_SERVER` — глобальное состояние процесса Behat,
-     * а не приватное состояние контекста. Прежнее значение возвращает
-     * `restoreRedisUrl()` этого же контекста.
+     * Подмена меняет `$_ENV` и `$_SERVER` процесса Behat, но меняет их только
+     * этот домен: по правилу уборки ADR 0002 это приватное состояние домена.
+     * Прежнее значение возвращает `restoreRedisUrl()`, отфильтрованный тегом
+     * домена.
      */
     #[Given('хранилище записей не принимает подключений')]
     public function storageRefusesConnections(): void
@@ -57,7 +58,7 @@ final class ServiceHealthContext extends RawMinkContext
         $_ENV['REDIS_URL'] = $_SERVER['REDIS_URL'] = self::UNREACHABLE_REDIS_URL;
     }
 
-    #[AfterScenario]
+    #[AfterScenario('@domain:service_health')]
     public function restoreRedisUrl(): void
     {
         if (null === $this->replacedRedisUrl) {

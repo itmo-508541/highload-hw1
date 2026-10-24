@@ -16,9 +16,10 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
  * Домен `item_storage`: записи «ключ — значение» по HTTP — создание, чтение
  * и замена значения через `/items`.
  *
- * Перед каждым сценарием очищает тестовую БД Redis (`REDIS_URL` из `.env.test`):
- * в неё пишет только этот домен. Исключение из правила уборки в `@AfterScenario`
- * (ADR 0002) — прогон не зависит от остатков упавшего.
+ * Перед каждым сценарием домена очищает тестовую БД Redis (`REDIS_URL`
+ * из `.env.test`): в неё пишет только этот домен, это его приватное состояние,
+ * и хук фильтруется тегом домена (ADR 0002). Исключение из правила уборки
+ * в `@AfterScenario` — прогон не зависит от остатков упавшего.
  */
 final class ItemStorageContext extends RawMinkContext
 {
@@ -34,7 +35,7 @@ final class ItemStorageContext extends RawMinkContext
     ) {
     }
 
-    #[BeforeScenario]
+    #[BeforeScenario('@domain:item_storage')]
     public function flushTestRedisDatabase(): void
     {
         // БД 0 — данные dev-окружения: чистить можно только отдельную тестовую.
@@ -69,6 +70,12 @@ final class ItemStorageContext extends RawMinkContext
     public function clientPostsWithContentTypeAndBody(string $path, string $contentType, PyStringNode $body): void
     {
         $this->sendRequest('POST', $path, $body->getRaw(), $contentType);
+    }
+
+    #[When('/^клиент отправляет POST (\S+) без Content-Type и телом:$/')]
+    public function clientPostsWithoutContentTypeAndBody(string $path, PyStringNode $body): void
+    {
+        $this->sendRequest('POST', $path, $body->getRaw(), null);
     }
 
     #[When('/^клиент отправляет GET (\S+) с Accept (\S+)$/')]
