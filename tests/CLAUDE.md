@@ -9,6 +9,7 @@ PHPUnit-тесты.
 | возврат метода, исключение, вывод внешнего процесса | `tests/Unit/` | `TestCase` | ничего | `make test` |
 | обязательный сеттер трейта | `tests/Unit/Traits/` | `RequiredSetterTestCase` | ничего | `make test` |
 | сервис из контейнера, консольная команда ядра, сериализация | `tests/Integration/` | `KernelTestCase` | ядро | `make test-env` |
+| HTTP-ответ без браузера: код, заголовки, тело | `tests/Integration/` | `WebTestCase` | ядро | `make test-env` |
 | сессия, записанная во внешнее хранилище | `tests/Integration/Session/` | `KernelTestCase` | ядро, Redis | `make test-env` |
 | страница в браузере, поведение JS | `tests/E2E/` | `PantherTestCase` | браузер | `make test-env` |
 
