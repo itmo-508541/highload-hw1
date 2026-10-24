@@ -53,8 +53,11 @@
 `UpdateItemController` и `src/Controller/HealthController`. Каждый —
 `final` класс с единственным публичным `__invoke`; роут — атрибутом на
 `__invoke` с явным именем: `items_create`, `items_get`, `items_update`, `health`.
-У `{id}` требование `\d+`: нечисловой id не совпадает с роутом и даёт 404
-от роутера.
+У `{id}` требование `[1-9]\d{0,17}` — константа `ItemId::ROUTE_REQUIREMENT` на роуты `items_get`
+и `items_update`: нечисловой id, `0`, `01` и id длиннее 18 цифр не совпадают
+с роутом и дают 404 от роутера. Ограничение длины нужно потому, что строка
+за пределами `PHP_INT_MAX` не приводится к `int $id` контроллера: `TypeError`
+дал бы 500. 18 цифр меньше `PHP_INT_MAX`, а `items:seq` до них не дорастёт.
 
 Явные имена роутов понадобятся части 1–2 (метка ручки и `GET /handlers`):
 шаблон пути берётся из роута по имени, а не из фактического URL.
@@ -70,7 +73,8 @@
 ### D2. JSON для `/items` и `/health` — правилом `format_listener`
 
 В `config/packages/fos_rest.yaml` перед правилом `^/` добавляется
-`{ path: ^/(items|health), prefer_extension: false, fallback_format: json, priorities: [ json ] }`.
+`{ path: ^/(items|health)(/|$), prefer_extension: false, fallback_format: json, priorities: [ json ] }`.
+Путь закрыт справа: иначе правило забрало бы и `/healthz`, `/items-foo`.
 
 *Почему не `defaults: { _format: json }` на роутах:* `FormatListener` FOSRest
 висит на `kernel.request` с приоритетом 34, `RouterListener` — с 32. Формат
@@ -81,7 +85,8 @@
 
 ### D3. Модели ответов
 
-- `App\Model\Rest\ItemId` — `int $id`; ответ `POST` и `PUT`.
+- `App\Model\Rest\ItemId` — `int $id`; ответ `POST` и `PUT`; там же
+  требование к `{id}` в роутах (D1).
 - `App\Model\Rest\ItemValue` — `string|int|float|bool $value`; ответ `GET`
   и одновременно разобранное тело запроса (D5).
 - `/health` отвечает существующей `App\Model\Rest\Success('ok')`.
@@ -114,10 +119,17 @@
 
 `App\ValueResolver\ItemValueResolver` (`ValueResolverInterface`) срабатывает
 на аргумент контроллера типа `ItemValue`. Он берёт `$request->request->all()`
-(JSON уже разобран `body_listener`'ом) и требует: ключи ровно `['value']`,
-`is_scalar($value)`. Иначе — `BadRequestHttpException`, которая через FOSRest
+(JSON уже разобран `body_listener`'ом) и требует: `Content-Type` запроса —
+JSON, ключи ровно `['value']`, `is_scalar($value)`, а для `float` —
+`is_finite`. Иначе — `BadRequestHttpException`, которая через FOSRest
 становится JSON-ответом 400. Невалидный JSON отклоняет сам `body_listener`
 (тоже 400).
+
+Проверка `Content-Type` нужна потому, что `body_listener` пропускает тела
+форм, а Symfony сам раскладывает их в `$request->request`: без неё
+`value=foo` формой давал бы 201. Проверка `is_finite` нужна потому, что
+`{"value": 1e400}` декодируется в `INF`: `is_scalar` его пропускает,
+а `json_encode` в хранилище бросил бы исключение и дал 500.
 
 Резолвер работает на этапе разрешения аргументов, до вызова контроллера.
 Поэтому `PUT` с плохим телом отвечает 400, не обращаясь к Redis, — как
@@ -148,6 +160,10 @@ DSN, задаётся в `.env.test`); сценарии Behat очищают е�
 сценарием. Без этого сценарии увеличивали бы `items:seq` и писали `item:*`
 в данные dev-окружения. Окружение `e2e` (сессии в Redis) этим не
 затрагивается.
+
+Очистка — `#[BeforeScenario]` общего контекста, а не `@AfterScenario`
+по общему правилу уборки: прогон не зависит от остатков упавшего. Это
+исключение записывается в ADR 0002 и в `features/CLAUDE.md`.
 
 ### D8. ADR
 
@@ -185,7 +201,7 @@ DSN, задаётся в `.env.test`); сценарии Behat очищают е�
 | items: Созданная запись видна через другой экземпляр | `item_storage` | `@domain:item_storage` | `features/item_storage_create.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | сценарий «запись видна через другой экземпляр»; второй экземпляр — в «Решениях» |
 | items: Чтение созданной записи | `item_storage` | `@domain:item_storage` | `features/item_storage_read.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | outline «значение читается таким, каким записано», набор `string-foo` |
 | items: Тип значения сохраняется | `item_storage` | `@domain:item_storage` | `features/item_storage_read.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | outline «значение читается таким, каким записано», наборы `string-digit`, `int`, `float`, `true`, `false`, `empty-string` |
-| items: Несуществующий id | `item_storage` | `@domain:item_storage` | `features/item_storage_read.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | outline «запись не найдена», набор `missing-id`, утверждение «код 404» |
+| items: Несуществующий id | `item_storage` | `@domain:item_storage` | `features/item_storage_read.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | outline «запись не найдена», наборы `missing-id`, `huge-id` (id длиннее 18 цифр, D1), утверждение «код 404» |
 | items: id не является числом | `item_storage` | `@domain:item_storage` | `features/item_storage_read.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | outline «запись не найдена», набор `non-numeric-id` |
 | items: Ошибка отдаётся в JSON | `item_storage` | `@domain:item_storage` | `features/item_storage_read.feature` | `HttpApiContext` | новое поведение | новая | outline «запись не найдена», утверждение «`Content-Type: application/json`, тело — JSON-объект» при `Accept: */*` |
 | items: Замена значения | `item_storage` | `@domain:item_storage` | `features/item_storage_replace.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | сценарий «значение заменяется» |
@@ -197,8 +213,10 @@ DSN, задаётся в `.env.test`); сценарии Behat очищают е�
 | items: Значение null | `item_storage` | `@domain:item_storage` | `features/item_storage_invalid_body.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | outline «невалидное тело отклоняется», набор `null-value` |
 | items: Значение — массив или объект | `item_storage` | `@domain:item_storage` | `features/item_storage_invalid_body.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | outline «невалидное тело отклоняется», наборы `array-value`, `object-value` |
 | items: Невалидный JSON | `item_storage` | `@domain:item_storage` | `features/item_storage_invalid_body.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | outline «невалидное тело отклоняется», набор `invalid-json` |
-| health: Хранилище доступно | `service_health` | `@domain:service_health` | `features/service_health_readiness.feature` | `ServiceHealthContext`, `HttpApiContext` | новое поведение | новая | сценарий «сервис готов»: код 200, `Content-Type: application/json` |
-| health: Хранилище недоступно | `service_health` | `@domain:service_health` | `features/service_health_readiness.feature` | `ServiceHealthContext`, `HttpApiContext` | новое поведение | новая | сценарий «хранилище недоступно»: код 503; шов — в «Решениях» |
+| items: Тело не в формате JSON | `item_storage` | `@domain:item_storage` | `features/item_storage_invalid_body.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | outline «невалидное тело отклоняется», набор `form-body`; шаг отправки с произвольным `Content-Type` — в `ItemStorageContext` |
+| items: Число вне диапазона | `item_storage` | `@domain:item_storage` | `features/item_storage_invalid_body.feature` | `ItemStorageContext`, `HttpApiContext` | новое поведение | новая | outline «невалидное тело отклоняется», набор `overflow-float` |
+| health: Хранилище доступно | `service_health` | `@domain:service_health` | `features/service_health_readiness.feature` | `ServiceHealthContext`, `HttpApiContext` | новое поведение | новая | сценарий «сервис готов»: код 200, `Content-Type: application/json`, тело — JSON-объект |
+| health: Хранилище недоступно | `service_health` | `@domain:service_health` | `features/service_health_readiness.feature` | `ServiceHealthContext`, `HttpApiContext` | новое поведение | новая | outline «хранилище недоступно», наборы `ping-fails` и `connect-fails`: код 503, `Content-Type: application/json`, тело — JSON-объект; швы — в «Решениях» |
 
 ### PHPUnit
 
@@ -207,11 +225,11 @@ DSN, задаётся в `.env.test`); сценарии Behat очищают е�
 | qa: E2E не подменяет сессии на mock_file | ключ `sf_s:` в Redis после сохранения сессии | Integration | characterization | ядро, Redis | `KernelTestCase` | уже покрыта | `tests/Integration/Session/E2eSessionStorageTest.php` |
 | qa: Главная открывается в браузере | адрес страницы в браузере | E2E | characterization | браузер | `PantherTestCase` | уже покрыта | `tests/E2E/HomepageTest.php`; Behat — `features/admin_access_anonymous_entry.feature` |
 
-Итого строк: 21 — Behat: новая 19; PHPUnit: уже покрыта 2. Переписывается 0,
+Итого строк: 23 — Behat: новая 21; PHPUnit: уже покрыта 2. Переписывается 0,
 `БЛОКИРОВАНО` 0, `ТРЕБУЕТ РЕШЕНИЯ` 0.
 
-**Сверка со спекой.** Сценариев в дельтах 26: `items` — 18, `health` — 2,
-`qa` — 6. В таблицах — 21, прозой ниже — 5, не названных нигде нет.
+**Сверка со спекой.** Сценариев в дельтах 28: `items` — 20, `health` — 2,
+`qa` — 6. В таблицах — 23, прозой ниже — 5, не названных нигде нет.
 Нормативных фраз без своего сценария найдено 3, все названы ниже.
 
 **Покрыто не своей строкой:**
@@ -232,12 +250,16 @@ DSN, задаётся в `.env.test`); сценарии Behat очищают е�
 
 - items, «Тело запроса записи»: «MUST NOT изменять хранилище» для `POST` —
   второе утверждение outline «невалидное тело отклоняется» на всех его
-  наборах: после запроса в тестовой БД Redis нет ключей `item:*`
-  и `items:seq`.
+  наборах: после запроса тестовая БД Redis пуста (`DBSIZE` = 0; она
+  очищается перед сценарием, D7), так что проверка не повторяет схему
+  ключей `ItemRepository`.
 - items, «Формат ответов и доступ»: JSON и `Content-Type` для **успешных**
   ответов — шаг про `Content-Type` в сценариях «запись создаётся»,
   «значение заменяется» и в outline «значение читается таким, каким
-  записано»; запросы шлют `Accept: */*`.
+  записано»; для ответов **400** и 404 после `PUT` — шаги про `Content-Type`
+  и «тело ответа — JSON-объект» в outline «невалидное тело отклоняется»
+  и в сценариях `features/item_storage_replace.feature` с кодами ошибок;
+  запросы шлют `Accept: */*`.
 - items и health: доступ без аутентификации для `GET`, `PUT`, `/health` —
   структурно: ни один сценарий не шлёт учётных данных.
 
@@ -262,9 +284,10 @@ DSN, задаётся в `.env.test`); сценарии Behat очищают е�
   `getPage()->getContent()`). Ограничение по сравнению с Panther, где кода
   ответа нет, к этим строкам не относится.
 - Mink рассчитан на браузерные действия, а запросов с методом и JSON-телом
-  в его API нет. `HttpApiContext` шлёт запросы через клиент драйвера
-  (`BrowserKitDriver::getClient()->request(…)` с
-  `CONTENT_TYPE: application/json`), а ответ читает через сессию Mink.
+  в его API нет. Запросы шлёт трейт `SendsJsonRequests` через клиент
+  драйвера (`BrowserKitDriver::getClient()->request(…)`); `Content-Type` —
+  `application/json` по умолчанию или заданный шагом `ItemStorageContext`.
+  Ответ читается через сессию Mink.
 - Ни nginx, ни PHP-FPM сценариям не нужны: сессия `symfony` выполняет
   запрос ядром в процессе Behat. В GitLab job `qa:behat-env` уже поднимает
   Redis сервисом (`.gitlab-ci.yml`).
@@ -281,7 +304,21 @@ DSN, задаётся в `.env.test`); сценарии Behat очищают е�
   умеет подменять приватный сервис, пока он не создан. Подмена действует
   только на первый запрос сценария: перед вторым ядро перезагрузится. Поэтому
   сценарий «хранилище недоступно» делает ровно один запрос. Наблюдательный
-  прогон до появления контроллера невозможен.
+  прогон до появления контроллера невозможен. Это шов набора `ping-fails`.
+- Шов набора `connect-fails`: ветка D6, где падает сам `createConnection`
+  (исключение Cache, а не `\RedisException` от `PING`). `ServiceHealthContext`
+  до первого запроса подменяет `REDIS_URL` на недоступный адрес: `%env()%`
+  разрешается при создании сервиса `Redis`, то есть уже в запросе. Прежнее
+  значение возвращает `#[AfterScenario]` того же контекста — это приватное
+  состояние контекста, и уборка в своём контексте правилу соответствует.
+  Проверено прогоном: без ветки исключения Cache в `HealthController` набор
+  даёт 500 (`Redis connection failed: Connection refused`), с ней — 503;
+  запасной путь из Risks не понадобился.
+- `form-body` в сессии `symfony`: BrowserKit кладёт в `$request->request`
+  только параметры запроса и не разбирает тело формы, как это делает PHP-FPM.
+  `SendsJsonRequests` для `application/x-www-form-urlencoded` передаёт
+  разобранное тело параметрами; без этого набор проходил бы и без проверки
+  `Content-Type` в резолвере.
 - Сверка с `vendor/` (FOSRest 3.9.0), D1 и D5 подтверждены, запасные варианты
   не нужны. `ViewResponseListener::onKernelController` для объекта
   с `__invoke` читает атрибуты метода `__invoke` (`IS_INSTANCEOF`
@@ -307,12 +344,15 @@ DSN, задаётся в `.env.test`); сценарии Behat очищают е�
    больше не говорят «пока не настроена».
 2. **Изоляция в Redis.** Test-окружение пишет в отдельную БД Redis:
    `REDIS_URL` с индексом БД в `.env.test` (D7); очистка этой БД
-   (`FLUSHDB`) в `#[BeforeScenario]` общего контекста.
-3. **Общий контекст HTTP-шагов.** `features/bootstrap/HttpApiContext.php`:
-   отправка запроса с методом, путём и JSON-телом, проверка кода ответа,
-   `Content-Type` и JSON-тела. Нужен обоим доменам, поэтому живёт в общем
-   контексте (правило «Где живёт шаг» в `features/CLAUDE.md`); регистрируется
-   в `behat.yml.dist`.
+   (`FLUSHDB`) в `#[BeforeScenario]` общего контекста — исключение из правила
+   уборки (D7).
+3. **Общий контекст HTTP-шагов.** `features/bootstrap/HttpApiContext.php`
+   держит только шаги, которые используют оба домена (правило «Где живёт шаг»
+   в `features/CLAUDE.md`): запрос без тела, проверки кода ответа,
+   `Content-Type` и «тело ответа — JSON-объект». Запрос с JSON-телом
+   и сравнение тела с JSON нужны только `item_storage` и живут
+   в `ItemStorageContext`. Помощники запроса и чтения ответа — трейт
+   `SendsJsonRequests`. Контекст регистрируется в `behat.yml.dist`.
 
 ## Наблюдаемость
 
@@ -351,11 +391,16 @@ DSN, задаётся в `.env.test`); сценарии Behat очищают е�
 ## Risks / Trade-offs
 
 - [Redis недоступен → `/items` отвечают 500] → принято: specs этого не
-  описывают; `/health` в этот момент отвечает 503, по нему compose и
-  зависимые сервисы не шлют трафик.
-- [`body_listener` не разбирает тело без `Content-Type: application/json`] →
-  такое тело даёт 400 «нет ключа value». Клиенты (нагрузочный скрипт) обязаны
-  слать заголовок; в README это указывается вместе с примерами запросов.
+  описывают; `/health` в этот момент отвечает 503, по нему зависимые сервисы
+  могут не слать трафик (healthcheck compose на `/health` пока не заведён).
+- [`body_listener` пропускает тела форм и тела без `Content-Type`] →
+  резолвер (D5) отвечает 400 на любой не-JSON `Content-Type`, в том числе
+  на отсутствующий. Клиенты (нагрузочный скрипт) обязаны слать заголовок;
+  в README это указывается вместе с примерами запросов.
+- [Подмена `REDIS_URL` в наборе `connect-fails` может не дойти до контейнера
+  ядра драйвера: значение env кешируется контейнером] → проверено прогоном
+  (Решения): подмена доходит, ветка `createConnection` срабатывает, запасной
+  путь не понадобился.
 - [`#[Rest\View(statusCode: 201)]` на `__invoke` без базового класса FOSRest]
   → чтение атрибута проверяется по коду `ViewResponseListener` из `vendor/`
   (скилл `vendor-class-lookup`) до написания контроллера; запасной вариант —
@@ -371,7 +416,8 @@ DSN, задаётся в `.env.test`); сценарии Behat очищают е�
   до перезагрузки между сценариями, и подмена `Redis` не дойдёт до запроса]
   → первым прогоном сценария «хранилище недоступно» проверить, что ответ 503;
   если нет — брать контейнер в шаге через ядро драйвера
-  (`fob_symfony.driver_kernel`), а не в конструкторе контекста.
+  (`fob_symfony.driver_kernel`), а не в конструкторе контекста. Проверено
+  задачей 4.12: ответ 503.
 - [Новая dev-зависимость `behat/mink-browserkit-driver`] → только
   `require-dev`, в prod-образ не попадает.
 

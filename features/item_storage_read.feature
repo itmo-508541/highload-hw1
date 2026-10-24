@@ -31,6 +31,7 @@ Feature: Чтение записи
         And тело ответа — JSON-объект
 
         Examples:
-            | набор          | путь              |
-            | missing-id     | /items/999999999  |
-            | non-numeric-id | /items/abc        |
+            | набор          | путь                        |
+            | missing-id     | /items/999999999            |
+            | non-numeric-id | /items/abc                  |
+            | huge-id        | /items/99999999999999999999 |

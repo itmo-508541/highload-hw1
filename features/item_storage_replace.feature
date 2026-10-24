@@ -25,6 +25,8 @@ Feature: Замена значения записи
             {"value": 42}
             """
         Then код ответа 404
+        And ответ имеет Content-Type application/json
+        And тело ответа — JSON-объект
         When клиент отправляет GET /items/999999999
         Then код ответа 404
 
@@ -35,6 +37,8 @@ Feature: Замена значения записи
             {"value": null}
             """
         Then код ответа 400
+        And ответ имеет Content-Type application/json
+        And тело ответа — JSON-объект
         When клиент читает эту запись
         Then тело ответа — JSON:
             """
@@ -47,3 +51,5 @@ Feature: Замена значения записи
             {}
             """
         Then код ответа 400
+        And ответ имеет Content-Type application/json
+        And тело ответа — JSON-объект

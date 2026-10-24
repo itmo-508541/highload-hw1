@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Model\Rest\Success;
-use Symfony\Component\Cache\Exception\InvalidArgumentException as RedisConnectionException;
+use Symfony\Component\Cache\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Routing\Attribute\Route;
@@ -29,7 +29,9 @@ final readonly class HealthController
     {
         try {
             ($this->redis)()->ping();
-        } catch (RedisConnectionException|\RedisException $e) {
+        } catch (InvalidArgumentException|\RedisException $e) {
+            // InvalidArgumentException бросает `RedisAdapter::createConnection`, когда
+            // подключение не устанавливается; \RedisException — отказ уже открытого соединения.
             throw new ServiceUnavailableHttpException(null, 'Storage is unavailable.', $e);
         }
 

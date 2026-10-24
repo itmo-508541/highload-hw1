@@ -17,7 +17,7 @@ final readonly class UpdateItemController
     ) {
     }
 
-    #[Route(path: '/items/{id}', name: 'items_update', requirements: ['id' => '\d+'], methods: ['PUT'])]
+    #[Route(path: '/items/{id}', name: 'items_update', requirements: ['id' => ItemId::ROUTE_REQUIREMENT], methods: ['PUT'])]
     public function __invoke(int $id, ItemValue $item): ItemId
     {
         if (!$this->items->replace($id, $item)) {

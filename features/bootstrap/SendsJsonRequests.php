@@ -5,16 +5,37 @@ declare(strict_types=1);
 namespace App\Behat;
 
 use Behat\Mink\Driver\BrowserKitDriver;
+use Symfony\Component\BrowserKit\AbstractBrowser;
 
 /**
- * HTTP-запрос с методом и JSON-телом через клиент драйвера сессии `symfony`:
+ * HTTP-запрос с методом и телом через клиент драйвера сессии `symfony`:
  * в API Mink таких запросов нет. Ответ читается через сессию Mink.
  *
  * Для контекстов-наследников RawMinkContext.
  */
 trait SendsJsonRequests
 {
-    private function sendJsonRequest(string $method, string $path, ?string $body = null): void
+    private function sendRequest(string $method, string $path, ?string $body = null, string $contentType = 'application/json'): void
+    {
+        $server = ['HTTP_ACCEPT' => '*/*'];
+        if (null !== $body) {
+            $server['CONTENT_TYPE'] = $contentType;
+        }
+
+        // PHP-FPM раскладывает тело формы в `$_POST` сам, а BrowserKit кладёт
+        // в `$request->request` только параметры запроса — передаём их явно.
+        $parameters = [];
+        if (null !== $body && 'application/x-www-form-urlencoded' === $contentType) {
+            parse_str($body, $parameters);
+        }
+
+        $this->browserKitClient()->request($method, $this->locatePath($path), $parameters, [], $server, $body);
+    }
+
+    /**
+     * @return AbstractBrowser<object, object>
+     */
+    private function browserKitClient(): AbstractBrowser
     {
         $session = $this->getSession();
         if (!$session->isStarted()) {
@@ -26,22 +47,28 @@ trait SendsJsonRequests
             throw new \LogicException(\sprintf('JSON requests need the browserless "symfony" session, got driver "%s".', get_debug_type($driver)));
         }
 
-        $server = ['HTTP_ACCEPT' => '*/*'];
-        if (null !== $body) {
-            $server['CONTENT_TYPE'] = 'application/json';
-        }
-
-        $driver->getClient()->request($method, $this->locatePath($path), [], [], $server, $body);
+        return $driver->getClient();
     }
 
     private function responseJson(bool $associative = true): mixed
     {
-        $content = $this->getSession()->getPage()->getContent();
-
         try {
-            return json_decode((string) $content, $associative, 512, \JSON_THROW_ON_ERROR);
+            return json_decode($this->responseContent(), $associative, 512, \JSON_THROW_ON_ERROR);
         } catch (\JsonException $jsonException) {
-            throw new \RuntimeException(\sprintf("Response body is not JSON: %s\n--- body ---\n%s", $jsonException->getMessage(), $content), 0, $jsonException);
+            throw new \RuntimeException($this->withResponseBody('Response body is not JSON: '.$jsonException->getMessage()), 0, $jsonException);
         }
+    }
+
+    private function responseContent(): string
+    {
+        return (string) $this->getSession()->getPage()->getContent();
+    }
+
+    /**
+     * Сообщение о падении шага с телом ответа: по нему видно, что ответил сервис.
+     */
+    private function withResponseBody(string $message): string
+    {
+        return $message."\n--- body ---\n".$this->responseContent();
     }
 }

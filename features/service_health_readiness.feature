@@ -8,9 +8,16 @@ Feature: Готовность сервиса
         When клиент отправляет GET /health
         Then код ответа 200
         And ответ имеет Content-Type application/json
+        And тело ответа — JSON-объект
 
-    Scenario: хранилище недоступно
-        Given хранилище записей не отвечает
+    Scenario Outline: хранилище недоступно
+        Given хранилище записей <отказ>
         When клиент отправляет GET /health
         Then код ответа 503
         And ответ имеет Content-Type application/json
+        And тело ответа — JSON-объект
+
+        Examples:
+            | набор         | отказ                    |
+            | ping-fails    | не отвечает на PING      |
+            | connect-fails | не принимает подключений |

@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Behat;
 
-use Behat\Gherkin\Node\PyStringNode;
 use Behat\Hook\BeforeScenario;
 use Behat\MinkExtension\Context\RawMinkContext;
 use Behat\Step\Then;
 use Behat\Step\When;
 
 /**
- * Общий контекст, не домен: HTTP-запросы с JSON-телом и проверки ответа,
- * нужные доменам `item_storage` и `service_health`.
+ * Общий контекст, не домен: HTTP-шаги, которые используют оба домена —
+ * `item_storage` и `service_health`.
  *
- * Перед каждым сценарием очищает тестовую БД Redis (`REDIS_URL` из `.env.test`).
+ * Перед каждым сценарием очищает тестовую БД Redis (`REDIS_URL` из `.env.test`):
+ * исключение из правила уборки в `@AfterScenario` (ADR 0002) — прогон не зависит
+ * от остатков упавшего.
  */
 final class HttpApiContext extends RawMinkContext
 {
@@ -39,13 +40,7 @@ final class HttpApiContext extends RawMinkContext
     #[When('/^клиент отправляет (GET|POST|PUT) (\S+)$/')]
     public function clientSends(string $method, string $path): void
     {
-        $this->sendJsonRequest($method, $path);
-    }
-
-    #[When('/^клиент отправляет (GET|POST|PUT) (\S+) с телом:$/')]
-    public function clientSendsWithBody(string $method, string $path, PyStringNode $body): void
-    {
-        $this->sendJsonRequest($method, $path, $body->getRaw());
+        $this->sendRequest($method, $path);
     }
 
     #[Then('код ответа :code')]
@@ -53,7 +48,7 @@ final class HttpApiContext extends RawMinkContext
     {
         $actual = $this->getSession()->getStatusCode();
         if ($actual !== $code) {
-            throw new \RuntimeException(\sprintf("Expected status %d, got %d.\n--- body ---\n%s", $code, $actual, $this->getSession()->getPage()->getContent()));
+            throw new \RuntimeException($this->withResponseBody(\sprintf('Expected status %d, got %d.', $code, $actual)));
         }
     }
 
@@ -72,20 +67,7 @@ final class HttpApiContext extends RawMinkContext
     {
         $body = $this->responseJson(false);
         if (!$body instanceof \stdClass) {
-            throw new \RuntimeException(\sprintf('Expected a JSON object, got %s.', get_debug_type($body)));
-        }
-    }
-
-    /**
-     * Сравнение строгое: JSON-тип значения тоже должен совпасть (`1` ≠ `"1"`).
-     */
-    #[Then('тело ответа — JSON:')]
-    public function responseBodyShouldBeJson(PyStringNode $expected): void
-    {
-        $expectedValue = json_decode($expected->getRaw(), true, 512, \JSON_THROW_ON_ERROR);
-        $actualValue = $this->responseJson();
-        if ($actualValue !== $expectedValue) {
-            throw new \RuntimeException(\sprintf('Expected JSON body %s, got %s.', $expected->getRaw(), $this->getSession()->getPage()->getContent()));
+            throw new \RuntimeException($this->withResponseBody(\sprintf('Expected a JSON object, got %s.', get_debug_type($body))));
         }
     }
 }

@@ -15,6 +15,9 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  * и скалярным значением. JSON уже разобран FOSRest `body_listener`'ом,
  * невалидный JSON он отклоняет сам.
  *
+ * `Content-Type` проверяется здесь: тела форм `body_listener` пропускает, и Symfony
+ * раскладывает их в тот же `$request->request`.
+ *
  * Работает до вызова контроллера: невалидное тело даёт 400, не обращаясь к хранилищу.
  */
 final class ItemValueResolver implements ValueResolverInterface
@@ -25,6 +28,10 @@ final class ItemValueResolver implements ValueResolverInterface
             return [];
         }
 
+        if ('json' !== $request->getContentTypeFormat()) {
+            throw new BadRequestHttpException('Body must be sent with "Content-Type: application/json".');
+        }
+
         $body = $request->request->all();
         if (['value'] !== array_keys($body)) {
             throw new BadRequestHttpException('Body must be a JSON object with exactly one key "value".');
@@ -33,6 +40,11 @@ final class ItemValueResolver implements ValueResolverInterface
         $value = $body['value'];
         if (!\is_scalar($value)) {
             throw new BadRequestHttpException('"value" must be a string, a number or a boolean.');
+        }
+
+        // `1e400` декодируется в INF, а его не закодировать обратно в JSON при записи.
+        if (\is_float($value) && !is_finite($value)) {
+            throw new BadRequestHttpException('"value" must be a finite number.');
         }
 
         return [new ItemValue($value)];

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Behat;
 
 use Behat\Gherkin\Node\PyStringNode;
-use Behat\Mink\Driver\BrowserKitDriver;
 use Behat\MinkExtension\Context\RawMinkContext;
 use Behat\Step\Given;
 use Behat\Step\Then;
@@ -33,21 +32,33 @@ final class ItemStorageContext extends RawMinkContext
     #[Given('/^существует запись со значением (.+)$/')]
     public function thereIsAnItemWithValue(string $value): void
     {
-        $this->sendJsonRequest('POST', '/items', \sprintf('{"value": %s}', $value));
+        $this->sendRequest('POST', '/items', \sprintf('{"value": %s}', $value));
 
         $status = $this->getSession()->getStatusCode();
-        $body = $this->responseJson();
-        if (201 !== $status || !\is_array($body) || !\is_int($body['id'] ?? null)) {
-            throw new \RuntimeException(\sprintf("Could not create an item with value %s: status %d.\n--- body ---\n%s", $value, $status, $this->getSession()->getPage()->getContent()));
+        $id = $this->createdItemId();
+        if (201 !== $status || null === $id) {
+            throw new \RuntimeException($this->withResponseBody(\sprintf('Could not create an item with value %s: status %d.', $value, $status)));
         }
 
-        $this->itemId = $body['id'];
+        $this->itemId = $id;
+    }
+
+    #[When('/^клиент отправляет (GET|POST|PUT) (\S+) с телом:$/')]
+    public function clientSendsWithBody(string $method, string $path, PyStringNode $body): void
+    {
+        $this->sendRequest($method, $path, $body->getRaw());
+    }
+
+    #[When('/^клиент отправляет (POST|PUT) (\S+) с Content-Type (\S+) и телом:$/')]
+    public function clientSendsWithContentTypeAndBody(string $method, string $path, string $contentType, PyStringNode $body): void
+    {
+        $this->sendRequest($method, $path, $body->getRaw(), $contentType);
     }
 
     #[When('клиент читает эту запись')]
     public function clientReadsTheItem(): void
     {
-        $this->sendJsonRequest('GET', $this->itemPath());
+        $this->sendRequest('GET', $this->itemPath());
     }
 
     /**
@@ -58,27 +69,26 @@ final class ItemStorageContext extends RawMinkContext
     #[When('клиент читает эту запись через другой экземпляр сервиса')]
     public function clientReadsTheItemThroughAnotherInstance(): void
     {
-        $driver = $this->getSession()->getDriver();
-        $client = $driver instanceof BrowserKitDriver ? $driver->getClient() : null;
+        $client = $this->browserKitClient();
         if (!$client instanceof KernelBrowser) {
             throw new \LogicException(\sprintf('Another service instance needs a KernelBrowser, got "%s".', get_debug_type($client)));
         }
 
         $client->getKernel()->shutdown();
-        $this->sendJsonRequest('GET', $this->itemPath());
+        $this->sendRequest('GET', $this->itemPath());
     }
 
     #[When('клиент заменяет эту запись телом:')]
     public function clientReplacesTheItemWith(PyStringNode $body): void
     {
-        $this->sendJsonRequest('PUT', $this->itemPath(), $body->getRaw());
+        $this->sendRequest('PUT', $this->itemPath(), $body->getRaw());
     }
 
     #[When('клиент дважды отправляет POST /items с телом:')]
     public function clientSendsPostTwice(PyStringNode $body): void
     {
         for ($i = 0; $i < 2; ++$i) {
-            $this->sendJsonRequest('POST', '/items', $body->getRaw());
+            $this->sendRequest('POST', '/items', $body->getRaw());
             $this->responses[] = [
                 'status' => $this->getSession()->getStatusCode(),
                 'body' => $this->responseJson(),
@@ -107,9 +117,8 @@ final class ItemStorageContext extends RawMinkContext
     #[Then('тело ответа — объект с единственным ключом id, положительным целым')]
     public function responseBodyIsPositiveId(): void
     {
-        $body = $this->responseJson();
-        if (!\is_array($body) || ['id'] !== array_keys($body) || !\is_int($body['id']) || $body['id'] <= 0) {
-            throw new \RuntimeException(\sprintf('Expected {"id": <positive int>}, got %s.', $this->getSession()->getPage()->getContent()));
+        if (null === $this->createdItemId()) {
+            throw new \RuntimeException($this->withResponseBody('Expected {"id": <positive int>}.'));
         }
     }
 
@@ -117,17 +126,46 @@ final class ItemStorageContext extends RawMinkContext
     public function responseBodyIsTheItemId(): void
     {
         if (['id' => $this->itemId] !== $this->responseJson()) {
-            throw new \RuntimeException(\sprintf('Expected {"id": %d}, got %s.', $this->itemId, $this->getSession()->getPage()->getContent()));
+            throw new \RuntimeException($this->withResponseBody(\sprintf('Expected {"id": %d}.', $this->itemId)));
         }
     }
 
+    /**
+     * Сравнение строгое: JSON-тип значения тоже должен совпасть (`1` ≠ `"1"`).
+     */
+    #[Then('тело ответа — JSON:')]
+    public function responseBodyShouldBeJson(PyStringNode $expected): void
+    {
+        $expectedValue = json_decode($expected->getRaw(), true, 512, \JSON_THROW_ON_ERROR);
+        if ($this->responseJson() !== $expectedValue) {
+            throw new \RuntimeException($this->withResponseBody(\sprintf('Expected JSON body %s.', $expected->getRaw())));
+        }
+    }
+
+    /**
+     * Тестовая БД Redis очищается перед сценарием, поэтому «не изменилось» — «пуста»:
+     * проверка не повторяет схему ключей `ItemRepository`.
+     */
     #[Then('хранилище записей не изменилось')]
     public function storageIsUntouched(): void
     {
-        $keys = array_merge($this->redis->keys('item:*') ?: [], $this->redis->exists('items:seq') ? ['items:seq'] : []);
-        if ([] !== $keys) {
-            throw new \RuntimeException(\sprintf('Expected no item keys in Redis, found: %s.', implode(', ', $keys)));
+        $size = $this->redis->dbSize();
+        if (0 !== $size) {
+            throw new \RuntimeException(\sprintf('Expected the test Redis database to stay empty, found %s keys: %s.', var_export($size, true), implode(', ', $this->redis->keys('*') ?: [])));
         }
+    }
+
+    /**
+     * id из ответа создания: тело — ровно `{"id": N}` с положительным целым `N`.
+     */
+    private function createdItemId(): ?int
+    {
+        $body = $this->responseJson();
+        if (!\is_array($body) || ['id'] !== array_keys($body) || !\is_int($body['id']) || $body['id'] <= 0) {
+            return null;
+        }
+
+        return $body['id'];
     }
 
     private function itemPath(): string
