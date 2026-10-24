@@ -22,19 +22,5 @@ services:
         user: "1001:1001"
         profiles: ["init"]
 
-    phpmyadmin:
-        image: phpmyadmin:latest
-        ports:
-            - 8080:80
-        networks:
-            - mysql
-        depends_on:
-            - mysql
-        environment:
-            PMA_ARBITRARY: "1"
-            PMA_HOST: "mysql"
-            PMA_USER: "root"
-            PMA_PASSWORD: "root"
-
 #    mysql:
 #        image: mysql:8.0-oracle

@@ -48,3 +48,10 @@ services:
         - { name: sonata.admin, model_class: App\Entity\Config, manager_type: orm, group: Internal, label: ConfigAdmin }
       calls:
         - ['setTranslationDomain', ['ConfigAdmin']]
+
+    OpenTelemetry\API\Metrics\MeterProviderInterface:
+        factory: ['\OpenTelemetry\API\Globals', 'meterProvider']
+
+    OpenTelemetry\API\Metrics\MeterInterface:
+        factory: ['@OpenTelemetry\API\Metrics\MeterProviderInterface', 'getMeter']
+        arguments: ['%env(OTEL_SERVICE_NAME)%']

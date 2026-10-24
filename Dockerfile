@@ -23,6 +23,7 @@ RUN apt-get update \
             "php8.4-mbstring" \
             "php8.4-mysql" \
             "php8.4-redis" \
+            "php8.4-protobuf" \
             "php8.4-xml" \
             "php8.4-zip" \
     && apt-get purge --autoremove -y gnupg \
