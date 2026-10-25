@@ -121,11 +121,11 @@ services:
     redis:
         image: redis:8-trixie
         user: "999:999"
-        command: ["redis-server", "--requirepass", "root"]
+        command: ["redis-server", "--requirepass", "${ENV_redis_password:?}"]
         networks:
             - redis
         environment:
-            REDISCLI_AUTH: "root"
+            REDISCLI_AUTH: "${ENV_redis_password:?}"
         volumes:
             - redis-data:/data
         <<: *default-security
@@ -146,7 +146,7 @@ services:
         networks:
             - mysql
         environment:
-            MYSQL_ROOT_PASSWORD: "root"
+            MYSQL_ROOT_PASSWORD: "${ENV_database_root_password:?}"
         volumes:
             - database:/var/lib/mysql
 
