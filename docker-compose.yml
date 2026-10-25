@@ -5,6 +5,37 @@ x-security: &default-security
     security_opt:
         - no-new-privileges:true
 
+x-php-env: &php-env
+    HOME: /tmp
+
+x-php: &php
+    build:
+        context: "."
+        dockerfile: Dockerfile
+        target: prod
+    networks:
+        - nginx
+        - mysql
+        - redis
+        - observability
+    depends_on:
+        redis:
+            condition: service_healthy
+        mysql:
+            condition: service_started
+    <<: *default-security
+    tmpfs:
+        - /tmp:rw,noexec,nosuid
+    environment:
+        <<: *php-env
+    secrets:
+        - jwt_public.pem
+        - jwt_private.pem
+    volumes:
+        - static:/srv/public/bundles
+        - ./.env:/srv/.env:ro
+        - ./.env.prod:/srv/.env.prod:ro
+
 services:
     nginx:
         build:
@@ -26,37 +57,26 @@ services:
         volumes:
             - static:/srv/public/bundles
 
-    php: &php
-        build:
-            context: "."
-            dockerfile: Dockerfile
-            target: prod
-        networks:
-            - nginx
-            - mysql
-            - redis
-            - observability
-        depends_on:
-            redis:
-                condition: service_healthy
-            mysql:
-                condition: service_started
-        <<: *default-security
-        tmpfs:
-            - /tmp:rw,noexec,nosuid
+    php:
+        <<: *php
         environment:
-            HOME: /tmp
-        secrets:
-            - jwt_public.pem
-            - jwt_private.pem
-        volumes:
-            - static:/srv/public/bundles
-            - ./.env:/srv/.env:ro
-            - ./.env.prod:/srv/.env.prod:ro
+            <<: *php-env
+            POD_ID: 'pod-1'
+            DATACENTER: 'dc-eu-west-2'
+
+    spare:
+        <<: *php
+        environment:
+            <<: *php-env
+            POD_ID: 'pod-2'
+            DATACENTER: 'dc-us-east-5'
 
     init:
         <<: *php
         command: ["phing"]
+        environment:
+            <<: *php-env
+            OTEL_PHP_AUTOLOAD_ENABLED: false
         depends_on:
             - php
 

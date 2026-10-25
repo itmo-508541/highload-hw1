@@ -50,8 +50,33 @@ services:
         - ['setTranslationDomain', ['ConfigAdmin']]
 
     OpenTelemetry\API\Metrics\MeterProviderInterface:
-        factory: ['\OpenTelemetry\API\Globals', 'meterProvider']
+        factory: ['OpenTelemetry\API\Globals', 'meterProvider']
 
     OpenTelemetry\API\Metrics\MeterInterface:
         factory: ['@OpenTelemetry\API\Metrics\MeterProviderInterface', 'getMeter']
-        arguments: ['%env(OTEL_SERVICE_NAME)%']
+        arguments:
+            $name: '%env(OTEL_SERVICE_NAME)%'
+            $attributes:
+                pod_id: '%env(POD_ID)%'
+                datacenter: '%env(DATACENTER)%'
+
+    otel.latency.histogram:
+        class: OpenTelemetry\API\Metrics\HistogramInterface
+        factory: ['@OpenTelemetry\API\Metrics\MeterInterface', 'createHistogram']
+        arguments: ['web_latency', 'ms']
+
+    otel.throughput.counter:
+        class: OpenTelemetry\API\Metrics\CounterInterface
+        factory: ['@OpenTelemetry\API\Metrics\MeterInterface', 'createCounter']
+        arguments: ['web_throughput']
+
+    otel.errors.counter:
+        class: OpenTelemetry\API\Metrics\CounterInterface
+        factory: ['@OpenTelemetry\API\Metrics\MeterInterface', 'createCounter']
+        arguments: ['web_errors']
+
+    App\EventListener\CollectMetricsListener:
+        arguments:
+            - '@otel.latency.histogram'
+            - '@otel.throughput.counter'
+            # - '@otel.errors.counter'

@@ -7,12 +7,7 @@ namespace App\Attribute;
 #[\Attribute]
 class CollectMetrics
 {
-    public function __construct(protected string $name)
+    public function __construct(public string $name)
     {
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
     }
 }

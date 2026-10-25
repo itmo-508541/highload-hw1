@@ -19,7 +19,7 @@ final readonly class CreateItemController
     ) {
     }
 
-    #[CollectMetrics(name: 'items_create')]
+    #[CollectMetrics(name: 'api_items_create')]
     #[Route(path: '/items', name: 'items_create', methods: ['POST'])]
     #[Rest\View(statusCode: Response::HTTP_CREATED)]
     public function __invoke(ItemValue $item): ItemId

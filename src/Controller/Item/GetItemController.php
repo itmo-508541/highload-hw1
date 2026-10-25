@@ -16,7 +16,7 @@ final readonly class GetItemController
     ) {
     }
 
-    #[CollectMetrics(name: 'items_read')]
+    #[CollectMetrics(name: 'api_items_read')]
     #[Route(path: '/items/{id}', name: 'items_get', requirements: ['id' => ItemRoute::ID_REQUIREMENT], methods: ['GET'])]
     public function __invoke(int $id): ItemValue
     {

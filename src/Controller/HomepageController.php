@@ -14,10 +14,10 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route(path: '/homepage')]
 class HomepageController
 {
-    #[IsGranted('ROLE_ADMIN')]
-    #[CollectMetrics(name: 'test_homepage')]
+    #[IsGranted('PUBLIC_ACCESS')]
+    #[CollectMetrics(name: 'user_homepage')]
     #[Route(path: '/')]
-    public function indexAction(MeterInterface $meter): Response
+    public function __invoke(MeterInterface $meter): Response
     {
         if (random_int(0, 9) > 4) {
             throw new BadRequestHttpException();

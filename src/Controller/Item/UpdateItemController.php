@@ -17,7 +17,7 @@ final readonly class UpdateItemController
     ) {
     }
 
-    #[CollectMetrics(name: 'items_update')]
+    #[CollectMetrics(name: 'api_items_update')]
     #[Route(path: '/items/{id}', name: 'items_update', requirements: ['id' => ItemRoute::ID_REQUIREMENT], methods: ['PUT'])]
     public function __invoke(int $id, ItemValue $item): ItemId
     {
