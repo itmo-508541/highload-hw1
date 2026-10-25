@@ -4,21 +4,25 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Attribute\CollectMetrics;
 use OpenTelemetry\API\Metrics\MeterInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route(path: '/homepage')]
 class HomepageController
 {
+    #[IsGranted('ROLE_ADMIN')]
+    #[CollectMetrics(name: 'test_homepage')]
     #[Route(path: '/')]
     public function indexAction(MeterInterface $meter): Response
     {
-        $rand = random_int(0, 100);
+        if (random_int(0, 9) > 4) {
+            throw new BadRequestHttpException();
+        }
 
-        $latency = $meter->createHistogram('homepage_duration', 'ms');
-        $latency->record($rand, ['status' => 'ok']);
-
-        return new Response((string) $rand);
+        return new Response('');
     }
 }

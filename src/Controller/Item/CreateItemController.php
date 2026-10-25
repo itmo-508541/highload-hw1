@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Item;
 
+use App\Attribute\CollectMetrics;
 use App\Model\Rest\ItemId;
 use App\Model\Rest\ItemValue;
 use App\Repository\ItemRepository;
@@ -18,6 +19,7 @@ final readonly class CreateItemController
     ) {
     }
 
+    #[CollectMetrics(name: 'items_create')]
     #[Route(path: '/items', name: 'items_create', methods: ['POST'])]
     #[Rest\View(statusCode: Response::HTTP_CREATED)]
     public function __invoke(ItemValue $item): ItemId

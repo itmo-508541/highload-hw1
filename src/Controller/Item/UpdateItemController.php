@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Item;
 
+use App\Attribute\CollectMetrics;
 use App\Model\Rest\ItemId;
 use App\Model\Rest\ItemValue;
 use App\Repository\ItemRepository;
@@ -16,6 +17,7 @@ final readonly class UpdateItemController
     ) {
     }
 
+    #[CollectMetrics(name: 'items_update')]
     #[Route(path: '/items/{id}', name: 'items_update', requirements: ['id' => ItemRoute::ID_REQUIREMENT], methods: ['PUT'])]
     public function __invoke(int $id, ItemValue $item): ItemId
     {
