@@ -71,7 +71,7 @@ docker-compose и конфигов Prometheus и Grafana, проброс `POD_ID
 | `openspec/` | Спецификации поведения и changes |
 | `config/` | Конфигурация Symfony |
 | `docker/` | Конфиги образов: `php`, `php-dev`, `nginx`, `nginx-dev`, `git` |
-| `tools/` | Обвязка phing: bootstrap и задача `dotEnvProperty` |
+| `tools/` | Обвязка phing (bootstrap, задача `dotEnvProperty`) и сборка дампа env для demo (`env-dump.php`) |
 | `secrets/` | Шаблоны секретов для деплоя (значений нет) |
 | `build/` | Временные файлы, gitignored. Не источник правды |
 | `vendor/` | Зависимости Composer (gitignored, см. Constraints) |

@@ -33,6 +33,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* /usr/share/man/* /usr/share/doc/* /var/cache/* /var/log/* /tmp/* \
     && chown www-data:www-data /srv
 
+# Точка монтирования тома dotenv (demo): пустой том наследует владельца каталога, иначе init не запишет дамп
+RUN install -d -o www-data -g www-data /run/dotenv
+
 WORKDIR /srv
 COPY docker/php /etc/php/8.4/
 EXPOSE 9000

@@ -15,6 +15,12 @@ x-php-dev: &php-dev
         - "host.docker.internal:host-gateway"
     volumes: !override
         - .:/srv
+    # Без init: в dev он не обязателен и выключен профилем, дамп env не создаётся
+    depends_on: !override
+        redis:
+            condition: service_healthy
+        mysql:
+            condition: service_started
 
 services:
     nginx:
@@ -27,9 +33,10 @@ services:
     spare:
         <<: *php-dev
 
+    # Выключен: инициализация dev — make init. Заглушка ничего не выполняет и падает при случайном запуске
     init:
-        user: "1001:1001"
-        profiles: ["init"]
+        profiles: ["disabled"]
+        command: ["false"]
 
 #    mysql:
 #        image: mysql:8.0-oracle

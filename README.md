@@ -24,6 +24,9 @@ make
 ```
 
 `make` поднимает контейнеры, ставит зависимости и выполняет `phing` (БД и ассеты).
+Изменился `docker-compose.override.yml.dist` — скопируйте его заново: без свежего
+override Compose может отвергнуть проект (например, `php` в базовом файле зависит
+от `init`, которого в dev нет).
 
 Prod-режим — для демонстрации, без `docker-compose.override.yml`:
 
@@ -31,7 +34,7 @@ Prod-режим — для демонстрации, без `docker-compose.over
 docker compose up -d
 ```
 
-Код и зависимости собираются в образ (`target: prod`, `APP_ENV=prod`), одноразовый сервис `init` выполняет `phing` и завершается. Переключение в режим разработки — копированием `docker-compose.override.yml.dist`, как выше.
+Код и зависимости собираются в образ (`target: prod`, `APP_ENV=prod`). Одноразовый сервис `init` собирает дамп env и выполняет `phing`, `php` стартует после него. Подробнее — [docs/runbooks/dotenv.md](docs/runbooks/dotenv.md). Переключение в режим разработки — копированием `docker-compose.override.yml.dist`, как выше.
 
 Установка и обновление зависимостей (Composer в контейнере `php`):
 
@@ -73,7 +76,7 @@ curl -i -X POST http://localhost/items -H 'Content-Type: application/json' -d '{
 | [openspec/specs/](openspec/specs/) | Принятое поведение (Requirement / Scenario) |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | CI-гейт, переменные, обзор деплоя → детали в `.gitlab-ci.yml` |
 | [docs/runbooks/redis.md](docs/runbooks/redis.md) | Runbook: Redis / сессии |
-| [docs/runbooks/dotenv.md](docs/runbooks/dotenv.md) | Runbook: Dotenv / env / prod-шим |
+| [docs/runbooks/dotenv.md](docs/runbooks/dotenv.md) | Runbook: Dotenv / цепочка env / demo-дамп / prod-шим |
 | [docs/runbooks/phing.md](docs/runbooks/phing.md) | Runbook: Phing / init / test-env |
 | [docs/runbooks/volume.md](docs/runbooks/volume.md) | Runbook: именованный Docker volume |
 | [docs/runbooks/e2e.md](docs/runbooks/e2e.md) | Runbook: E2E / Panther / CI-джобы |

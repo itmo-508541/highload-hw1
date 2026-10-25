@@ -23,6 +23,8 @@ x-php: &php
             condition: service_healthy
         mysql:
             condition: service_started
+        init:
+            condition: service_completed_successfully
     <<: *default-security
     tmpfs:
         - /tmp:rw,noexec,nosuid
@@ -31,10 +33,11 @@ x-php: &php
     secrets:
         - jwt_public.pem
         - jwt_private.pem
+    # Как на production: .env-файлов нет, шим подключает дамп env, собранный init
     volumes:
         - static:/srv/public/bundles
-        - ./.env:/srv/.env:ro
-        - ./.env.prod:/srv/.env.prod:ro
+        - dotenv:/run/dotenv:ro
+        - ./secrets/env-demo.php:/srv/.env.local.php:ro
 
 services:
     nginx:
@@ -71,14 +74,21 @@ services:
             POD_ID: 'pod-2'
             DATACENTER: 'dc-us-east-5'
 
+    # При каждом старте пересобирает дамп env из .env-цепочки проекта, затем готовит БД и assets
     init:
         <<: *php
-        command: ["phing"]
+        command: ["sh", "-c", "php tools/env-dump.php /run/dotenv-src /run/dotenv/.env.local.php && exec phing"]
         environment:
             <<: *php-env
             OTEL_PHP_AUTOLOAD_ENABLED: false
         depends_on:
-            - php
+            mysql:
+                condition: service_started
+        volumes:
+            - static:/srv/public/bundles
+            - dotenv:/run/dotenv
+            - ./secrets/env-demo.php:/srv/.env.local.php:ro
+            - .:/run/dotenv-src:ro
 
     prometheus:
         image: prom/prometheus:v3.15.1
@@ -145,6 +155,7 @@ volumes:
     static:
     redis-data:
     prometheus-data:
+    dotenv:
 
 networks:
     nginx:

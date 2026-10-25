@@ -13,8 +13,55 @@
 - `.env.$APP_ENV` и `.env.$APP_ENV.local` (по окружениям).
 
 В ветках **кроме** `master`/`production` пайплайн и разработчик опираются на
-закоммиченный **`.env`** (плюс при необходимости локальные `.env.local` /
-`.env.local.php` у разработчика).
+закоммиченный **`.env`** (плюс при необходимости локальный `.env.local`).
+
+**`.env.local.php` в dev не создавать** — [ADR 0005](../adr/0005-env-dump-only-in-demo.md).
+Если он появился, первым краснеет `tests/Integration/TestEnvironmentTest.php`.
+
+В dev сервис `init` выключен (профиль `disabled`, команда `false`): инициализация —
+`make init`.
+
+## Demo-режим (prod-образ без override): дамп в томе
+
+Почему устроено так — [ADR 0005](../adr/0005-env-dump-only-in-demo.md).
+
+1. `init` стартует первым и собирает дамп:
+   `tools/env-dump.php /run/dotenv-src /run/dotenv/.env.local.php` из `.env` →
+   `.env.local` → `.env.prod` → `.env.prod.local` (оба `.local` — если есть).
+   Без `.env` `init` падает.
+2. Дамп лежит в именованном томе **`dotenv`** (`/run/dotenv`): у `init` на
+   запись, у `php` только на чтение.
+3. Шим [`secrets/env-demo.php`](../../secrets/env-demo.php) смонтирован в
+   `php` и `init` как `/srv/.env.local.php` и подключает дамп из тома.
+   `.env`-файлов в `php` нет.
+4. `init` выполняет `phing`, `php` стартует только после успешного `init`.
+
+Применить правку `.env*` — перезапустить demo (дамп руками не удалять):
+
+```bash
+docker compose down
+```
+
+```bash
+docker compose up -d
+```
+
+Посмотреть значение в дампе:
+
+```bash
+docker compose exec php php -r 'var_export((include "/srv/.env.local.php")["ENV_default_uri"]);'
+```
+
+Ловушки:
+
+- `docker compose up -d` поверх запущенного demo: при упавшем `init` уже
+  работающий `php` остаётся на прежнем дампе. Перезапускать через `down`.
+- `docker compose up php --no-deps` поднимет `php` с дампом прошлого старта.
+- После обновления `docker-compose.override.yml.dist` скопируйте его заново:
+  без `php.depends_on: !override` Compose отвергнет dev-проект
+  (`service "php" depends on undefined service "init"`).
+- Demo и dev собирают образ сервиса `php` под одним именем: при переключении
+  режима пересоберите его (`docker compose build php`).
 
 ## Production (mainline): дамп и Docker secrets
 

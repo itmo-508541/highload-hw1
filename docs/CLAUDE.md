@@ -10,7 +10,7 @@
 |------|------------|
 | `runbooks/redis.md` | Redis: сессии, записи `/items` и тестовая БД, smoke `redis-cli`, local vs prod AUTH |
 | `runbooks/e2e.md` | E2E: Panther/Chromium, контуры Unit vs E2E, CI job’ы |
-| `runbooks/dotenv.md` | Dotenv: цепочка env, prod-шим, группы `ENV_*` |
+| `runbooks/dotenv.md` | Dotenv: цепочка env, demo-дамп, prod-шим, группы `ENV_*` |
 | `runbooks/phing.md` | Phing: `make init`, bootstrap/`symfonyenv`, test-env для Behat |
 | `runbooks/volume.md` | Именованный bind-volume: когда нужен, smoke, ловушки |
 

@@ -41,8 +41,8 @@ Bootstrap:
 
 В `build.xml` обращения вида `${dotenv.ENV_database_host}` или
 `${dotenv.APP_ENV}` соответствуют тому, что увидит приложение через Runtime — в
-том числе при **`.env.local.php`** (локально, в тестах, или на проде через шим
-`/srv/.env.local.php` → секрет; см. [`dotenv.md`](dotenv.md)).
+том числе при **`.env.local.php`** (в demo-режиме — шим → дамп в томе `dotenv`,
+на проде — шим `/srv/.env.local.php` → секрет; см. [`dotenv.md`](dotenv.md)).
 
 ## Behat и test-env
 
