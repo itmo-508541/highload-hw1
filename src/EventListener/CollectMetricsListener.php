@@ -20,8 +20,9 @@ class CollectMetricsListener implements EventSubscriberInterface
     private ?float $startTime = null;
 
     public function __construct(
-        private HistogramInterface $latency,
-        private CounterInterface $throughput,
+        private readonly HistogramInterface $latency,
+        private readonly CounterInterface $throughput,
+        private readonly array $defaultAttributes = [],
     ) {
     }
 
@@ -37,7 +38,7 @@ class CollectMetricsListener implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event): void
     {
         if ($event->isMainRequest()) {
-            $this->attributes = [];
+            $this->attributes = $this->defaultAttributes;
             $this->startTime = microtime(true);
         }
     }
@@ -65,9 +66,9 @@ class CollectMetricsListener implements EventSubscriberInterface
 
             $this->latency->record((microtime(true) - $this->startTime) * 1000, $this->attributes);
             $this->throughput->add(1, $this->attributes);
-            //if ($statusCode >= 400) {
+            // if ($statusCode >= 400) {
             //    $this->errors->add(1, $this->attributes);
-            //}
+            // }
         }
     }
 }
