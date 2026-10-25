@@ -90,6 +90,20 @@ services:
             - ./secrets/env-demo.php:/srv/.env.local.php:ro
             - .:/run/dotenv-src:ro
 
+    grafana:
+        image: grafana/grafana:11.6.16-ubuntu
+        ports:
+            - "3000:3000"
+        networks:
+            - observability
+        environment:
+            GF_SECURITY_ADMIN_PASSWORD: "${ENV_grafana_admin_password:?}"
+        volumes:
+            - grafana-data:/var/lib/grafana
+        configs:
+            - source: grafana-datasource-prometheus.yml
+              target: /etc/grafana/provisioning/datasources/prometheus.yml
+
     prometheus:
         image: prom/prometheus:v3.15.1
         command:
@@ -155,6 +169,7 @@ volumes:
     static:
     redis-data:
     prometheus-data:
+    grafana-data:
     dotenv:
 
 networks:
@@ -168,6 +183,8 @@ configs:
         file: docker/otel-collector/config.yaml
     prometheus.yaml:
         file: docker/prometheus/prometheus.yml
+    grafana-datasource-prometheus.yml:
+        file: docker/grafana/datasources/prometheus.yml
 
 secrets:
     jwt_public.pem:

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "62946d3892dba9dfef9355fa690f7d64",
+    "content-hash": "0945d7d35ee3ed72b498283cf79d58f7",
     "packages": [
         {
             "name": "beberlei/doctrineextensions",
@@ -1692,6 +1692,46 @@
                 "source": "https://github.com/protocolbuffers/protobuf-php/tree/v5.36.2"
             },
             "time": "2026-09-17T15:56:42+00:00"
+        },
+        {
+            "name": "grafana/foundation-sdk",
+            "version": "v0.0.21",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/grafana/grafana-foundation-sdk.git",
+                "reference": "0ec8113b169595ca822f12cc70fb24dff9a89c91"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/grafana/grafana-foundation-sdk/zipball/0ec8113b169595ca822f12cc70fb24dff9a89c91",
+                "reference": "0ec8113b169595ca822f12cc70fb24dff9a89c91",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Grafana\\Foundation\\": "php/src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "description": "A set of tools, types and libraries for building and manipulating Grafana objects.",
+            "homepage": "https://github.com/grafana/grafana-foundation-sdk",
+            "keywords": [
+                "Metrics",
+                "grafana",
+                "logs",
+                "observability",
+                "sdk",
+                "traces"
+            ],
+            "support": {
+                "issues": "https://github.com/grafana/grafana-foundation-sdk/issues",
+                "source": "https://github.com/grafana/grafana-foundation-sdk/tree/v0.0.21"
+            },
+            "time": "2026-10-16T13:02:08+00:00"
         },
         {
             "name": "knplabs/knp-menu",
