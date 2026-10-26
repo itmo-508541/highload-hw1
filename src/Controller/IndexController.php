@@ -10,8 +10,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(path: '/')]
 class IndexController
 {
-    #[Route(path: '/')]
-    public function indexAction(): Response
+    public function __invoke(): Response
     {
         return new Response('');
     }

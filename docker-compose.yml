@@ -91,7 +91,7 @@ services:
             - .:/run/dotenv-src:ro
 
     grafana:
-        image: grafana/grafana:11.6.16-ubuntu
+        image: grafana/grafana:12.2.0
         ports:
             - "3000:3000"
         networks:

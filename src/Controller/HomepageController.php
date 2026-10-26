@@ -16,7 +16,6 @@ class HomepageController
 {
     #[IsGranted('PUBLIC_ACCESS')]
     #[CollectMetrics(name: 'user_homepage')]
-    #[Route(path: '/')]
     public function __invoke(MeterInterface $meter): Response
     {
         if (random_int(0, 9) > 4) {
