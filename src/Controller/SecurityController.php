@@ -9,14 +9,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-#[Route(name: 'app_logout')]
 class SecurityController extends AbstractController
 {
     public function __construct(private readonly AuthenticationUtils $authenticationUtils)
     {
     }
 
-    #[Route(path: '/admin/login', name: 'app_logoutapp_login')]
+    #[Route(path: '/admin/login', name: 'app_login')]
     public function login(): Response
     {
         // if ($this->getUser()) {
@@ -30,7 +29,7 @@ class SecurityController extends AbstractController
         return $this->render('security/admin_login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
     }
 
-    #[Route(path: '/admin/logout', name: 'app_logoutapp_logout')]
+    #[Route(path: '/admin/logout', name: 'app_logout')]
     public function logout(): never
     {
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
