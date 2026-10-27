@@ -142,6 +142,23 @@ services:
             nginx:
                 condition: service_healthy
 
+    grafana-k6:
+        image: grafana/k6:1.8.2
+        networks:
+            - nginx
+        environment:
+            # localhost внутри контейнера — сам k6, приложение доступно по имени сервиса
+            BASE_URL: http://nginx
+        configs:
+            - source: k6-scenario.js
+              target: /k6/scenario.js
+        depends_on:
+            nginx:
+                condition: service_healthy
+            grafana-init:
+                condition: service_completed_successfully
+        command: run /k6/scenario.js
+
     prometheus:
         image: prom/prometheus:v3.15.1
         command:
@@ -225,6 +242,8 @@ configs:
         file: docker/grafana/datasources/prometheus.yml
     grafana-dashboards.yml:
         file: docker/grafana/dashboards/default.yml
+    k6-scenario.js:
+        file: docker/k6/scenario.js
 
 secrets:
     jwt_public.pem:
