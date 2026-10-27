@@ -61,6 +61,13 @@ services:
             - /tmp:rw,noexec,nosuid,size=128M
         volumes:
             - static:/srv/public/bundles
+        healthcheck:
+            test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost/health"]
+            interval: 10s
+            timeout: 3s
+            retries: 5
+            start_period: 30s
+            start_interval: 2s
 
     php:
         <<: *php
@@ -115,7 +122,7 @@ services:
             start_period: 30s
 
     grafana-init:
-        image: alpine:latest
+        image: alpine:3.24.3
         restart: "no"
         volumes:
             - grafana-data:/grafana
@@ -133,7 +140,7 @@ services:
             grafana:
                 condition: service_healthy
             nginx:
-                condition: service_started
+                condition: service_healthy
 
     prometheus:
         image: prom/prometheus:v3.15.1
