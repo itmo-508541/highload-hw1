@@ -148,7 +148,7 @@ class DashboardGenerator
         $values = [];
         $variableOptions = [];
         foreach ($options as $i => [$text, $value]) {
-            $values[] = $text === $value ? $value : sprintf('%s : %s', $text, $value);
+            $values[] = $text === $value ? $value : \sprintf('%s : %s', $text, $value);
             $variableOptions[] = new VariableOption(selected: 0 === $i, text: $text, value: $value);
         }
 

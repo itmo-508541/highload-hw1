@@ -38,5 +38,8 @@ services:
         profiles: ["disabled"]
         command: ["false"]
 
+    grafana-k6:
+        profiles: ["disable"]
+
 #    mysql:
 #        image: mysql:8.0-oracle

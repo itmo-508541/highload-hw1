@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller\Item;
 
 use App\Grafana\DashboardGenerator;
-use Grafana\Foundation\Dashboard\Dashboard;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;

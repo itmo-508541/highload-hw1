@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Item;
 
 use App\Attribute\CollectMetrics;
+use App\Grafana\RandomError;
 use App\Model\Rest\ItemId;
 use App\Model\Rest\ItemValue;
 use App\Repository\ItemRepository;
@@ -14,6 +15,7 @@ final readonly class UpdateItemController
 {
     public function __construct(
         private ItemRepository $items,
+        private RandomError $randomError,
     ) {
     }
 
@@ -24,6 +26,8 @@ final readonly class UpdateItemController
         if (!$this->items->replace($id, $item->getValue())) {
             throw new ItemNotFoundHttpException($id);
         }
+
+        $this->randomError->run();
 
         return new ItemId($id);
     }
