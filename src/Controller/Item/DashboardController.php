@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Item;
 
 use App\Grafana\DashboardGenerator;
+use Grafana\Foundation\Dashboard\Dashboard;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(path: '/handlers', name: 'handlers', methods: ['GET'])]
-final readonly class HandlersController
+final readonly class DashboardController
 {
     public function __construct(
         private DashboardGenerator $dashboardGenerator,
@@ -19,16 +19,11 @@ final readonly class HandlersController
     ) {
     }
 
+    #[Route(path: '/items/dashboard', name: 'dashboard', methods: ['GET'])]
     public function __invoke(): JsonResponse
     {
-        $data = [];
-        foreach ($this->names as $controller) {
-            $data[] = [
-                'uid' => $controller,
-                'dashboard' => $this->dashboardGenerator->generate($controller),
-            ];
-        }
+        $dashboard = $this->dashboardGenerator->generate($this->names);
 
-        return new JsonResponse($data);
+        return new JsonResponse($dashboard);
     }
 }

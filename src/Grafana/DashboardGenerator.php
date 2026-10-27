@@ -9,8 +9,11 @@ use Grafana\Foundation\Common\DataSourceRef;
 use Grafana\Foundation\Common\LegendDisplayMode;
 use Grafana\Foundation\Common\LegendPlacement;
 use Grafana\Foundation\Common\VizLegendOptionsBuilder;
+use Grafana\Foundation\Dashboard\CustomVariableBuilder;
+use Grafana\Foundation\Dashboard\Dashboard;
 use Grafana\Foundation\Dashboard\DashboardBuilder;
 use Grafana\Foundation\Dashboard\QueryVariableBuilder;
+use Grafana\Foundation\Dashboard\VariableOption;
 use Grafana\Foundation\Dashboard\VariableRefresh;
 use Grafana\Foundation\Dashboard\VariableSort;
 use Grafana\Foundation\Prometheus\DataqueryBuilder;
@@ -22,44 +25,49 @@ use Grafana\Foundation\Units\Constants as Units;
  */
 class DashboardGenerator
 {
+    private const string UID = 'highload-hw1';
+
+    private const string TITLE = 'highload-hw1';
+
     private const string DATASOURCE_TYPE = 'prometheus';
 
     private const string DATASOURCE_UID = 's1-prom';
 
     private const string QUERY_MIN_INTERVAL = '15s';
 
+    private const string SELECTOR = 'job="otelcollector",controller=~"$controller",datacenter=~"$datacenter",pod_id=~"$pod_id"';
+
     private const string STATUS_OK = 'status_code=~"[123].."';
 
     private const string STATUS_ERROR = 'status_code=~"[45].."';
 
-    private string $selector;
+    private const array CONTROLLER_ALL = ['All', '.*'];
 
-    public function generate(string $controller): \stdClass
+    private const array CONTROLLER_NONE = ['None', '^$'];
+
+    public function generate(array $controllers): Dashboard
     {
-        $this->selector = \sprintf(
-            'job="otelcollector",controller="%s",datacenter=~"$datacenter",pod_id=~"$pod_id"',
-            $controller,
-        );
-
-        return new DashboardBuilder(title: $controller)
-            ->uid('web_'.$controller)
+        return new DashboardBuilder(title: self::TITLE)
+            ->uid(self::UID)
             ->tags(['highload', 'web', 'otel'])
             ->editable()
             ->refresh('5s')
             ->time('now-15m', 'now')
             ->timezone(CommonConstants::TIME_ZONE_BROWSER)
+            ->withVariable($this->controllerVariable($controllers))
             ->withVariable($this->variable(
                 'datacenter',
                 'datacenter',
-                \sprintf('label_values(web_throughput_total{controller="%s"}, datacenter)', $controller),
+                'label_values(web_throughput_total{controller=~"$controller"}, datacenter)',
             ))
             ->withVariable($this->variable(
                 'pod_id',
                 'pod',
-                \sprintf('label_values(web_throughput_total{controller="%s",datacenter=~"$datacenter"}, pod_id)', $controller),
+                'label_values(web_throughput_total{controller=~"$controller",datacenter=~"$datacenter"}, pod_id)',
             ))
             ->withPanel(
-                $this->timeseries(1, 'Latency (ok)', Units::MILLISECONDS)
+                $this
+                    ->timeseries(1, 'Latency (ok)', Units::MILLISECONDS)
                     ->description('Ответы 1xx, 2xx, 3xx. Перцентили интерполируются внутри бакетов гистограммы, это не точные значения.')
                     /* @phpstan-ignore argument.type */
                     ->withTarget($this->query(
@@ -108,7 +116,7 @@ class DashboardGenerator
                     /* @phpstan-ignore argument.type */
                     ->withTarget($this->query(
                         'A',
-                        \sprintf('sum(rate(web_throughput_total{%s}[$__rate_interval]))', $this->selector),
+                        \sprintf('sum(rate(web_throughput_total{%s}[$__rate_interval]))', self::SELECTOR),
                         'rps',
                     ))
             )
@@ -118,17 +126,39 @@ class DashboardGenerator
                     /* @phpstan-ignore argument.type */
                     ->withTarget($this->query(
                         'A',
-                        \sprintf('sum by (status_code) (rate(web_throughput_total{%s,%s}[$__rate_interval]))', $this->selector, self::STATUS_ERROR),
+                        \sprintf('sum by (status_code) (rate(web_throughput_total{%s,%s}[$__rate_interval]))', self::SELECTOR, self::STATUS_ERROR),
                         '{{status_code}}',
                     ))
             )
-            ->build()
-            ->jsonSerialize();
+            ->build();
     }
 
     private function datasource(): DataSourceRef
     {
         return new DataSourceRef(type: self::DATASOURCE_TYPE, uid: self::DATASOURCE_UID);
+    }
+
+    private function controllerVariable(array $controllers): CustomVariableBuilder
+    {
+        $options = [self::CONTROLLER_ALL, self::CONTROLLER_NONE];
+        foreach ($controllers as $controller) {
+            $options[] = [$controller, $controller];
+        }
+
+        $values = [];
+        $variableOptions = [];
+        foreach ($options as $i => [$text, $value]) {
+            $values[] = $text === $value ? $value : sprintf('%s : %s', $text, $value);
+            $variableOptions[] = new VariableOption(selected: 0 === $i, text: $text, value: $value);
+        }
+
+        return new CustomVariableBuilder('controller')
+            ->label('controller')
+            ->values(implode(', ', $values))
+            ->options($variableOptions)
+            ->current(new VariableOption(text: self::CONTROLLER_ALL[0], value: self::CONTROLLER_ALL[1]))
+            ->multi(false)
+            ->includeAll(false);
     }
 
     private function variable(string $name, string $label, string $query): QueryVariableBuilder
@@ -178,7 +208,7 @@ class DashboardGenerator
         return \sprintf(
             'histogram_quantile(%s, sum by (le) (rate(web_latency_milliseconds_bucket{%s,%s}[$__rate_interval])))',
             $quantile,
-            $this->selector,
+            self::SELECTOR,
             $statusFilter,
         );
     }

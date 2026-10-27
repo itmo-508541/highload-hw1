@@ -10,7 +10,6 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(path: '/health', name: 'health', methods: ['GET'])]
 final readonly class HealthController
 {
     /**
@@ -25,6 +24,7 @@ final readonly class HealthController
     ) {
     }
 
+    #[Route(path: '/health', name: 'health', methods: ['GET'])]
     public function __invoke(): Success
     {
         $failure = null;

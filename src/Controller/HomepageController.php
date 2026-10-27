@@ -11,11 +11,11 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route(path: '/homepage')]
 class HomepageController
 {
     #[IsGranted('PUBLIC_ACCESS')]
     #[CollectMetrics(name: 'user_homepage')]
+    #[Route(path: '/homepage')]
     public function __invoke(MeterInterface $meter): Response
     {
         if (random_int(0, 9) > 4) {
