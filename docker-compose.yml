@@ -54,6 +54,8 @@ services:
         depends_on:
             php:
                 condition: service_started
+            spare:
+                condition: service_started
         <<: *default-security
         tmpfs:
             - /tmp:rw,noexec,nosuid,size=128M
@@ -103,6 +105,35 @@ services:
         configs:
             - source: grafana-datasource-prometheus.yml
               target: /etc/grafana/provisioning/datasources/prometheus.yml
+            - source: grafana-dashboards.yml
+              target: /etc/grafana/provisioning/dashboards/default.yml
+        healthcheck:
+            test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 30s
+
+    grafana-init:
+        image: alpine:latest
+        restart: "no"
+        volumes:
+            - grafana-data:/grafana
+        command:
+            - sh
+            - -c
+            - |
+                set -e
+                mkdir -p /grafana/dashboards
+                wget -q -O /grafana/dashboards/highload-hw1.json http://nginx/items/dashboard
+                chmod -R +r /grafana/dashboards
+        networks:
+            - nginx
+        depends_on:
+            grafana:
+                condition: service_healthy
+            nginx:
+                condition: service_started
 
     prometheus:
         image: prom/prometheus:v3.15.1
@@ -185,6 +216,8 @@ configs:
         file: docker/prometheus/prometheus.yml
     grafana-datasource-prometheus.yml:
         file: docker/grafana/datasources/prometheus.yml
+    grafana-dashboards.yml:
+        file: docker/grafana/dashboards/default.yml
 
 secrets:
     jwt_public.pem:
