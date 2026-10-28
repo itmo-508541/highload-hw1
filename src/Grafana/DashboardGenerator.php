@@ -50,7 +50,7 @@ class DashboardGenerator
         return new DashboardBuilder(title: self::TITLE)
             ->uid(self::UID)
             ->tags(['highload', 'web', 'otel'])
-            ->editable()
+            ->readonly()
             ->refresh('5s')
             ->time('now-15m', 'now')
             ->timezone(CommonConstants::TIME_ZONE_BROWSER)

@@ -1,100 +1,125 @@
 # Инструменты автоматизации в Grafana
 
-Домашняя работа HW1 ([`HW1.md`](HW1.md)): микросервис на Symfony 7.4 / PHP 8.4 с REST-ручками над записями и ручкой готовности, на котором строятся метрики золотых сигналов, генератор дашборда Grafana и нагрузочный скрипт. Локальная разработка — в Docker, деплой — через GitLab CI/CD.
+[Домашняя работа](HW1.md): микросервис на Symfony 7.4 / PHP 8.4. CRUD-сервис на PHP 8.4 отдаёт метрики золотых сигналов через OpenTelemetry в Prometheus и далее в Grafana.
 
-## Технологический стек
+**Скринкаст:** <!-- ссылка -->
 
-- PHP `8.4`
-- Symfony `7.4.*`
-- MySQL `8.0`
-- Redis `8`
-- Docker / Docker Compose
-- Composer
-- Phing (инициализация, миграции, deploy-команды)
-- QA-инструменты: PHP CS Fixer, PHPStan, Rector, PHPUnit, Behat
-- OpenSpec (процесс изменений: explore → propose → apply → archive); CLI через `npx`, Node.js ≥ 20.19
-
-## Быстрый старт
-
-Режим разработки:
+## Запуск
 
 ```bash
-cp docker-compose.override.yml.dist docker-compose.override.yml
-make
+cp .env.example .env
+docker compose up -d --build
 ```
 
-`make` поднимает контейнеры, ставит зависимости и выполняет `phing` (БД и ассеты).
-Изменился `docker-compose.override.yml.dist` — скопируйте его заново: без свежего
-override Compose может отвергнуть проект (например, `php` в базовом файле зависит
-от `init`, которого в dev нет).
+Через 2-3 минуты нагрузка выходит на полку, и на дашборде появляются данные: <http://localhost:3000/d/highload-hw1>. Логин `admin`, пароль - `ENV_grafana_admin_password` из `.env`.
 
-Prod-режим — для демонстрации, без `docker-compose.override.yml`:
+## Приложение
 
-```bash
-docker compose up -d
-```
-
-Код и зависимости собираются в образ (`target: prod`, `APP_ENV=prod`). Одноразовый сервис `init` собирает дамп env и выполняет `phing`, `php` стартует после него. Подробнее — [docs/runbooks/dotenv.md](docs/runbooks/dotenv.md). Переключение в режим разработки — копированием `docker-compose.override.yml.dist`, как выше.
-
-Установка и обновление зависимостей (Composer в контейнере `php`):
-
-```bash
-make deps
-```
-
-Проверки перед commit:
-
-```bash
-make qa
-```
-
-## Ручки
+Нет возможности запустить Web-сервер на "голом" PHP, поэтому используется Nginx. Также не существует In-memory хранилища, поэтому используется Redis. Из-за невозможности организации "In-memory" хранилища нельзя отправлять данные для метрик сразу же в Prometheus и, как промежуточное звено, был установлен контейнер OpenTelemetry Collector.
 
 | Ручка | Ответ |
 |---|---|
 | `POST /items` | `201 {"id": N}` |
-| `GET /items/{id}` | `200 {"value": X}`; нет записи — `404` |
-| `PUT /items/{id}` | `200 {"id": N}`; нет записи — `404` |
+| `GET /items/{id}` | `200 {"value": X}`; нет записи - `404` |
+| `PUT /items/{id}` | `200 {"id": N}`; нет записи - `404` |
 | `GET /health` | `200`, когда Redis доступен; иначе `503` |
+| `GET /items/dashboard` | JSON дашборда Grafana (см. «Дашборд») |
 
-Тело `POST` и `PUT` — `{"value": <строка | число | true | false>}`, ровно один ключ; иначе `400`. Записи хранятся в Redis ([ADR 0004](docs/adr/0004-items-stored-in-redis.md)).
+Метрики в Prometheus отдаются из OpenTelemetry Collector `http://otelcollector:8889/metrics`
 
-Заголовок `Content-Type: application/json` обязателен: без него тело не разбирается, и запрос получает `400`.
+Два экземпляра приложения собраны из одного образа и отличаются только переменными окружения `POD_ID` и `DATACENTER`.
 
-```bash
-curl -i -X POST http://localhost/items -H 'Content-Type: application/json' -d '{"value":"foo"}'
-```
+## Состав стека и порядок запуска
 
-## Документация
+| Сервис | Образ | Роль |
+|---|---|---|
+| `init` | сборка `Dockerfile`, `target: prod` | одноразовый: дамп env, миграции, ассеты (`phing`) |
+| `php`, `spare` | тот же образ | два экземпляра приложения (PHP-FPM) |
+| `nginx` | сборка `Dockerfile-nginx` | вход на `:80`, healthcheck через `/health` |
+| `mysql` | `mysql:8.0-debian` | БД |
+| `redis` | `redis:8-trixie` | хранилище записей |
+| `otelcollector` | `otel/opentelemetry-collector-contrib:0.163.2` | приём OTLP, отдача `/metrics` |
+| `prometheus` | `prom/prometheus:v3.15.1` | скрейпит коллектор раз в 15 с |
+| `grafana` | `grafana/grafana:12.2.0` | datasource и дашборд через provisioning |
+| `grafana-init` | `alpine:3.24.3` | одноразовый: скачивает JSON дашборда |
+| `grafana-k6` | `grafana/k6:1.8.2` | фоновая нагрузка |
 
-| Вход | Зачем |
-|------|--------|
-| [ABOUT.md](ABOUT.md) | Продукт: цель HW1, ручки, архитектура, ограничения |
-| [CLAUDE.md](CLAUDE.md) | Агентский контекст: constraints, каталоги, скиллы |
-| [docs/adr/](docs/adr/) | Architecture Decision Records |
-| [patterns/tests/](patterns/tests/) | Каталог механик тестов |
-| [openspec/specs/](openspec/specs/) | Принятое поведение (Requirement / Scenario) |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | CI-гейт, переменные, обзор деплоя → детали в `.gitlab-ci.yml` |
-| [docs/runbooks/redis.md](docs/runbooks/redis.md) | Runbook: Redis / сессии |
-| [docs/runbooks/dotenv.md](docs/runbooks/dotenv.md) | Runbook: Dotenv / цепочка env / demo-дамп / prod-шим |
-| [docs/runbooks/phing.md](docs/runbooks/phing.md) | Runbook: Phing / init / test-env |
-| [docs/runbooks/volume.md](docs/runbooks/volume.md) | Runbook: именованный Docker volume |
-| [docs/runbooks/e2e.md](docs/runbooks/e2e.md) | Runbook: E2E / Panther / CI-джобы |
+## Метрики
 
-## Начало работы
+Ручка подключается к метрикам атрибутом `#[CollectMetrics(name: '...')]` на контроллере. Имя из атрибута становится значением лейбла `controller`.
 
-После шага из раздела «Быстрый старт» у вас уже есть локальный **`docker-compose.override.yml`** (его нет в репозитории: файл в **`.gitignore`**, создаётся копированием **`docker-compose.override.yml.dist`**).
+`App\EventListener\CollectMetricsListener` подписан на события ядра Symfony:
 
-В поле **`user`** задайте **`"<uid>:<gid>"`**, подставив вывод команд **`id -u`** и **`id -g`** на вашей машине. Тогда процесс сервиса **`php`** и файлы, которые приложение или **`docker compose exec php …`** создают в смонтированном каталоге **`./:/srv`**, на хосте будут принадлежать вашему пользователю.
+- `kernel.request` (приоритет 100, раньше роутера и firewall) запоминает время начала;
+- `kernel.controller` читает атрибут `#[CollectMetrics]`;
+- `kernel.terminate` записывает latency и счётчик с кодом ответа.
 
-Если **`user`** не задавать, образ по умолчанию работает от **`www-data`** (`Dockerfile`) — новые файлы на хосте окажутся с владельцем **`www-data`**. Если владелец дерева проекта всё же «съехал», из корня репозитория выполните **`make owner`** (внутри используется `sudo`; см. комментарий к цели в `Makefile`).
+`/health` и `/items/dashboard` не размечены атрибутом и не получают лейбл `controller`.
 
-## Принципы работы backend-разработчика
+| Метрика в Prometheus | Тип | Единица | Сигнал |
+|---|---|---|---|
+| `web_latency_milliseconds` (`_bucket`, `_sum`, `_count`) | histogram | мс | latency |
+| `web_throughput_total` | counter | запросы | RPS и ошибки |
 
-- Пишите и проверяйте код в Docker-контуре проекта, чтобы окружение совпадало у команды и в CI.
-- **Команды, затрагивающие PHP и инструменты вокруг него** (Composer, Symfony Console, PHPUnit, Behat, Phing, PHP CS Fixer, PHPStan, Rector и т.п.) **выполняйте только** в сервисе `php`. **Не** запускайте их на хосте — иначе версии PHP, расширений и пути разойдутся с CI и продом. Сначала смотрите цели в **`Makefile`**; если подходящей цели нет — `docker compose exec php …` из корня репозитория. Примеры: `make deps` или `docker compose exec php composer install`.
-- В режиме разработки файлы репозитория внутри контейнера `php` смонтированы в `/srv/` (пути от корня проекта на хосте совпадают с ожидаемыми в командах ниже).
-- Структура таблиц и индексы создаются автоматически, создавать новые миграции для этого не нужно; миграции Doctrine в проекте используются для добавления или изменения **данных**.
-- Соблюдайте единый стиль кода (`.editorconfig`, `.php-cs-fixer.dist.php`) и не обходите проверки качества.
-- Перед merge обязательно прогоняйте QA-набор (`php-cs-fixer`, `phpstan`, `rector`, `phpunit`, `behat`).
-- Не храните production-секреты в репозитории и в коммитах. Для production используются CI-переменные и серверные env-файлы.
+| Лейбл | Значения | Откуда |
+|---|---|---|
+| `controller` | `api_items_create`, `api_items_read`, `api_items_update` | `#[CollectMetrics(name:)]` |
+| `status_code` | `200`, `201`, `400`, `403`, `404`, `406`, … | код ответа |
+| `pod_id` | `pod-1`, `pod-2` | env `POD_ID` |
+| `datacenter` | `dc-eu-west-2`, `dc-us-east-5` | env `DATACENTER` |
+
+Для корректной агрегации по нескольким экземплярам приложения лучше всего использовать Histogram, потому что оно разбивает все наблюдения (например, время выполнения запроса) на заранее заданные интервалы (buckets) и подсчитывает, сколько значений попало в каждый из них. Это позволяет увидеть распределение задержек:
+
+-  `0, 5, 10, 25, 50, 75, 100, 250, 500, 1000` мс, плюс `+Inf`. Это границы OpenTelemetry SDK по умолчанию.
+
+## Дашборд
+
+Структура дашборда создаётся самим приложением: оно само знает как показывать его метрики. При этом задачей контейнера `grafana-init` - всего лишь скачать JSON из `/items/dashboard` и положить в нужную директорию.
+
+1. При сборке DI-контейнера Symfony, `CollectMetricsPass` находит все контроллеры с `#[CollectMetrics]` и сохраняет имена в параметр `app.collect_metrics.names`.
+2. `GET /items/dashboard` строит дашборд классом `App\Grafana\DashboardGenerator` на `grafana/foundation-sdk` и отдаёт JSON.
+3. `grafana-init` скачивает этот JSON в том `grafana-data`. Grafana подхватывает его через file provisioning (`docker/grafana/dashboards/default.yml`).
+
+Список ручек в генераторе не хранится. Новая ручка с атрибутом `#[CollectMetrics]` появится на дашборде после перезапуска стека.
+
+Дашборд `highload-hw1` в папке `S1`, только для чтения.
+
+**Переменные:**
+
+| Переменная | Тип | Значения |
+|---|---|---|
+| `controller` | custom, одно значение | `All`, `None` и имена ручек |
+| `datacenter` | query, multi + All | `label_values(web_throughput_total{controller=~"$controller"}, datacenter)` |
+| `pod_id` | query, multi + All | `label_values(web_throughput_total{controller=~"$controller",datacenter=~"$datacenter"}, pod_id)` |
+
+**Панели.** Общий селектор:
+`job="otelcollector",controller=~"$controller",datacenter=~"$datacenter",pod_id=~"$pod_id"`.
+
+| Панель | PromQL |
+|---|---|
+| Latency (ok), p50/p95/p99 | `histogram_quantile(φ, sum by (le) (rate(web_latency_milliseconds_bucket{…,status_code=~"[123].."}[$__rate_interval])))` |
+| Latency (error), p50/p95/p99 | то же с `status_code=~"[45].."` |
+| RPS | `sum(rate(web_throughput_total{…}[$__rate_interval]))` |
+| Ошибки по кодам ответа | `sum by (status_code) (rate(web_throughput_total{…,status_code=~"[45].."}[$__rate_interval]))` |
+
+## Нагрузка
+
+k6 запускается сервисом `grafana-k6` после того, как `nginx` стал healthy и
+`grafana-init` успешно завершился. Сценарий - `docker/k6/scenario.js`, запросы
+идут на `http://nginx`, то есть на оба экземпляра.
+
+| Сценарий | Executor | Ручка |
+|---|---|---|
+| `api_items_create` | `constant-vus` | `POST /items` |
+| `api_items_read` | `ramping-arrival-rate` | `GET /items/{id}` |
+| `api_items_update` | `ramping-arrival-rate` | `PUT /items/{id}` |
+
+Итого около 100 RPS на оба экземпляра.
+
+## Секреты
+
+Пароль администратора Grafana и пароли БД и Redis задаются в `.env`, который
+не хранится в репозитории (`.gitignore`). Пример - `.env.example`. Без `.env`
+compose завершается с ошибкой (`${ENV_grafana_admin_password:?}`).
+
+Если в переменной с паролем от Grafana завести значение `admin`, то при первом запуске Grafana попросит сменить пароль.
