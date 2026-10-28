@@ -25,8 +25,8 @@ export const options = {
             timeUnit: '1s',
             preAllocatedVUs: 50,
             stages: [
-                { target: 25, duration: '1m' },
-                { target: 50, duration: '120m' },
+                { target: 50, duration: '1m' },
+                { target: 100, duration: '120m' },
             ],
         },
 
@@ -37,8 +37,8 @@ export const options = {
             timeUnit: '1s',
             preAllocatedVUs: 50,
             stages: [
-                { target: 25, duration: '1m' },
-                { target: 50, duration: '120m' },
+                { target: 50, duration: '1m' },
+                { target: 100, duration: '120m' },
             ],
         },
     },

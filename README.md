@@ -11,7 +11,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Через 2-3 минуты нагрузка выходит на полку, и на дашборде появляются данные: <http://localhost:3000/d/highload-hw1>. Логин `admin`, пароль - `ENV_grafana_admin_password` из `.env`.
+Через 1-2 минуты нагрузка выходит на полку, и на дашборде в Grafana появляются данные: <http://localhost:3000/d/highload-hw1>. Логин `admin`, пароль - `ENV_grafana_admin_password` из `.env`.
 
 ## Приложение
 
